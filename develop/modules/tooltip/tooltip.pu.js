@@ -1,4 +1,5 @@
-var $ = require('zepto');
+require('zepto');
+require('zepto/event');
 
 require('bootstrapTooltip');
 

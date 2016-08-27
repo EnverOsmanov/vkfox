@@ -1,13 +1,14 @@
-var _ = require('shim/underscore.js')._,
+require('zepto');
+require('zepto/event');
+var _ = require('../shim/underscore.js')._,
     Backbone = require('backbone'),
-    $ = require('zepto'),
-    Vow = require('shim/vow.js'),
-    Request = require('request/request.js'),
-    Mediator = require('mediator/mediator.js');
+    Vow = require('../shim/vow.js'),
+    Request = require('../request/request.js'),
+    Mediator = require('../mediator/mediator.js');
 
-require('navigation/navigation.pu.js');
-require('item-list/item-list.pu.js');
-require('item/item.pu.js');
+require('../navigation/navigation.pu.js');
+require('../item-list/item-list.pu.js');
+require('../item/item.pu.js');
 require('angular').module('app')
     .factory('Chat', function () {
         return {

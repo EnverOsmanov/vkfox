@@ -5,7 +5,7 @@
         <meta charset="utf-8">
         <title>VKfox</title>
         <!-- @if TARGET='FIREFOX' -->
-        <base href="/vkfox/data/" />
+        <base href="/data/" />
         <!-- @endif -->
         <!-- @if TARGET!='FIREFOX' -->
         <base href="/" />
@@ -26,10 +26,10 @@
                         ng-class="{app__bullet_active: index <= step}">
                     </div>
                 </div>
-                <div
+                <divи
                     style="width:{{progress}}%"
                     class="app__progress">
-                </div>
+                </divи>
             </div>
             <div class="app__main app__main_step_{{step}}" ng-bind-html-unsafe="mainText | i18n">
             </div>

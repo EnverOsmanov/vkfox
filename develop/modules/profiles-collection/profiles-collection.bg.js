@@ -1,8 +1,8 @@
 var UPDATE_NON_FRIENDS_PERIOD = 10000,
 
-    Users = require('users/users.bg.js'),
-    _ = require('shim/underscore.js')._,
-    Mediator = require('mediator/mediator.js'),
+    Users = require('../users/users.bg.js'),
+    _ = require('../shim/underscore.js')._,
+    Mediator = require('../mediator/mediator.js'),
     Backbone = require('backbone');
 
 module.exports = Backbone.Collection.extend({

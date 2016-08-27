@@ -1,5 +1,6 @@
-var _ = require('shim/underscore.js')._,
-    $ = require('zepto');
+require('zepto');
+require('zepto/event');
+var _ = require('../shim/underscore.js')._;
 
 require('angular').module('app')
     /**

@@ -1,8 +1,8 @@
 var MARK_PERIOD = 5 * 60 * 1000, //5 min
 
-    Mediator = require('mediator/mediator.js'),
-    Request = require('request/request.bg.js'),
-    PersistentModel = require('persistent-model/persistent-model.js'),
+    Mediator = require('../mediator/mediator.js'),
+    Request = require('../request/request.bg.js'),
+    PersistentModel = require('../persistent-model/persistent-model.js'),
 
     timeoutId, settings = new PersistentModel({
         enabled: false

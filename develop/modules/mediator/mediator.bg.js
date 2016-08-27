@@ -1,7 +1,7 @@
 var Dispatcher = require('./dispatcher.js'),
     Mediator = Object.create(Dispatcher),
-    Browser = require('browser/browser.bg.js'),
-    Env = require('env/env.js');
+    Browser = require('../browser/browser.bg.js'),
+    Env = require('../env/env.js');
 
 
 if (Env.firefox) {
@@ -9,7 +9,7 @@ if (Env.firefox) {
         data = require('sdk/self').data,
         pageMod = require("sdk/page-mod"), activeWorkers = [firefoxPanel];
 
-
+    console.log("AAAA" + data.url("../mediator/contentScript.js"));
     pageMod.PageMod({
         include: /.*vkfox\/data\/pages\/.*\.html/,
         // include: "resource://jid1-ci3mbxpmmpdxuq-at-jetpack/vkfox/data/pages/popup.html",

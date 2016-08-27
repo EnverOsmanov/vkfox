@@ -1,6 +1,6 @@
 var Dispatcher = require('./dispatcher.js'),
     Mediator = Object.create(Dispatcher),
-    Env = require('env/env.js');
+    Env = require('../env/env.js');
 
 if (Env.firefox) {
     // is opened from panel

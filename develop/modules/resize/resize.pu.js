@@ -1,3 +1,5 @@
+require('zepto');
+require('zepto/event');
 require('angular').module('app').directive('resize', function () {
     var
     MOVE_DEBOUCE = 10,
@@ -9,9 +11,9 @@ require('angular').module('app').directive('resize', function () {
     MIN_HEIGHT = 375,
     DEFAULT_FONT_SIZE = 12,
 
-    PersistentModel = require('persistent-model/persistent-model.js'),
-    ProxyMethods = require('proxy-methods/proxy-methods.js').forward(
-        'resize/resize.bg.js',
+    PersistentModel = require('../persistent-model/persistent-model.js'),
+    ProxyMethods = require('../proxy-methods/proxy-methods.js').forward(
+        '../resize/resize.bg.js',
         ['setPanelSize']
     ),
     model = new PersistentModel({
@@ -20,8 +22,7 @@ require('angular').module('app').directive('resize', function () {
         fontSize: DEFAULT_FONT_SIZE
     }, {name: 'resize'}),
 
-    $ = require('zepto'),
-    _ = require('shim/underscore.js')._,
+    _ = require('../shim/underscore.js')._,
     root = $('html'),
     screenX, screenY,
     dragMove = _.debounce(function (e) {

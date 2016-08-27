@@ -1,8 +1,8 @@
-var Vow = require('shim/vow.js'),
-    Mediator = require('mediator/mediator.js'),
-    Browser = require('browser/browser.js'),
-    Tracker = require('tracker/tracker.js'),
-    PersistentModel = require('persistent-model/persistent-model.js'),
+var Vow = require('../shim/vow.js'),
+    Mediator = require('../mediator/mediator.js'),
+    Browser = require('../browser/browser.js'),
+    Tracker = require('../tracker/tracker.js'),
+    PersistentModel = require('../persistent-model/persistent-model.js'),
 
     model = new PersistentModel(
         {lastPath: '/chat'},

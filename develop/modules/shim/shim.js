@@ -6,7 +6,7 @@
  * This loader solves this issues.
  * Is used to laod unserscore and shim/vow.js libs
  */
-var Env = require('env/env.js');
+var Env = require('../env/env.js');
 if (Env.background && Env.firefox) {
     var toolkitLoader = require('toolkit/loader'),
         Require = toolkitLoader.Require,
@@ -24,10 +24,10 @@ if (Env.background && Env.firefox) {
         }));
 
     (function () {
-        var require = Require(loader, module);
+        var myRequire = Require(loader, module);
 
-        exports.vow = require('vow');
-        exports.underscore = require('underscore');
+        exports.vow = myRequire('packages/vow/lib/vow.js');
+        exports.underscore = myRequire('packages/underscore/underscore.js');
     })();
 } else {
     exports.vow = require('vow');

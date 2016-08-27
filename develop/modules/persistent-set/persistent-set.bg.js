@@ -1,5 +1,5 @@
 var
-storage = require('storage/storage.js'),
+storage = require('../storage/storage.js'),
 constructor = function (name) {
     var item = storage.getItem(name);
 

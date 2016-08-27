@@ -1,14 +1,14 @@
 /*jshint bitwise: false */
 /*global $ */
 var
-_ = require('shim/underscore.js')._,
-PersistentModel = require('persistent-model/persistent-model.js'),
-I18n = require('i18n/i18n.js'),
-Env = require('env/env.js'),
-Env = require('env/env.js'),
-Browser = require('browser/browser.js'),
-Request = require('request/request.js'),
-Config = require('config/config.js'),
+_ = require('../shim/underscore.js')._,
+PersistentModel = require('../persistent-model/persistent-model.js'),
+I18n = require('../i18n/i18n.js'),
+Env = require('../env/env.js'),
+Browser = require('../browser/browser.js'),
+Request = require('../request/request.js'),
+Config = require('../config/config.js'),
+MySys = require('sdk/system'),
 
 url = 'http://www.google-analytics.com/collect',
 persistentModel = new PersistentModel({}, {name: 'tracker'}),
@@ -36,7 +36,7 @@ function guid() {
 }
 function getBrowserVersion() {
     if (Env.background && Env.firefox) {
-        return require('sdk/system').platformVersion;
+        return MySys.platformVersion;
     } else {
         // we don't user require('zepto')
         // to hack for Firefox's SDK syntax analyzer

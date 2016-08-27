@@ -2,12 +2,12 @@ var
 DROP_PROFILES_INTERVAL = 60000,
 USERS_GET_DEBOUNCE = 400,
 
-Vow = require('shim/vow.js'),
+Vow = require('../shim/vow.js'),
 Backbone = require('backbone'),
-Mediator = require('mediator/mediator.js'),
-Request = require('request/request.bg.js'),
-ProxyMethods = require('proxy-methods/proxy-methods.js'),
-_ = require('shim/underscore.js')._,
+Mediator = require('../mediator/mediator.js'),
+Request = require('../request/request.bg.js'),
+ProxyMethods = require('../proxy-methods/proxy-methods.js'),
+_ = require('../shim/underscore.js')._,
 
 inProgress, usersGetQueue, friendsProfilesDefer,
 usersColl = new (Backbone.Collection.extend({
@@ -85,7 +85,7 @@ Mediator.sub('auth:success', function () {
 
 dropOldNonFriendsProfiles();
 
-module.exports = ProxyMethods.connect('users/users.bg.js', _.extend({
+module.exports = ProxyMethods.connect('../users/users.bg.js', _.extend({
     getFriendsProfiles: function () {
         if (!friendsProfilesDefer) {
             friendsProfilesDefer = Request.api({
@@ -121,4 +121,4 @@ module.exports = ProxyMethods.connect('users/users.bg.js', _.extend({
             return promise;
         });
     }
-}, require('users/name.js')));
+}, require('../users/name.js')));

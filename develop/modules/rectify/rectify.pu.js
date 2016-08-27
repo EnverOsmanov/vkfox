@@ -1,7 +1,8 @@
-var I18N = require('i18n/i18n.pu.js'),
+require('zepto');
+require('zepto/event');
+var I18N = require('../i18n/i18n.pu.js'),
     linkify = require('javascript-linkify'),
-    jEmoji = require('jEmoji'),
-    $ = require('zepto');
+    jEmoji = require('jEmoji');
 
 require('angular').module('app')
     .filter('rectify', function ($sanitize) {

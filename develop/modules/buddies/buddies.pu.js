@@ -1,12 +1,13 @@
-var Mediator = require('mediator/mediator.js'),
-    PersistentModel = require('persistent-model/persistent-model.js'),
-    I18N = require('i18n/i18n.js'),
-    $ = require('zepto');
+require('zepto');
+require('zepto/event');
+var Mediator = require('../mediator/mediator.js'),
+    PersistentModel = require('../persistent-model/persistent-model.js'),
+    I18N = require('../i18n/i18n.js');
 
-require('navigation/navigation.pu.js');
-require('item-list/item-list.pu.js');
-require('item/item.pu.js');
-require('checkbox/checkbox.pu.js');
+require('../navigation/navigation.pu.js');
+require('../item-list/item-list.pu.js');
+require('../item/item.pu.js');
+require('../checkbox/checkbox.pu.js');
 require('bootstrapDropdown');
 require('angular').module('app')
     .controller('buddiesCtrl', function ($scope, $element, $filter) {

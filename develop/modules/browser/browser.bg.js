@@ -8,9 +8,9 @@ var BADGE_COLOR = [231, 76, 60, 255],
         "38": "./assets/logo38_offline.png"
     },
 
-    Vow = require('shim/vow.js'),
-    Env = require('env/env.js'),
-    _ = require('shim/underscore.js')._,
+    Vow = require('../shim/vow.js'),
+    Env = require('../env/env.js'),
+    _ = require('../shim/underscore.js')._,
 
     Browser;
 
@@ -53,7 +53,7 @@ if (Env.firefox) {
 
 // overcome circular dependency through Mediator
 _.defer(function () {
-    require('proxy-methods/proxy-methods.js').connect('browser/browser.bg.js', Browser);
+    require('../proxy-methods/proxy-methods.js').connect('../browser/browser.bg.js', Browser);
 });
 module.exports = Browser = {
     getVkfoxVersion: (function () {

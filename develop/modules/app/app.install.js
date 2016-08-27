@@ -2,10 +2,10 @@ var angular = require('angular'),
     Tracker, Mediator;
 
 angular.module('app', []);
-Tracker = require('tracker/tracker.js');
-Mediator = require('mediator/mediator.js');
-require('anchor/anchor.pu.js');
-require('filters/filters.pu.js');
+Tracker = require('../tracker/tracker.js');
+Mediator = require('../mediator/mediator.js');
+require('../anchor/anchor.pu.js');
+require('../filters/filters.pu.js');
 angular.module('app').controller('AppCtrl', function ($scope) {
         var data = {
             // authorization  step
@@ -23,7 +23,9 @@ angular.module('app').controller('AppCtrl', function ($scope) {
                                 $scope.step++;
                             });
                         });
+                        console.log("before AUTH:SUCCESS");
                         Mediator.pub('auth:oauth');
+                        console.log("after AUTH:SUCCESS");
                     } else {
                         $scope.step++;
                     }

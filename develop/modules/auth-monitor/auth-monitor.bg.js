@@ -1,11 +1,11 @@
 var
 CHECK_AUTH_PERIOD = 3000, //ms
 
-_ = require('shim/underscore.js')._,
-Config = require('config/config.js'),
-Request = require('request/request.bg.js'),
-Auth = require('auth/auth.bg.js'),
-Mediator = require('mediator/mediator.js'),
+_ = require('../shim/underscore.js')._,
+Config = require('../config/config.js'),
+Request = require('../request/request.bg.js'),
+Auth = require('../auth/auth.bg.js'),
+Mediator = require('../mediator/mediator.js'),
 
 userId,
 /**
@@ -27,6 +27,7 @@ monitorAuthChanges = _.debounce(function () {
 }, CHECK_AUTH_PERIOD);
 
 Mediator.sub('auth:success', function (data) {
+    console.log("sub AUTH:SUCCESS in monitor");
     userId = data.userId;
     monitorAuthChanges();
 });
