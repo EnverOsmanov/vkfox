@@ -2,13 +2,13 @@ var
 MAX_ITEMS_COUNT = 50,
 UPDATE_PERIOD = 10000, //ms
 
-_ = require('shim/underscore.js')._,
-Vow = require('shim/vow.js'),
+_ = require('../shim/underscore.js')._,
+Vow = require('../shim/vow.js'),
 Backbone = require('backbone'),
-Tracker = require('tracker/tracker.js'),
-Request = require('request/request.bg.js'),
-Browser = require('browser/browser.bg.js'),
-Mediator = require('mediator/mediator.js'),
+Tracker = require('../tracker/tracker.js'),
+Request = require('../request/request.bg.js'),
+Browser = require('../browser/browser.bg.js'),
+Mediator = require('../mediator/mediator.js'),
 
 profilesColl = new (Backbone.Collection.extend({
     model: Backbone.Model.extend({

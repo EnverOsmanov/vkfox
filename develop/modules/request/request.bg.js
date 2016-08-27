@@ -8,11 +8,11 @@ API_VERSION = 4.99,
 REAUTH_DEBOUNCE = 2000,
 XHR_TIMEOUT = 30000,
 
-Vow = require('shim/vow.js'),
-_ = require('shim/underscore.js')._,
-ProxyMethods = require('proxy-methods/proxy-methods.js'),
-Auth = require('auth/auth.bg.js'),
-Env = require('env/env.js'),
+Vow = require('../shim/vow.js'),
+_ = require('../shim/underscore.js')._,
+ProxyMethods = require('../proxy-methods/proxy-methods.js'),
+Auth = require('../auth/auth.bg.js'),
+Env = require('../env/env.js'),
 
 apiQueriesQueue = [],
 
@@ -144,7 +144,7 @@ xhr = (function () {
 })(),
 Request;
 
-module.exports = Request = ProxyMethods.connect('request/request.bg.js', {
+module.exports = Request = ProxyMethods.connect('../request/request.bg.js', {
     get: function (url, data, dataType) {
         return xhr('get', url, data, dataType);
     },

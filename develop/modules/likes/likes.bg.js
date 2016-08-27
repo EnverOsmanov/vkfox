@@ -1,6 +1,6 @@
-var Mediator = require('mediator/mediator.js'),
-    _ = require('shim/underscore.js')._,
-    Request = require('request/request.bg.js');
+var Mediator = require('../mediator/mediator.js'),
+    _ = require('../shim/underscore.js')._,
+    Request = require('../request/request.bg.js');
 
 /**
  * @param [Object] params

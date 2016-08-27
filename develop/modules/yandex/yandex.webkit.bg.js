@@ -1,6 +1,6 @@
-var Mediator = require('mediator/mediator.js'),
-    PersistentModel = require('persistent-model/persistent-model.js'),
-    Browser = require('browser/browser.bg.js'),
+var Mediator = require('../mediator/mediator.js'),
+    PersistentModel = require('../persistent-model/persistent-model.js'),
+    Browser = require('../browser/browser.bg.js'),
 
     yandexSettings = new PersistentModel({
         enabled: true,

@@ -1,7 +1,7 @@
-require('notifications/notifications.bg.js');
+require('../notifications/notifications.bg.js');
 var
-Mediator = require('mediator/mediator.js'),
-PersistentModel = require('persistent-model/persistent-model.js'),
+Mediator = require('../mediator/mediator.js'),
+PersistentModel = require('../persistent-model/persistent-model.js'),
 
 model = new PersistentModel(
     {lastPath: '/chat'},

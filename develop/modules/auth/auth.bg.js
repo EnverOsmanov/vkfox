@@ -3,14 +3,14 @@ var RETRY_INTERVAL = 10000, //ms
     IN_PROGRESS = 1,
     READY = 2,
 
-    Config = require('config/config.js'),
-    Mediator = require('mediator/mediator.js'),
-    Env = require('env/env.js'),
-    Browser = require('browser/browser.bg.js');
+    Config = require('../config/config.js'),
+    Mediator = require('../mediator/mediator.js'),
+    Env = require('../env/env.js'),
+    Browser = require('../browser/browser.bg.js');
 
-var _ = require('shim/underscore.js')._,
+var _ = require('../shim/underscore.js')._,
     Backbone = require('backbone'),
-    Vow = require('shim/vow.js'),
+    Vow = require('../shim/vow.js'),
 
     model = new Backbone.Model(),
     Auth, page, iframe,
@@ -85,6 +85,7 @@ Mediator.sub('auth:state:get', function () {
 });
 
 Mediator.sub('auth:oauth', function () {
+    console.log("sub AUTH:OAUTH in auth");
     Browser.createTab(Config.AUTH_URI);
 });
 

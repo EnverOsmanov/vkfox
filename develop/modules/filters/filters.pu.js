@@ -1,7 +1,7 @@
-var _ = require('shim/underscore.js')._,
-    Config = require('config/config.js'),
+var _ = require('../shim/underscore.js')._,
+    Config = require('../config/config.js'),
     moment = require('moment'),
-    I18N = require('i18n/i18n.pu.js');
+    I18N = require('../i18n/i18n.pu.js');
 
 require('rectify/rectify.pu.js');
 require('angular').module('app')

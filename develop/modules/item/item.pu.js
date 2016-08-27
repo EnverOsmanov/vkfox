@@ -1,8 +1,9 @@
-var Mediator = require('mediator/mediator.js'),
-    Request = require('request/request.js'),
-    Browser = require('browser/browser.js'),
-    $ = require('zepto'),
-    I18N = require('i18n/i18n.pu.js');
+require('zepto');
+require('zepto/event');
+var Mediator = require('../mediator/mediator.js'),
+    Request = require('../request/request.js'),
+    Browser = require('../browser/browser.js'),
+    I18N = require('../i18n/i18n.pu.js');
 
 require('angular').module('app')
     .directive('item', function () {

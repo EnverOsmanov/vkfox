@@ -2,9 +2,9 @@ var LONG_POLL_WAIT = 20,
     DEBOUNCE_RATE = 1000,
     fetchUpdates,
 
-    _ = require('shim/underscore.js')._,
-    Request = require('request/request.bg.js'),
-    Mediator = require('mediator/mediator.js'),
+    _ = require('../shim/underscore.js')._,
+    Request = require('../request/request.bg.js'),
+    Mediator = require('../mediator/mediator.js'),
 
 enableLongPollUpdates = _.debounce(function () {
     Request.api({
@@ -32,5 +32,6 @@ fetchUpdates = _.debounce(function (params) {
 }, DEBOUNCE_RATE);
 
 Mediator.sub('auth:success', function () {
+    console.log("sub AUTH:SUCCESS in longpoll");
     enableLongPollUpdates();
 });

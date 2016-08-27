@@ -7,7 +7,8 @@ module.exports = function (grunt) {
         DEVELOPMENT = 'DEVELOPMENT',
         BROWSERS = [FIREFOX, CHROME, OPERA],
         SRC_DIR = 'develop/',
-        LOCALES = ['ru', 'en', 'uk'];
+        LOCALES = ['ru', 'en', 'uk'],
+        FIREFOX_DIR = '/usr/lib/firefox/firefox.sh';
 
     grunt.loadNpmTasks('grunt-inline-angular-templates');
     grunt.loadNpmTasks('grunt-messageformat');
@@ -20,17 +21,18 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-preprocess');
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-contrib-compress');
-    grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-jpm');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        env : {
+        env: {
             opera: {TARGET: OPERA},
             chrome: {TARGET: CHROME},
             firefox: {TARGET: FIREFOX},
-            production: {ENV : PRODUCTION},
-            development: {ENV : DEVELOPMENT}
+            production: {ENV: PRODUCTION},
+            development: {ENV: DEVELOPMENT},
+            fireloc: {FIREFOX_BIN: FIREFOX_DIR}
         },
         inline_angular_templates: {
             popup: {
@@ -40,100 +42,48 @@ module.exports = function (grunt) {
             }
         },
         browserify: (function () {
-            var vendorShim = {
-                'angularKeypress': {
-                    path: 'bower_components/angular-ui-utils/modules/keypress/keypress.js',
-                    exports: 'angular',
-                    depends: {angular: 'angular'}
-                },
-                //we create a chain of moment.js => lang/ru.js => lang/uk.js
-                'moment': {
-                    path: 'bower_components/moment/lang/ru.js',
-                    exports: 'moment',
-                    depends: {moment1: 'moment'}
-                },
-                'moment1': {
-                    path: 'bower_components/moment/lang/uk.js',
-                    exports: 'moment',
-                    depends: {moment2: 'moment'}
-                },
-                'moment2': {
-                    path: 'bower_components/moment/moment.js',
-                    exports: 'moment'
-                },
-                'angularSanitize': {
-                    path: 'bower_components/angular-sanitize/angular-sanitize.js',
-                    exports: 'angular',
-                    depends: {angular: 'angular'}
-                },
-                'bootstrapDropdown': {
-                    path: 'bower_components/bootstrap/js/bootstrap-dropdown.js',
-                    exports: 'jQuery',
-                    depends: {zepto: 'jQuery'}
-                },
-                'bootstrapTooltip': {
-                    path: 'bower_components/bootstrap/js/bootstrap-tooltip.js',
-                    exports: 'jQuery',
-                    depends: {zepto: 'jQuery'}
-                },
-                'angular': {
-                    path: 'bower_components/angular-unstable/angular.js',
-                    exports: 'angular'
-                },
-                'javascript-linkify': {
-                    path: 'bower_components/javascript-linkify/ba-linkify.js',
-                    exports: 'linkify',
-                },
-                'zepto': {
-                    path: 'bower_components/zeptojs/src/event.js',
-                    exports: '$',
-                    depends: {zepto1: 'Zepto'}
-                },
-                'zepto1': {
-                    path: 'bower_components/zeptojs/src/detect.js',
-                    exports: 'Zepto',
-                    depends: {zepto2: 'Zepto'}
-                },
-                'zepto2': {
-                    path: 'bower_components/zeptojs/src/data.js',
-                    exports: 'Zepto',
-                    depends: {zepto3: 'Zepto'}
-                },
-                'zepto3': {
-                    path: 'bower_components/zeptojs/src/selector.js',
-                    exports: 'Zepto',
-                    depends: {zepto4: 'Zepto'}
-                },
-                'zepto4': {
-                    path: 'bower_components/zeptojs/src/zepto.js',
-                    exports: 'Zepto',
-                },
-                'jEmoji': {
-                    path: 'bower_components/emoji/lib/emoji.js',
-                    exports: 'jEmoji'
-                }
-            }, commonExternals = ['backbone', 'underscore', 'vow'], options = {
-                prelude: grunt.file.read('node_modules/browserify/node_modules/browser-pack/prelude.js'),
-                external: Object.keys(vendorShim).concat(commonExternals),
-                ignore: [
-                    'browser/browser.bg.js',
-                    'tracker/tracker.bg.js',
-                    './request.bg.js',
-                    './tracker.bg.js',
-                    './mediator.bg.js',
-                    'chrome',
-                    'toolkit/loader',
-                    '@loader/options',
-                    'sdk/ui/button/action',
-                    'sdk/panel',
-                    'sdk/timers',
-                    'sdk/system',
-                    'sdk/system/globals',
-                    'sdk/tabs',
-                    'sdk/self',
-                    'sdk/simple-storage'
-                ]
-            };
+            var shimNames = [
+                    'angular',
+                    'moment',
+                    'moment1',
+                    'moment2',
+                    'angularKeypress',
+                    'angularSanitize',
+                    'bootstrapTooltip',
+                    'javascript-linkify',
+                    'jEmoji',
+                    'bootstrapDropdown'
+                ],
+                commonExternals = ['backbone', 'underscore', 'vow',
+                    'zepto',
+                    'zepto/event',
+                    'zepto/detect',
+                    'zepto/data',
+                    'zepto/selector'
+                ], options = {
+                    external: shimNames.concat(commonExternals),
+                    ignore: [
+                        'browser/browser.bg.js',
+                        'tracker/tracker.bg.js',
+                        './request.bg.js',
+                        './tracker.bg.js',
+                        './mediator.bg.js',
+                        'chrome',
+                        'toolkit/loader',
+                        '@loader/options',
+                        'sdk/ui/button/action',
+                        'sdk/request',
+                        'sdk/page-mod',
+                        'sdk/page-worker',
+                        'sdk/panel',
+                        'sdk/timers',
+                        'sdk/system',
+                        'sdk/system/globals',
+                        'sdk/tabs',
+                        'sdk/self',
+                        'sdk/simple-storage'
+                    ]
+                };
 
             return BROWSERS.reduce(function (browserify, browser) {
                 browserify[browser.toLowerCase() + 'Popup'] = {
@@ -154,16 +104,13 @@ module.exports = function (grunt) {
                             //zepto is hardcoded (simply concatenated)
                             //to make it globally available,
                             //because require('zepto') would break cfx xpi.
-                            'bower_components/zepto-bootstrap/zepto.js',
+                            'bower_components/zeptojs/src/zepto.js',
                             'modules/app/app.bg.js'
                         ],
                     },
                     options: {
-                        prelude: grunt.file.read('node_modules/browserify/node_modules/browser-pack/prelude.js'),
                         external: commonExternals,
                         ignore: [
-                            './mediator.pu.js',
-                            'browserAction',
                             'sdk/timers',
                             '@loader/options',
                             'sdk/ui/button/action',
@@ -193,75 +140,50 @@ module.exports = function (grunt) {
                     src: commonExternals,
                     dest: 'pages/vendor.js',
                     options: {
-                        prelude: grunt.file.read('node_modules/browserify/node_modules/browser-pack/prelude.js'),
-                        alias: [
-                            '../node_modules/backbone/backbone.js:backbone',
-                            '../node_modules/underscore/underscore.js:underscore',
-                            '../node_modules/vow/lib/vow.js:vow'
-                        ]
+                        alias: {
+                            "backbone": '../node_modules/backbone/backbone.js',
+                            "underscore": '../node_modules/underscore/underscore.js',
+                            "vow": '../node_modules/vow/lib/vow.js',
+                            "zepto": "../node_modules/zepto/src/zepto.js",
+                            "zepto/event": "../node_modules/zepto/src/event.js",
+                            "zepto/detect": "../node_modules/zepto/src/detect.js",
+                            "zepto/data": "../node_modules/zepto/src/data.js",
+                            "zepto/selector": "../node_modules/zepto/src/selector.js"
+                        }
                     }
                 },
                 vendorPopup: {
                     files: {
-                        'pages/vendor.pu.js': [Object.keys(vendorShim)]
+                        'pages/vendor.pu.js': []
                     },
                     options: {
-                        prelude: grunt.file.read('node_modules/browserify/node_modules/browser-pack/prelude.js'),
-                        shim: vendorShim
+                        require: shimNames
                     }
                 }
             });
         })(),
-        'mozilla-cfx': {
-            run: {
-                options: {
-                    'mozilla-addon-sdk': '1_17',
-                    extension_dir: '.',
-                    command: 'run',
-                    arguments: '-p ../ff'
-                }
-            },
-            'run-build': {
-                options: {
-                    'mozilla-addon-sdk': '1_17',
-                    extension_dir: '../build/firefox',
-                    command: 'run',
-                    arguments: '-p ../../ff'
-                }
-            },
-
-            xpi: {
-                options: {
-                    'mozilla-addon-sdk': '1_17',
-                    extension_dir: '../build/firefox/',
-                    command: 'xpi',
-                    arguments: '-p ../../ff'
-                }
+        jpm: {
+            options: {
+                src: "../build/firefox",
+                xpi: "../build/firefox"
             }
         },
-        'mozilla-addon-sdk': {
-            '1_17': {
-                options: {
-                    revision: '1.17'
-                }
-            }
-        },
-        preprocess : {
+        preprocess: {
             popup: {
-                src : 'pages/popup.raw.html',
-                dest : 'pages/popup.html'
+                src: 'pages/popup.raw.html',
+                dest: 'pages/popup.html'
             },
             install: {
-                src : 'pages/install.raw.html',
-                dest : 'pages/install.html'
+                src: 'pages/install.raw.html',
+                dest: 'pages/install.html'
             },
             manifest: {
-                src : 'manifest.raw.json',
-                dest : 'manifest.json'
+                src: 'manifest.raw.json',
+                dest: 'manifest.json'
             },
             env: {
-                src : 'modules/env/env.raw.js',
-                dest : 'modules/env/env.js'
+                src: 'modules/env/env.raw.js',
+                dest: 'modules/env/env.js'
             }
         },
         watch: BROWSERS.reduce(function (watch, browser) {
@@ -357,6 +279,9 @@ module.exports = function (grunt) {
                 src: [
                     'package.json',
                     'packages/**',
+                    'node_modules/backbone/*',
+                    'node_modules/underscore/*',
+                    'node_modules/vow/**/*',
 
                     'data/assets/**',
 
@@ -425,6 +350,7 @@ module.exports = function (grunt) {
             commonTasks = [
                 'env:firefox',
                 'env:development',
+                'env:fireloc',
                 'less',
                 'preprocess:env',
                 'preprocess:install',
@@ -433,18 +359,17 @@ module.exports = function (grunt) {
                 'browserify:vendorCommon',
                 'browserify:vendorPopup',
                 'browserify:firefoxPopup',
-                'browserify:firefoxInstall',
-                'mozilla-addon-sdk'
+                'browserify:firefoxInstall'
             ];
 
         grunt.registerTask(browserLowercased, commonTasks.concat([
-            'mozilla-cfx:run'
+            'jpm:run'
         ]));
         grunt.registerTask('build:' + browserLowercased, commonTasks.concat([
             'clean:' + browserLowercased,
             'copy:' + browserLowercased,
-            'mozilla-cfx:xpi',
-            'mozilla-cfx:run-build'
+            'jpm:xpi',
+            'jpm:run'
         ]));
     });
 

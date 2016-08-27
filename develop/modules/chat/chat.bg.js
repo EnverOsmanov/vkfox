@@ -2,18 +2,18 @@
 var
 MAX_HISTORY_COUNT = 10,
 
-_ = require('shim/underscore.js')._,
-Vow = require('shim/vow.js'),
+_ = require('../shim/underscore.js')._,
+Vow = require('../shim/vow.js'),
 Backbone = require('backbone'),
-Request = require('request/request.bg.js'),
-Mediator = require('mediator/mediator.js'),
-Users = require('users/users.bg.js'),
-Router = require('router/router.bg.js'),
-Browser = require('browser/browser.bg.js'),
-I18N = require('i18n/i18n.js'),
-Notifications = require('notifications/notifications.bg.js'),
-PersistentModel = require('persistent-model/persistent-model.js'),
-ProfilesCollection = require('profiles-collection/profiles-collection.bg.js'),
+Request = require('../request/request.bg.js'),
+Mediator = require('../mediator/mediator.js'),
+Users = require('../users/users.bg.js'),
+Router = require('../router/router.bg.js'),
+Browser = require('../browser/browser.bg.js'),
+I18N = require('../i18n/i18n.js'),
+Notifications = require('../notifications/notifications.bg.js'),
+PersistentModel = require('../persistent-model/persistent-model.js'),
+ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
 
 dialogColl = new (Backbone.Collection.extend({
     comparator: function (dialog) {
