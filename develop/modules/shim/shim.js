@@ -26,8 +26,8 @@ if (Env.background && Env.firefox) {
     (function () {
         var myRequire = Require(loader, module);
 
-        exports.vow = myRequire('packages/vow/lib/vow.js');
-        exports.underscore = myRequire('packages/underscore/underscore.js');
+        exports.vow = myRequire('vow');
+        exports.underscore = myRequire('underscore');
     })();
 } else {
     exports.vow = require('vow');

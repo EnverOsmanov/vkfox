@@ -1,4 +1,4 @@
-require('zepto');
+require('zepto.js');
 require('zepto/event');
 var Mediator = require('../mediator/mediator.js'),
     PersistentModel = require('../persistent-model/persistent-model.js'),

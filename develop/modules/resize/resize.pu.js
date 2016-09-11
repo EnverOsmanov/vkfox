@@ -1,5 +1,4 @@
-require('zepto');
-require('zepto/event');
+require('zepto.js');
 require('angular').module('app').directive('resize', function () {
     var
     MOVE_DEBOUCE = 10,

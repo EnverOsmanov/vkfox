@@ -1,7 +1,7 @@
-require('zepto');
+require('zepto.js');
 require('zepto/event');
 var I18N = require('../i18n/i18n.pu.js'),
-    linkify = require('javascript-linkify'),
+    linkify = require('linkifyjs'),
     jEmoji = require('jEmoji');
 
 require('angular').module('app')

@@ -6,6 +6,7 @@ if (Env.firefox) {
     // is opened from panel
     if (typeof addon !== 'undefined') {
         addon.port.on('message', function (messageData) {
+            console.log('m ' + messageData);
             Dispatcher.pub.apply(Mediator, [].slice.call(messageData));
         });
 

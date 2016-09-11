@@ -1,4 +1,4 @@
-require('zepto');
+require('zepto.js');
 require('zepto/event');
 var Mediator = require('../mediator/mediator.js'),
     Request = require('../request/request.js'),

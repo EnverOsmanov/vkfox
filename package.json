@@ -19,16 +19,38 @@
     "grunt-usemin": "~0.1.12",
     "messageformat": "^0.1.7",
     "underscore": "~1.6.0",
-    "vow": "~0.3.12",
-    "zepto": "1.1.6"
+    "vow": "~0.3.12"
   },
   "devDependencies": {
+    "bower-resolve": "^2.2.1",
     "browserify": "^13.1.0",
     "browserify-shim": "^3.8.12",
+    "del": "^2.2.2",
     "grunt": "~0.4.5",
     "grunt-browserify": "5.0.0",
     "grunt-contrib-watch": "^0.5.3",
     "grunt-inline-angular-templates": "~0.1.5",
-    "grunt-jpm": "0.1.3"
+    "grunt-jpm": "0.1.3",
+    "gulp": "^3.9.1",
+    "gulp-debug": "^2.1.2",
+    "gulp-env": "^0.4.0",
+    "gulp-inline-angular-templates": "^0.1.5",
+    "gulp-less": "^3.1.0",
+    "gulp-preprocess": "^2.0.0",
+    "gulp-rename": "^1.2.2",
+    "less": "^2.7.1",
+    "resolve": "^1.1.7",
+    "run-sequence": "^1.2.2",
+    "vinyl-source-stream": "^1.1.0",
+    "webpack": "^1.13.2"
+  },
+  "browser": {
+    "zepto.js": "./develop/bower_components/zepto.js/src/zepto.js",
+    "zepto/event": "./develop/bower_components/zepto.js/src/event.js",
+    "zepto/detect": "./develop/bower_components/zepto.js/src/detect.js",
+    "zepto/data": "./develop/bower_components/zepto.js/src/data.js",
+    "zepto/selector": "./develop/bower_components/zepto.js/src/selector.js",
+    "bootstrapTooltip": "./develop/bower_components/bootstrap/js/tooltip.js",
+    "bootstrapDropdown": "./develop/bower_components/bootstrap/js/dropdown.js"
   }
 }

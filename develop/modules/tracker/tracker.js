@@ -7,8 +7,7 @@ I18n = require('../i18n/i18n.js'),
 Env = require('../env/env.js'),
 Browser = require('../browser/browser.js'),
 Request = require('../request/request.js'),
-Config = require('../config/config.js'),
-MySys = require('sdk/system'),
+Config = require('../config/config.js');
 
 url = 'http://www.google-analytics.com/collect',
 persistentModel = new PersistentModel({}, {name: 'tracker'}),
@@ -36,9 +35,9 @@ function guid() {
 }
 function getBrowserVersion() {
     if (Env.background && Env.firefox) {
-        return MySys.platformVersion;
+        return require('sdk/system').platformVersion;
     } else {
-        // we don't user require('zepto')
+        // we don't user require('zepto.js')
         // to hack for Firefox's SDK syntax analyzer
         // But we do need, to somewhere include zepto
         return $.browser.version;

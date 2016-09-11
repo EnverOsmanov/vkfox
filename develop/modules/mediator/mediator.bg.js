@@ -11,18 +11,21 @@ if (Env.firefox) {
 
     console.log("AAAA" + data.url("../mediator/contentScript.js"));
     pageMod.PageMod({
-        include: /.*vkfox\/data\/pages\/.*\.html/,
+        include: /.*\/data\/pages\/.*\.html/,
         // include: "resource://jid1-ci3mbxpmmpdxuq-at-jetpack/vkfox/data/pages/popup.html",
         contentScriptFile: data.url("modules/mediator/contentScript.js"),
         onAttach: function (worker) {
+            console.log('bg');
             activeWorkers.push(worker);
             worker.port.on('detach', function () {
+                console.log('detach');
                 var index = activeWorkers.indexOf(worker);
                 if (index !== -1) {
                     activeWorkers.splice(index, 1);
                 }
             });
             worker.port.on('message', function (messageData) {
+                console.log('mes' + messageData);
                 Dispatcher.pub.apply(Mediator, [].slice.call(messageData));
             });
         }

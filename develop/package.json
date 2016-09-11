@@ -14,7 +14,6 @@
     "underscore": "./packages/underscore/underscore.js",
     "vow": "./packages/vow/lib/vow.js",
     "angular": "./bower_components/angular-unstable/angular.js",
-    "zepto": "./packages/zepto/src/zepto.js",
     "zepto/event": "./packages/zepto/src/event.js",
     "zepto/detect": "./packages/zepto/src/detect.js",
     "zepto/data": "./packages/zepto/src/data.js",
@@ -25,13 +24,13 @@
     "angularKeypress": "./bower_components/angular-ui-utils/modules/keypress/keypress.js",
     "angularSanitize": "./bower_components/angular-sanitize/angular-sanitize.js",
     "bootstrapTooltip": "./bower_components/bootstrap/js/bootstrap-tooltip.js",
-    "javascript-linkify": "./bower_components/javascript-linkify/ba-linkify.js",
+    "linkifyjs": "./bower_components/javascript-linkify/ba-linkify.js",
     "jEmoji": "./bower_components/emoji/lib/emoji.js",
     "bootstrapDropdown": "./bower_components/bootstrap/js/bootstrap-dropdown.js"
   },
   "browserify-shim": {
     "angular": "angular",
-    "zepto": "$",
+    "zepto": "zepto",
     "zepto/event": {
       "depends": ["zepto"]
     },
