@@ -1,5 +1,7 @@
-require('zepto');
-require('zepto/event');
+var jQuery = require('zepto.js');
+window.$ = window.jQuery = jQuery;
+console.log(jQuery);
+console.log(jQuery.fn);
 
 require('bootstrapTooltip');
 
@@ -31,3 +33,5 @@ $(document).on('show', '[title]', function (e) {
         $(this).data('tooltip').$tip.remove();
     });
 });
+
+jQuery.noConflict(true);

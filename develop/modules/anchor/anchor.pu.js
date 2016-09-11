@@ -1,5 +1,4 @@
-require('zepto');
-require('zepto/event');
+require('zepto.js');
 var Browser = require('../browser/browser.js');
 
 $(document).on('click', '[anchor]', function (e) {

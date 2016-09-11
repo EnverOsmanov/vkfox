@@ -49,17 +49,17 @@ module.exports = function (grunt) {
                     'moment2',
                     'angularKeypress',
                     'angularSanitize',
-                    'bootstrapTooltip',
                     'javascript-linkify',
                     'jEmoji',
-                    'bootstrapDropdown'
-                ],
-                commonExternals = ['backbone', 'underscore', 'vow',
+                    'bootstrapDropdown',
                     'zepto',
                     'zepto/event',
                     'zepto/detect',
                     'zepto/data',
-                    'zepto/selector'
+                    'zepto/selector',
+                    'bootstrapTooltip'
+                ],
+                commonExternals = ['backbone', 'underscore', 'vow'
                 ], options = {
                     external: shimNames.concat(commonExternals),
                     ignore: [
@@ -144,17 +144,12 @@ module.exports = function (grunt) {
                             "backbone": '../node_modules/backbone/backbone.js',
                             "underscore": '../node_modules/underscore/underscore.js',
                             "vow": '../node_modules/vow/lib/vow.js',
-                            "zepto": "../node_modules/zepto/src/zepto.js",
-                            "zepto/event": "../node_modules/zepto/src/event.js",
-                            "zepto/detect": "../node_modules/zepto/src/detect.js",
-                            "zepto/data": "../node_modules/zepto/src/data.js",
-                            "zepto/selector": "../node_modules/zepto/src/selector.js"
                         }
                     }
                 },
                 vendorPopup: {
                     files: {
-                        'pages/vendor.pu.js': []
+                        'pages/vendor.pu.js': shimNames
                     },
                     options: {
                         require: shimNames

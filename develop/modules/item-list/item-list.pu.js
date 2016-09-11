@@ -1,4 +1,4 @@
-require('zepto');
+require('zepto.js');
 require('zepto/event');
 var _ = require('../shim/underscore.js')._;
 

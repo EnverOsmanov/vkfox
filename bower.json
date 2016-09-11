@@ -1,13 +1,13 @@
 {
   "name": "vkfox",
   "dependencies": {
-    "bootstrap": "https://github.com/metrofun/bootstrap.git#~2.3.3",
+    "zepto.js": "^1.1.6",
     "angular-unstable": "~1.1.5",
     "angular-ui-utils": "~0.0.2",
-    "javascript-linkify": "https://github.com/cowboy/javascript-linkify.git",
-    "emoji": "~0.2.1",
-    "font-awesome": "~3.2.1",
     "angular-sanitize": "~1.0.8",
-    "moment": "~2.5.1"
+    "moment": "~2.5.1",
+    "bootstrap": "^3.3.7",
+    "linkifyjs": "^2.1.0",
+    "emoji": "^0.3.2"
   }
 }
