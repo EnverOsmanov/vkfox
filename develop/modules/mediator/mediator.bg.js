@@ -1,31 +1,29 @@
-var Dispatcher = require('./dispatcher.js'),
-    Mediator = Object.create(Dispatcher),
-    Browser = require('../browser/browser.bg.js'),
-    Env = require('../env/env.js');
+"use strict";
+const Dispatcher = require('./dispatcher.js'),
+    Mediator     = Object.create(Dispatcher),
+    Browser      = require('../browser/browser.bg.js'),
+    Env          = require('../env/env.js');
 
 
 if (Env.firefox) {
-    var firefoxPanel = Browser.getFirefoxPanel(),
-        data = require('sdk/self').data,
-        pageMod = require("sdk/page-mod"), activeWorkers = [firefoxPanel];
+    const firefoxPanel = Browser.getFirefoxPanel(),
+        data           = require('sdk/self').data,
+        pageMod        = require("sdk/page-mod"),
+        activeWorkers  = [firefoxPanel];
 
-    console.log("AAAA" + data.url("../mediator/contentScript.js"));
     pageMod.PageMod({
         include: /.*\/data\/pages\/.*\.html/,
         // include: "resource://jid1-ci3mbxpmmpdxuq-at-jetpack/vkfox/data/pages/popup.html",
         contentScriptFile: data.url("modules/mediator/contentScript.js"),
         onAttach: function (worker) {
-            console.log('bg');
             activeWorkers.push(worker);
             worker.port.on('detach', function () {
-                console.log('detach');
-                var index = activeWorkers.indexOf(worker);
+                const index = activeWorkers.indexOf(worker);
                 if (index !== -1) {
                     activeWorkers.splice(index, 1);
                 }
             });
             worker.port.on('message', function (messageData) {
-                console.log('mes' + messageData);
                 Dispatcher.pub.apply(Mediator, [].slice.call(messageData));
             });
         }
@@ -49,7 +47,8 @@ if (Env.firefox) {
             }
         });
     }, writable: true, enumerable: true});
-} else {
+}
+else {
     var activePorts = [];
 
     chrome.runtime.onConnect.addListener(function (port) {

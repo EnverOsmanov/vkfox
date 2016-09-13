@@ -1,4 +1,5 @@
-var Env = require('../env/env.js');
+"use strict";
+const Env = require('../env/env.js');
 
 exports.APP_ID = 3807372;
 if (Env.firefox) {

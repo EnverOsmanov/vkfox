@@ -1,5 +1,6 @@
-var Backbone = require('backbone'),
-    storage = require('../storage/storage.js');
+"use strict";
+const Backbone = require('backbone'),
+    storage    = require('../storage/storage.js');
 
 module.exports = Backbone.Model.extend({
     /**

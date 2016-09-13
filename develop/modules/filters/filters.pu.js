@@ -1,9 +1,10 @@
-var _ = require('../shim/underscore.js')._,
+"use strict";
+const _    = require('../shim/underscore.js')._,
     Config = require('../config/config.js'),
     moment = require('moment'),
-    I18N = require('../i18n/i18n.pu.js');
+    I18N   = require('../i18n/i18n.pu.js');
 
-require('rectify/rectify.pu.js');
+require('../rectify/rectify.pu.js');
 require('angular').module('app')
     .filter('i18n', function () {
         return function (input) {
@@ -14,23 +15,19 @@ require('angular').module('app')
     })
     .filter('duration', function () {
         /**
-        * Returns time duration in format 'HH:mm'
-        *
-        * @param {Array} seconds
-        *
-        * @returns {String}
-        */
+         * Returns time duration in format 'HH:mm'
+         *
+         * @param {Array} seconds
+         *
+         * @returns {String}
+         */
         return function (seconds) {
-            if (seconds) {
-                return moment.unix(seconds).format('HH:mm');
-            }
+            if (seconds) return moment.unix(seconds).format('HH:mm');
         };
     })
     .filter('timeago', function () {
         return function (timestamp) {
-            if (timestamp) {
-                return moment(timestamp).fromNow();
-            }
+            if (timestamp) return moment(timestamp).fromNow();
         };
     })
     .filter('capitalize', function () {
@@ -42,9 +39,7 @@ require('angular').module('app')
          * @returns {String}
          */
         return function (str) {
-            if (str && str.length) {
-                return str[0].toUpperCase() + str.substr(1);
-            }
+            if (str && str.length) return str[0].toUpperCase() + str.substr(1);
         };
     })
     .filter('where', function () {
@@ -61,7 +56,7 @@ require('angular').module('app')
         return function (input, property, value) {
             var obj;
             if (input) {
-                obj  = {};
+                obj = {};
                 obj[property] = value;
                 return _(input).findWhere(obj);
             }
@@ -79,12 +74,9 @@ require('angular').module('app')
             if (input) {
                 return [].concat(input).map(function (owner) {
                     //group profile
-                    if (owner.name) {
-                        return owner.name;
                     //user profile
-                    } else {
-                        return owner.first_name + ' ' + owner.last_name;
-                    }
+                    if (owner.name) return owner.name;
+                    else return owner.first_name + ' ' + owner.last_name;
                 }).join(', ');
             }
         };
@@ -92,9 +84,7 @@ require('angular').module('app')
     .filter('addVKBase', function () {
         return function (path) {
             if (path.indexOf(Config.VK_BASE) === -1) {
-                if (path.charAt(0) === '/') {
-                    path = path.substr(1);
-                }
+                if (path.charAt(0) === '/') path = path.substr(1);
                 path = Config.VK_BASE + path;
             }
             return path;
@@ -102,9 +92,7 @@ require('angular').module('app')
     })
     .filter('slice', function () {
         return function (arr, start, end) {
-            if (arr) {
-                return arr.slice(start, end);
-            }
+            if (arr) return arr.slice(start, end);
         };
     })
     .filter('isArray', function () {

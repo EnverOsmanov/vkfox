@@ -1,5 +1,12 @@
-<item-list
+<div
     item-list-fixed-header
-    ng-controller="GroupNewsController">
+    ng-controller="GroupNewsController" class="item-list">
+
+    <div class="item-list__content">
+        <div class="item-list__scroll">
+
     <ng-include src="'modules/news/feeds.tmpl.html'"></ng-include>
-</item-list>
+
+        </div>
+    </div>
+</div>

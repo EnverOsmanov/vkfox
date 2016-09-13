@@ -1,4 +1,5 @@
-var Config = require('../config/config.js'),
+"use strict";
+const Config = require('../config/config.js'),
     Mediator = require('../mediator/mediator.js');
 
 require('../navigation/navigation.pu.js');

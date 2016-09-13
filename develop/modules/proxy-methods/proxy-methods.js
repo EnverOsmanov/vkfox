@@ -1,11 +1,12 @@
+"use strict";
 /**
  * This module is used to proxy methods call from one module to another.
  * Is used to proxy calls from popup to background.
  * ProxyMethods can proxy only methods that return promises or no value,
  * because use the asynchronous Mediator underneath.
  */
-var Vow = require('../shim/vow.js'),
-    _ = require('../shim/underscore.js')._,
+const Vow    = require('../shim/vow.js'),
+    _        = require('../shim/underscore.js')._,
     Mediator = require('../mediator/mediator.js');
 
 module.exports = {

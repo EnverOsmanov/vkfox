@@ -1,9 +1,12 @@
+"use strict";
 try {
     require('../tracker/tracker.js').trackPage();
-    require('angular').module('app', ['ui.keypress', 'ngSanitize']);
-    require('../resize/resize.pu.js');
+    require('angular').module('app', ['ui.keypress', 'ngSanitize', 'ngRoute', 'ngAnimate']);
+    require('angular-route');
+    require('angular-animate');
     require('angularKeypress');
-    require('angularSanitize');
+    require('angular-sanitize');
+    require('../resize/resize.pu.js');
     require('../filters/filters.pu.js');
     require('../anchor/anchor.pu.js');
     require('../tooltip/tooltip.pu.js');

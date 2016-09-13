@@ -1,23 +1,22 @@
-var DEFAULT_LANGUAGE = 'en',
-
-    _ = require('../shim/underscore.js')._,
+"use strict";
+const DEFAULT_LANGUAGE = 'en',
+    _                  = require('../shim/underscore.js')._,
 
     i18n = _.extend(
         {},
         require('./ru.js'),
         require('./uk.js'),
         require('./en.js')
-    ), language, locale, messages, chr, Ci, Cc;
+    );
+
+let language, locale, messages;
 
 // Show russian locale for belorus
 i18n.be = i18n.ru;
-
 if (typeof navigator !== 'undefined') {
     locale = navigator.language;
 } else {
-    chr = require("chrome");
-    Cc = chr.Cc;
-    Ci = chr.Ci;
+    const { Cc, Ci } = require("chrome");
     locale = Cc["@mozilla.org/chrome/chrome-registry;1"]
         .getService(Ci.nsIXULChromeRegistry).getSelectedLocale("global");
 }
@@ -43,8 +42,7 @@ module.exports = {
     /**
      * Returns localized text
      *
-     * @param [String] key
-     * @param [...Mixed] any number of params
+     * @param {String} key
      *
      * @returns {String}
      */

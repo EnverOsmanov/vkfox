@@ -191,7 +191,7 @@ module.exports = Request = ProxyMethods.connect('../request/request.bg.js', {
                     v: API_VERSION
                 }).then(function (data) {
                     if (data.execute_errors) {
-                        console.warn(data.execute_errors);
+                        console.warn(data.execute_errors + JSON.stringify(data.execute_errors));
                     }
                     var response = data.response, i;
                     if (Array.isArray(response)) {

@@ -1,18 +1,17 @@
-require('zepto.js');
-require('zepto/event');
-var I18N = require('../i18n/i18n.pu.js'),
-    linkify = require('linkifyjs'),
-    jEmoji = require('jEmoji');
+"use strict";
+const I18N  = require('../i18n/i18n.pu.js'),
+    linkifyHtml = require('linkifyjs/html'),
+    jEmoji  = require('emoji');
 
 require('angular').module('app')
     .filter('rectify', function ($sanitize) {
-        var MAX_TEXT_LENGTH = 300,
+        const MAX_TEXT_LENGTH = 300,
             TRUNCATE_LENGTH = 200,
 
         showMoreButtonLabel = I18N.get('more...');
 
         $('body').on('click', '.show-more', function (e) {
-            var jTarget = $(e.currentTarget);
+            const jTarget = $(e.currentTarget);
 
             jTarget.replaceWith(linkifySanitizeEmoji(
                 jTarget.data('text'),
@@ -30,11 +29,12 @@ require('angular').module('app')
          * And repaces emoji unicodes with corrspondenting images
          *
          * @param {String} text
+         * @param {Boolean} hasEmoji
          * @returns {String} html
          */
         function linkifySanitizeEmoji(text, hasEmoji) {
-            var sanitized = $sanitize(hasEmoji ? jEmoji.unifiedToHTML(text):text),
-                linkifiedText = linkify(sanitized, {
+            const sanitized = $sanitize(hasEmoji ? jEmoji.unifiedToHTML(text):text),
+                linkifiedText = linkifyHtml(sanitized, {
                     callback: function (text, href) {
                         //"text" and "href" are safe tokens of the already sanitized string,
                         //which is passed to the "linkify" function above
@@ -51,7 +51,7 @@ require('angular').module('app')
         }
 
         function escapeQuotes(string) {
-            var entityMap = {
+            const entityMap = {
                 '"': '&quot;',
                 "'": '&#39;'
             };
@@ -72,7 +72,7 @@ require('angular').module('app')
          * @returns {String} html-string
          */
         return function (text, hasEmoji) {
-            var spaceIndex;
+            let spaceIndex;
 
             if (text) {
                 text = String(text);

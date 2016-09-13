@@ -1,24 +1,24 @@
-var
-MAX_ITEMS_COUNT = 50,
-MAX_COMMENTS_COUNT = 3,
-UPDATE_PERIOD = 2000, //ms
+"use strict";
+const MAX_ITEMS_COUNT  = 50,
+    MAX_COMMENTS_COUNT = 3,
+    UPDATE_PERIOD      = 2000, //ms
+    _                  = require('../shim/underscore.js')._,
+    Vow                = require('../shim/vow.js'),
+    Backbone           = require('backbone'),
+    Request            = require('../request/request.bg.js'),
+    User               = require('../users/users.bg.js'),
+    Mediator           = require('../mediator/mediator.js'),
+    Router             = require('../router/router.bg.js'),
+    Browser            = require('../browser/browser.bg.js'),
+    I18N               = require('../i18n/i18n.js'),
+    PersistentModel    = require('../persistent-model/persistent-model.js'),
+    Notifications      = require('../notifications/notifications.bg.js'),
+    ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js');
 
-_ = require('../shim/underscore.js')._,
-Vow = require('../shim/vow.js'),
-Backbone = require('backbone'),
-Request = require('../request/request.bg.js'),
-User = require('../users/users.bg.js'),
-Mediator = require('../mediator/mediator.js'),
-Router = require('../router/router.bg.js'),
-Browser = require('../browser/browser.bg.js'),
-I18N = require('../i18n/i18n.js'),
-PersistentModel = require('../persistent-model/persistent-model.js'),
-Notifications = require('../notifications/notifications.bg.js'),
-ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
-
-readyPromise = Vow.promise(),
-persistentModel, userId,
-autoUpdateNotificationsParams, autoUpdateCommentsParams,
+let persistentModel, userId,
+    autoUpdateNotificationsParams, autoUpdateCommentsParams,
+    fetchFeedbacksDebounced,
+    readyPromise = Vow.promise(),
 profilesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         parse: function (profile) {
@@ -31,7 +31,6 @@ profilesColl = new (ProfilesCollection.extend({
         }
     })
 }))(),
-fetchFeedbacksDebounced,
 FeedbacksCollection = Backbone.Collection.extend({
     comparator: function (model) {
         return model.get('date');
@@ -255,11 +254,10 @@ function fetchFeedbacks() {
         // first item in notifications contains quantity
         if ((notifications.items && notifications.items.length > 1)
             || (comments.items && comments.items.length)) {
-            profilesColl
-                .add(comments.profiles, {parse: true})
-                .add(comments.groups, {parse: true})
-                .add(notifications.profiles, {parse: true})
-                .add(notifications.groups, {parse: true});
+            profilesColl.add(comments.profiles, {parse: true});
+            profilesColl.add(comments.groups, {parse: true});
+            profilesColl.add(notifications.profiles, {parse: true});
+            profilesColl.add(notifications.groups, {parse: true});
 
             notifications.items.slice(1).forEach(addRawNotificationsItem);
             comments.items.forEach(addRawCommentsItem);

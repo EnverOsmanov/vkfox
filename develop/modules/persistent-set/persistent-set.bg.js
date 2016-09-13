@@ -1,6 +1,7 @@
-var
-storage = require('../storage/storage.js'),
-constructor = function (name) {
+"use strict";
+const storage = require('../storage/storage.js');
+
+const constructor = function (name) {
     var item = storage.getItem(name);
 
     if (item) {

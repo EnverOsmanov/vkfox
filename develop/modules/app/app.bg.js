@@ -1,3 +1,4 @@
+"use strict";
 try {
     require('../tracker/tracker.js').trackPage();
     require('../browser/browser.bg.js');

@@ -1,14 +1,13 @@
-var
-MAX_ITEMS_COUNT = 50,
-UPDATE_PERIOD = 10000, //ms
-
-_ = require('../shim/underscore.js')._,
-Vow = require('../shim/vow.js'),
-Backbone = require('backbone'),
-Tracker = require('../tracker/tracker.js'),
-Request = require('../request/request.bg.js'),
-Browser = require('../browser/browser.bg.js'),
-Mediator = require('../mediator/mediator.js'),
+"use strict";
+const MAX_ITEMS_COUNT = 50,
+    UPDATE_PERIOD     = 10000, //ms
+    _                 = require('../shim/underscore.js')._,
+    Vow               = require('../shim/vow.js'),
+    Backbone          = require('backbone'),
+    Tracker           = require('../tracker/tracker.js'),
+    Request           = require('../request/request.bg.js'),
+    Browser           = require('../browser/browser.bg.js'),
+    Mediator          = require('../mediator/mediator.js'),
 
 profilesColl = new (Backbone.Collection.extend({
     model: Backbone.Model.extend({
@@ -35,10 +34,11 @@ ItemsColl = Backbone.Collection.extend({
     })
 }),
 groupItemsColl = new ItemsColl(),
-friendItemsColl = new ItemsColl(),
-fetchNewsfeedDebounced,
-readyPromise = Vow.promise(),
-autoUpdateParams;
+friendItemsColl = new ItemsColl();
+
+let fetchNewsfeedDebounced,
+    autoUpdateParams,
+    readyPromise = Vow.promise();
 
 /**
  * Generates unique id for every item,
@@ -179,9 +179,8 @@ function fetchNewsfeed() {
 
         autoUpdateParams.start_time = response.time;
 
-        profilesColl
-            .add(newsfeed.profiles, {parse: true})
-            .add(newsfeed.groups, {parse: true});
+        profilesColl.add(newsfeed.profiles, {parse: true});
+        profilesColl.add(newsfeed.groups, {parse: true});
 
         discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
 

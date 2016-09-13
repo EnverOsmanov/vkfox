@@ -1,24 +1,27 @@
-var LONG_POLL_WAIT = 20,
-    DEBOUNCE_RATE = 1000,
-    fetchUpdates,
+"use strict";
+const LONG_POLL_WAIT = 20,
+    DEBOUNCE_RATE    = 1000,
+    _                = require('../shim/underscore.js')._,
+    Request          = require('../request/request.bg.js'),
+    Mediator         = require('../mediator/mediator.js');
 
-    _ = require('../shim/underscore.js')._,
-    Request = require('../request/request.bg.js'),
-    Mediator = require('../mediator/mediator.js'),
-
-enableLongPollUpdates = _.debounce(function () {
+let fetchUpdates;
+const enableLongPollUpdates = _.debounce(function () {
     Request.api({
         code: 'return API.messages.getLongPollServer();'
     }).then(fetchUpdates, enableLongPollUpdates).done();
-}, DEBOUNCE_RATE),
+}, DEBOUNCE_RATE);
+
 fetchUpdates = _.debounce(function (params) {
-    Request.get('http://' + params.server, {
-        act: 'a_check',
-        key:  params.key,
-        ts: params.ts,
+    Request.
+    get('http://' + params.server, {
+        act : 'a_check',
+        key : params.key,
+        ts  : params.ts,
         wait: LONG_POLL_WAIT,
         mode: 2
-    }, 'json').then(function (response) {
+    }, 'json').
+    then(function (response) {
         if (!response.updates) {
             enableLongPollUpdates();
             return;
@@ -28,10 +31,10 @@ fetchUpdates = _.debounce(function (params) {
 
         params.ts = response.ts;
         fetchUpdates(params);
-    }, enableLongPollUpdates).done();
+    }, enableLongPollUpdates).
+    done();
 }, DEBOUNCE_RATE);
 
 Mediator.sub('auth:success', function () {
-    console.log("sub AUTH:SUCCESS in longpoll");
     enableLongPollUpdates();
 });

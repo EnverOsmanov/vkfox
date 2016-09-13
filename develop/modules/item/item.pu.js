@@ -1,13 +1,22 @@
-require('zepto.js');
-require('zepto/event');
-var Mediator = require('../mediator/mediator.js'),
-    Request = require('../request/request.js'),
-    Browser = require('../browser/browser.js'),
-    I18N = require('../i18n/i18n.pu.js');
+"use strict";
+const Mediator = require('../mediator/mediator.js'),
+    Request    = require('../request/request.js'),
+    Browser    = require('../browser/browser.js'),
+    I18N       = require('../i18n/i18n.pu.js');
 
 require('angular').module('app')
     .directive('item', function () {
         return {
+            templateUrl: 'modules/item/item.tmpl.html',
+            replace    : true,
+            transclude : true,
+            restrict   : 'E',
+            scope: {
+                owners     : '=',
+                description: '@?',
+                reply      : '=?',
+                'class'    : '@'
+            },
             controller: function ($scope, $element, $timeout) {
                 $scope.reply = {
                     visible: false
@@ -44,26 +53,20 @@ require('angular').module('app')
                         $scope.reply.onSend(message);
                     }
                 };
-            },
-            templateUrl: 'modules/item/item.tmpl.html',
-            replace: true,
-            transclude: true,
-            restrict: 'E',
-            scope: {
-                owners: '=',
-                description: '@?',
-                reply: '=?',
-                'class': '@'
             }
         };
     })
     .directive('itemAttachment', function () {
-        var VIDEO_VIEW_URL = 'http://vkfox.io/video/';
+        const VIDEO_VIEW_URL = 'http://vkfox.io/video/';
 
         $(document).on('click', '.item__video', function (e) {
-            var jTarget = $(e.currentTarget),
-                video = [jTarget.data('id'), jTarget.data('access-key')].filter(Boolean).join('_'),
-                params = {videos: video};
+            const jTarget = $(e.currentTarget);
+            const video = [
+                jTarget.data('id'),
+                jTarget.data('access-key')
+            ].filter(Boolean).join('_');
+
+            const params = {videos: video};
 
             Request.api({
                 code: 'return API.video.get(' + JSON.stringify(params) + ');'
@@ -76,8 +79,8 @@ require('angular').module('app')
 
         return {
             templateUrl: 'modules/item/attachment.tmpl.html',
-            replace: true,
-            restrict: 'E',
+            replace    : true,
+            restrict   : 'E',
             scope: {
                 // TODO why @?
                 type: '@',
@@ -86,12 +89,12 @@ require('angular').module('app')
         };
     })
     .filter('docViewPath', function () {
-        var DOC_VIEW_URL = 'http://vkfox.io/doc/',
+        const DOC_VIEW_URL = 'http://vkfox.io/doc/',
             IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
 
         function isImage(filename) {
-            var IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff'],
-                match = filename.match(/\.([^.]+)$/);
+            const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff'],
+                match        = filename.match(/\.([^.]+)$/);
 
             if (match) {
                 console.log(match);
@@ -106,7 +109,7 @@ require('angular').module('app')
         };
     })
     .filter('imageViewPath', function () {
-        var IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
+        const IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
 
         return function (photo) {
             var sizes = [
@@ -128,16 +131,16 @@ require('angular').module('app')
     })
     .directive('itemActions', function () {
         return {
-            template: '<div class="item__actions" ng-transclude></div>',
-            replace: true,
+            template  : '<div class="item__actions" ng-transclude></div>',
+            replace   : true,
             transclude: true,
-            restrict: 'E'
+            restrict  : 'E'
         };
     })
     .directive('itemAction', function () {
         return {
             template: '<i class="item__action"></i>',
-            replace: true,
+            replace : true,
             restrict: 'E'
         };
     })
@@ -149,10 +152,10 @@ require('angular').module('app')
 
         return {
             transclude: true,
-            require: '^item',
-            restrict: 'A',
+            require   : '^item',
+            restrict  : 'A',
             scope: {
-                uid: '=',
+                uid   : '=',
                 chatId: '=?'
             },
             controller: function ($element, $transclude) {
@@ -168,15 +171,12 @@ require('angular').module('app')
                     element.bind('click', function () {
                         scope.$apply(function () {
                             itemCtrl.showReply(function (message) {
-                                var params = {
+                                const params = {
                                     message: message.trim()
                                 };
 
-                                if (scope.chatId) {
-                                    params.chat_id = scope.chatId;
-                                } else {
-                                    params.uid = scope.uid;
-                                }
+                                if (scope.chatId) params.chat_id = scope.chatId;
+                                else params.uid = scope.uid;
 
                                 Request.api({
                                     code: 'return API.messages.send(' + JSON.stringify(params) + ');'
@@ -196,12 +196,12 @@ require('angular').module('app')
         };
     })
     .directive('itemPostWall', function () {
-        var title =  I18N.get('Wall post');
+        const title =  I18N.get('Wall post');
 
         return {
             transclude: true,
-            require: '^item',
-            restrict: 'A',
+            require   : '^item',
+            restrict  : 'A',
             scope: {
                 uid: '='
             },
@@ -216,8 +216,8 @@ require('angular').module('app')
                     element.bind('click', function () {
                         scope.$apply(function () {
                             itemCtrl.showReply(function (message) {
-                                var params = {
-                                    message: message.trim(),
+                                const params = {
+                                    message : message.trim(),
                                     owner_id: scope.uid
                                 };
 
@@ -232,7 +232,7 @@ require('angular').module('app')
         };
     })
     .directive('itemActionLike', function () {
-        var title =  I18N.get('Like');
+        const title =  I18N.get('Like');
 
         return {
             templateUrl: 'modules/item/action-like.tmpl.html',
@@ -263,19 +263,19 @@ require('angular').module('app')
         };
     })
     .directive('itemActionComment', function () {
-        var title =  I18N.get('Comment');
+        const title =  I18N.get('Comment');
 
         return {
-            require: '^item',
+            require : '^item',
             template: '<i class="item__action icon-comment"></i>',
             restrict: 'E',
-            replace: true,
+            replace : true,
             scope: {
-                type: '=?',
+                type   : '=?',
                 ownerId: '=?',
-                id: '=?',
+                id     : '=?',
                 replyTo: '=?',
-                text: '='
+                text   : '='
             },
             compile: function (tElement, tAttrs) {
                 tAttrs.$set('title', title);

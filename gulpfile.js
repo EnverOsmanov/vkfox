@@ -1,38 +1,30 @@
-var gulp = require('gulp'),
-    env = require('gulp-env'),
-    less = require('gulp-less'),
-    preprocess = require('gulp-preprocess'),
-    rename = require('gulp-rename'),
+'use strict';
+
+const gulp                 = require('gulp'),
+    env                    = require('gulp-env'),
+    less                   = require('gulp-less'),
+    preprocess             = require('gulp-preprocess'),
+    rename                 = require('gulp-rename'),
     inlineAngularTemplates = require('gulp-inline-angular-templates'),
-    source = require('vinyl-source-stream'),
-    bowerResolve = require('bower-resolve'),
-    nodeResolve = require('resolve'),
-    browserify = require('browserify'),
-    del = require('del'),
-    path = require('path'),
-    exec = require('child_process').exec,
-    runSequence = require('run-sequence'),
-    debug = require('gulp-debug'),
-    FIREFOX_DIR = '/usr/lib/firefox/firefox.sh',
-    production = (process.env.NODE_ENV === 'production'),
-    commonExternals = ['backbone', 'underscore', 'vow'],
-    shimNames = [
-        'angular',
-        'moment',
-        'moment1',
-        'moment2',
-        'angularKeypress',
-        'angularSanitize',
-        'javascript-linkify',
-        'jEmoji',
-        'bootstrapDropdown',
-        'zepto',
-        'zepto/event',
-        'zepto/detect',
-        'zepto/data',
-        'zepto/selector',
-        'bootstrapTooltip'
-    ];
+    source                 = require('vinyl-source-stream'),
+    bowerResolve           = require('bower-resolve'),
+    nodeResolve            = require('resolve'),
+    browserify             = require('browserify'),
+    del                    = require('del'),
+    path                   = require('path'),
+    exec                   = require('child_process').exec,
+    runSequence            = require('run-sequence'),
+    debug                  = require('gulp-debug'),
+    FIREFOX_DIR            = '/usr/lib/firefox/firefox.sh',
+    production             = (process.env.NODE_ENV === 'production'),
+    commonExternals        = ['backbone', 'underscore', 'vow'];
+
+const webpackStream = require('webpack-stream');
+const webpack = webpackStream.webpack;
+const named = require('vinyl-named');
+const plumber = require('gulp-plumber');
+const notify = require('gulp-notify');
+const eslint = require("gulp-eslint");
 
 gulp.task('env:firefox', function () {
     env({
@@ -78,7 +70,7 @@ gulp.task('preprocess:install', function () {
 
 gulp.task('inline_angular_templates', function () {
     return gulp.src('./develop/modules/**/*.tmpl.html')
-        .pipe(inlineAngularTemplates('./build/firefox/data/pages/popup.html'))
+        .pipe(inlineAngularTemplates('./build/firefox/data/pages/popup.html', {base: './develop'}))
         .pipe(gulp.dest('./build/firefox/data/pages'));
 });
 
@@ -173,9 +165,10 @@ gulp.task('copy:firefox', function () {
         './develop/node_modules/underscore/*',
         './develop/node_modules/vow/**/*',
         //best font for window and osx in firefox and chrome
-        './develop/data/bower_components/components-font-awesome/font/fontawesome-webfont.ttf',
-        './develop/data/bower_components/emoji/lib/emoji.css',
-        './develop/data/bower_components/emoji/lib/emoji.png',
+        './develop/node_modules/emoji/lib/emoji.css',
+        './develop/node_modules/emoji/lib/emoji.png',
+        './develop/node_modules/components-font-awesome/font/fontawesome-webfont.ttf',
+        './develop/node_modules/components-font-awesome/font/fontawesome-webfont.woff',
 
         './develop/data/modules/yandex/search.moz.xml',
         './develop/data/modules/notifications/*.ogg',
@@ -193,6 +186,55 @@ gulp.task('jpm:run', function (cb) {
     })
 });
 
+gulp.task('webpack', function () {
+    let options = {
+        output: {
+            path: __dirname + '/build',
+            filename: "[name].js"
+        },
+        devtool: true ? "cheap-inline-module-source-map" : null,
+        plugins: [
+            new webpack.IgnorePlugin(/^sdk\//),
+            new webpack.IgnorePlugin(/^@loader\/options/),
+            new webpack.IgnorePlugin(/^toolkit\/loader/),
+            new webpack.IgnorePlugin(/^chrome$/),
+            new webpack.NoErrorsPlugin(),
+            new webpack.optimize.CommonsChunkPlugin({
+                name: "vendor"
+            })
+        ],
+        resolve: {
+            alias: {
+                angularKeypress  : 'angular-ui-utils/modules/keypress/keypress.js',
+                bootstrapTooltip : 'bootstrap/js/tooltip.js',
+                bootstrapDropdown: 'bootstrap/js/dropdown.js',
+                'zepto/event'    : 'zepto/src/event',
+                'zepto/detect'   : 'zepto/src/detect',
+                'zepto/data'     : 'zepto/src/data',
+                'zepto/selector' : 'zepto/src/selector'
+            }
+        }
+    };
+
+   return gulp.src(['./develop/modules/app/app.*.js', '!./develop/modules/app/app.bg.js'])
+       .pipe(plumber({
+           errorHandler: notify.onError( err => ({
+               title: 'Webpack',
+               message: err.message
+           }))
+       }))
+       .pipe(named())
+       .pipe(webpackStream(options))
+       .pipe(gulp.dest('build/firefox/data/pages'))
+});
+
+gulp.task('lint', () => {
+    return  gulp.src(['./develop/modules/**/*.js', '!./develop/modules/app/app.bg.js'])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
+});
+
 gulp.task('default', function (cb) {
         runSequence(
             ['env:firefox', 'env:development'],
@@ -200,10 +242,7 @@ gulp.task('default', function (cb) {
             'less',
             ['preprocess:env', 'preprocess:install', 'preprocess:popup'],
             'inline_angular_templates',
-            'browserify:vendorCommon',
-            'browserify:vendorPopup',
-            'browserify:firefoxPopup',
-            'browserify:firefoxInstall',
+            'webpack',
             'copy:firefox',
             'jpm:run',
             function () {

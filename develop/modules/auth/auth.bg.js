@@ -1,20 +1,20 @@
-var RETRY_INTERVAL = 10000, //ms
-    CREATED = 1,
-    IN_PROGRESS = 1,
-    READY = 2,
+"use strict";
+const RETRY_INTERVAL = 10000, //ms
+    CREATED          = 1,
+    IN_PROGRESS      = 1,
+    READY            = 2,
+    Config           = require('../config/config.js'),
+    Mediator         = require('../mediator/mediator.js'),
+    Env              = require('../env/env.js'),
+    Browser          = require('../browser/browser.bg.js'),
+    _                = require('../shim/underscore.js')._,
+    Backbone         = require('backbone'),
+    Vow              = require('../shim/vow.js'),
+    model            = new Backbone.Model();
 
-    Config = require('../config/config.js'),
-    Mediator = require('../mediator/mediator.js'),
-    Env = require('../env/env.js'),
-    Browser = require('../browser/browser.bg.js');
-
-var _ = require('../shim/underscore.js')._,
-    Backbone = require('backbone'),
-    Vow = require('../shim/vow.js'),
-
-    model = new Backbone.Model(),
-    Auth, page, iframe,
-    state = CREATED, authPromise = Vow.promise(),
+let Auth, page, iframe,
+    state       = CREATED,
+    authPromise = Vow.promise(),
 
     tryLogin = (function () {
         var tryLogin = Env.firefox ? function () {
@@ -85,7 +85,6 @@ Mediator.sub('auth:state:get', function () {
 });
 
 Mediator.sub('auth:oauth', function () {
-    console.log("sub AUTH:OAUTH in auth");
     Browser.createTab(Config.AUTH_URI);
 });
 
@@ -99,13 +98,13 @@ model.on('change:accessToken', function () {
 
 
 module.exports = Auth = {
-    retry: _.debounce(function () {
+    retry           : _.debounce(function () {
         if (state === IN_PROGRESS) {
             Auth.login(true);
             Auth.retry();
         }
     }, RETRY_INTERVAL),
-    login: function (force) {
+    login           : function (force) {
         if (force || state === CREATED) {
             Browser.setIconOffline();
             state = IN_PROGRESS;
@@ -122,12 +121,12 @@ module.exports = Auth = {
         }
         return authPromise;
     },
-    getAccessToken: function () {
+    getAccessToken  : function () {
         return Auth.login().then(function () {
             return model.get('accessToken');
         });
     },
-    getUserId: function () {
+    getUserId       : function () {
         return Auth.login().then(function () {
             return model.get('userId');
         });

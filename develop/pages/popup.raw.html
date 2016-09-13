@@ -11,14 +11,16 @@
         <!-- @endif -->
         <script src="modules/resize/dimensions.pu.js"></script>
         <link rel="stylesheet" href="pages/popup.css" />
-        <link rel="stylesheet" href="bower_components/emoji/lib/emoji.css" />
+        <link rel="stylesheet" href="/node_modules/emoji/lib/emoji.css" />
     </head>
     <body class="app">
+
+    <navigation></navigation>
         <!-- inlined templates goes here -->
         <ng-view></ng-view>
         <resize></resize>
         <script src="pages/vendor.js"></script>
         <script src="pages/vendor.pu.js"></script>
-        <script src="pages/popup.js"></script>
+        <script src="pages/app.pu.js"></script>
     </body>
 </html>

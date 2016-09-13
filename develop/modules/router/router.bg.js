@@ -1,7 +1,7 @@
+"use strict";
 require('../notifications/notifications.bg.js');
-var
-Mediator = require('../mediator/mediator.js'),
-PersistentModel = require('../persistent-model/persistent-model.js'),
+const Mediator      = require('../mediator/mediator.js'),
+    PersistentModel = require('../persistent-model/persistent-model.js'),
 
 model = new PersistentModel(
     {lastPath: '/chat'},
