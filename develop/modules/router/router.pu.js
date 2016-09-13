@@ -1,7 +1,8 @@
-var Vow = require('../shim/vow.js'),
-    Mediator = require('../mediator/mediator.js'),
-    Browser = require('../browser/browser.js'),
-    Tracker = require('../tracker/tracker.js'),
+"use strict";
+const Vow           = require('../shim/vow.js'),
+    Mediator        = require('../mediator/mediator.js'),
+    Browser         = require('../browser/browser.js'),
+    Tracker         = require('../tracker/tracker.js'),
     PersistentModel = require('../persistent-model/persistent-model.js'),
 
     model = new PersistentModel(
@@ -10,10 +11,10 @@ var Vow = require('../shim/vow.js'),
     );
 
 location.hash = model.get('lastPath');
-require('buddies/buddies.pu.js');
-require('settings/settings.pu.js');
-require('news/news.pu.js');
-require('chat/chat.pu.js');
+require('../buddies/buddies.pu.js');
+require('../settings/settings.pu.js');
+require('../news/news.pu.js');
+require('../chat/chat.pu.js');
 require('angular').module('app')
     .config(function ($routeProvider, $locationProvider, $compileProvider, $provide) {
         // Make Addon SDK compatible
@@ -23,7 +24,7 @@ require('angular').module('app')
         });
         $locationProvider.html5Mode(false);
 
-        $compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|chrome-extension|resource):/);
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|chrome-extension|resource):/);
 
         $routeProvider
             .when('/news', {

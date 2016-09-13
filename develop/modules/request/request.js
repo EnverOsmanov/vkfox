@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Returns a correct implementation
  * for background or popup page

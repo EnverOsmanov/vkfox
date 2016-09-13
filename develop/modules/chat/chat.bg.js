@@ -1,21 +1,22 @@
-/*jshint bitwise:false */
-var
-MAX_HISTORY_COUNT = 10,
+"use strict";
+const MAX_HISTORY_COUNT = 10,
+    _                   = require('../shim/underscore.js')._,
+    Vow                 = require('../shim/vow.js'),
+    Backbone            = require('backbone'),
+    Request             = require('../request/request.bg.js'),
+    Mediator            = require('../mediator/mediator.js'),
+    Users               = require('../users/users.bg.js'),
+    Router              = require('../router/router.bg.js'),
+    Browser             = require('../browser/browser.bg.js'),
+    I18N                = require('../i18n/i18n.js'),
+    Notifications       = require('../notifications/notifications.bg.js'),
+    PersistentModel     = require('../persistent-model/persistent-model.js'),
+    ProfilesCollection  = require('../profiles-collection/profiles-collection.bg.js');
 
-_ = require('../shim/underscore.js')._,
-Vow = require('../shim/vow.js'),
-Backbone = require('backbone'),
-Request = require('../request/request.bg.js'),
-Mediator = require('../mediator/mediator.js'),
-Users = require('../users/users.bg.js'),
-Router = require('../router/router.bg.js'),
-Browser = require('../browser/browser.bg.js'),
-I18N = require('../i18n/i18n.js'),
-Notifications = require('../notifications/notifications.bg.js'),
-PersistentModel = require('../persistent-model/persistent-model.js'),
-ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
+let persistentModel, userId,
+    readyPromise = Vow.promise();
 
-dialogColl = new (Backbone.Collection.extend({
+const dialogColl = new (Backbone.Collection.extend({
     comparator: function (dialog) {
         var messages = dialog.get('messages');
         return - messages[messages.length - 1].date;
@@ -26,8 +27,6 @@ profilesColl = new (ProfilesCollection.extend({
         idAttribute: 'uid'
     })
 }))(),
-persistentModel, userId,
-readyPromise = Vow.promise(),
 
 /**
  * Notifies about current state of module.
@@ -39,6 +38,35 @@ publishData = _.debounce(function publishData() {
         profiles: profilesColl.toJSON()
     });
 }, 0);
+
+readyPromise.then(function () {
+    Mediator.sub('longpoll:updates', onUpdates);
+
+    // Notify about changes
+    dialogColl.on('change', function () {
+        dialogColl.sort();
+        updateLatestMessageId();
+        publishData();
+    });
+    profilesColl.on('change', publishData);
+}).done();
+
+Mediator.sub('auth:success', function (data) {
+    initialize();
+    console.log("after init");
+
+    userId = data.userId;
+    getDialogs().then(getUnreadMessages).then(fetchProfiles).then(function () {
+        readyPromise.fulfill();
+    }).done();
+});
+
+Mediator.sub('chat:data:get', function () {
+    readyPromise.then(publishData).done();
+});
+
+
+//functions
 /**
  * Updates "latestMessageId" with current last message
  * Should be called on every incoming message
@@ -55,18 +83,20 @@ function updateLatestMessageId() {
         );
     }
 }
+
 function fetchProfiles() {
+    console.log("start of fetchProfiles");
     var requiredUids = dialogColl.reduce(function (uids, dialog) {
-        uids = uids.concat(dialog.get('messages').map(function (message) {
-            return message.uid;
-        }), dialog.get('uid'));
-        if (dialog.get('chat_active')) {
-            uids = uids.concat(dialog.get('chat_active'));
-        }
-        return uids;
-    }, [userId]),
-    cachesUids = profilesColl.pluck('uid'),
-    missingUids = _.chain(requiredUids).uniq().difference(cachesUids).value();
+            uids = uids.concat(dialog.get('messages').map(function (message) {
+                return message.uid;
+            }), dialog.get('uid'));
+            if (dialog.get('chat_active')) {
+                uids = uids.concat(dialog.get('chat_active'));
+            }
+            return uids;
+        }, [userId]),
+        cachesUids = profilesColl.pluck('uid'),
+        missingUids = _.chain(requiredUids).uniq().difference(cachesUids).value();
 
     profilesColl.remove(_(cachesUids).difference(requiredUids));
 
@@ -79,6 +109,7 @@ function fetchProfiles() {
         return Vow.fulfill();
     }
 }
+
 /**
  * Initialize all internal state
  */
@@ -136,6 +167,7 @@ function initialize() {
         publishData();
     }).done();
 }
+
 /**
  * Removes read messages from dialog,
  * leaves only first one or unread in sequence
@@ -157,6 +189,87 @@ function removeReadMessages(dialog) {
     });
     dialog.set({'messages': result}, {silent: true});
 }
+
+function getDialogs() {
+    return Request.api({
+        code: 'return API.messages.getDialogs({preview_length: 0});'
+    }).then(function (response) {
+        if (response && response[0]) {
+            dialogColl.reset(response.slice(1).map(function (item) {
+                return {
+                    id: item.chat_id ? 'chat_id_' + item.chat_id:'uid_' + item.uid,
+                    chat_id: item.chat_id,
+                    chat_active: item.chat_active,
+                    uid: item.uid,
+                    messages: [item]
+                };
+            }));
+        }
+        console.log("end of getDialogs");
+    });
+}
+
+function onUpdates(updates) {
+    updates.forEach(function (update) {
+        var messageId, mask, readState;
+
+        // @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
+        switch (update[0]) {
+            // reset message flags (FLAGS&=~$mask)
+            case 3:
+                messageId = update[1];
+                mask = update[2];
+                readState = mask & 1;
+                if (messageId && mask && readState) {
+                    dialogColl.some(function (dialog) {
+                        return dialog.get('messages').some(function (message) {
+                            if (message.mid === messageId) {
+                                message.read_state = readState;
+                                removeReadMessages(dialog);
+                                if (readState) {
+                                    Mediator.pub('chat:message:read', message);
+                                }
+                                dialogColl.trigger('change');
+                                return true;
+                            }
+                        });
+                    });
+                }
+                break;
+            case 4:
+                addNewMessage(update);
+                break;
+        }
+    });
+}
+
+/**
+ * If last message in dialog is unread,
+ * fetch dialog history and get last unread messages in a row
+ */
+function getUnreadMessages() {
+    // FIXME wtf models.filter?
+    var unreadDialogs = dialogColl.models.filter(function (dialog) {
+            return !dialog.get('chat_id') && !dialog.get('messages')[0].read_state;
+        }),
+        unreadHistoryRequests = unreadDialogs.map(function (dialog) {
+            return Request.api({code: 'return API.messages.getHistory({user_id: '
+            + dialog.get('uid') + ', count: '
+            + MAX_HISTORY_COUNT + '});'});
+        });
+
+    return Vow.all(unreadHistoryRequests).spread(function () {
+        _(arguments).each(function (historyMessages, index) {
+            if (historyMessages && historyMessages[0]) {
+                unreadDialogs[index].set({
+                    'messages': historyMessages.slice(1).reverse()
+                }, {silent: 'yes'});
+                removeReadMessages(unreadDialogs[index]);
+            }
+        });
+    });
+}
+
 
 /**
  * @param {Object} update Update object from long poll
@@ -212,105 +325,3 @@ function addNewMessage(update) {
         });
     }).done();
 }
-/**
- * If last message in dialog is unread,
- * fetch dialog history and get last unread messages in a row
- */
-function getUnreadMessages() {
-    // FIXME wtf models.filter?
-    var unreadDialogs = dialogColl.models.filter(function (dialog) {
-        return !dialog.get('chat_id') && !dialog.get('messages')[0].read_state;
-    }),
-    unreadHistoryRequests = unreadDialogs.map(function (dialog) {
-        return Request.api({code: 'return API.messages.getHistory({user_id: '
-            + dialog.get('uid') + ', count: '
-        + MAX_HISTORY_COUNT + '});'});
-    });
-
-    return Vow.all(unreadHistoryRequests).spread(function () {
-        _(arguments).each(function (historyMessages, index) {
-            if (historyMessages && historyMessages[0]) {
-                unreadDialogs[index].set({
-                    'messages': historyMessages.slice(1).reverse()
-                }, {silent: 'yes'});
-                removeReadMessages(unreadDialogs[index]);
-            }
-        });
-    });
-}
-function onUpdates(updates) {
-    updates.forEach(function (update) {
-        var messageId, mask, readState;
-
-        // @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
-        switch (update[0]) {
-            // reset message flags (FLAGS&=~$mask)
-        case 3:
-            messageId = update[1];
-            mask = update[2];
-            readState = mask & 1;
-            if (messageId && mask && readState) {
-                dialogColl.some(function (dialog) {
-                    return dialog.get('messages').some(function (message) {
-                        if (message.mid === messageId) {
-                            message.read_state = readState;
-                            removeReadMessages(dialog);
-                            if (readState) {
-                                Mediator.pub('chat:message:read', message);
-                            }
-                            dialogColl.trigger('change');
-                            return true;
-                        }
-                    });
-                });
-            }
-            break;
-        case 4:
-            addNewMessage(update);
-            break;
-        }
-    });
-}
-
-function getDialogs() {
-    return Request.api({
-        code: 'return API.messages.getDialogs({preview_length: 0});'
-    }).then(function (response) {
-        if (response && response[0]) {
-            dialogColl.reset(response.slice(1).map(function (item) {
-                return {
-                    id: item.chat_id ? 'chat_id_' + item.chat_id:'uid_' + item.uid,
-                    chat_id: item.chat_id,
-                    chat_active: item.chat_active,
-                    uid: item.uid,
-                    messages: [item]
-                };
-            }));
-        }
-    });
-}
-
-readyPromise.then(function () {
-    Mediator.sub('longpoll:updates', onUpdates);
-
-    // Notify about changes
-    dialogColl.on('change', function () {
-        dialogColl.sort();
-        updateLatestMessageId();
-        publishData();
-    });
-    profilesColl.on('change', publishData);
-}).done();
-
-Mediator.sub('auth:success', function (data) {
-    initialize();
-
-    userId = data.userId;
-    getDialogs().then(getUnreadMessages).then(fetchProfiles).then(function () {
-        readyPromise.fulfill();
-    }).done();
-});
-
-Mediator.sub('chat:data:get', function () {
-    readyPromise.then(publishData).done();
-});

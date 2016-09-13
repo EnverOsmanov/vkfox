@@ -1,16 +1,16 @@
-require('zepto.js');
-require('zepto/event');
-var _ = require('../shim/underscore.js')._,
+"use strict";
+const _      = require('../shim/underscore.js')._,
     Backbone = require('backbone'),
-    Vow = require('../shim/vow.js'),
-    Request = require('../request/request.js'),
-    Mediator = require('../mediator/mediator.js');
+    Vow      = require('../shim/vow.js'),
+    Request  = require('../request/request.js'),
+    Mediator = require('../mediator/mediator.js'),
+    Users    = require('../users/users.pu.js');
 
 require('../navigation/navigation.pu.js');
 require('../item-list/item-list.pu.js');
 require('../item/item.pu.js');
 require('angular').module('app')
-    .factory('Chat', function () {
+    .factory('$Chat', function () {
         return {
             /**
             * Fold adjoint messages with a common author into a group
@@ -32,8 +32,8 @@ require('angular').module('app')
                         lastItem.items.push(message);
                     } else {
                         memo.push({
-                            items: [message],
-                            out: author === selfProfile,
+                            items : [message],
+                            out   : author === selfProfile,
                             author: author
                         });
                     }
@@ -53,13 +53,11 @@ require('angular').module('app')
             getHistory: function (dialog, offset) {
                 var params = {
                     offset: offset,
-                    count: 5
+                    count : 5
                 };
-                if (dialog.chat_active) {
-                    params.chat_id = dialog.chat_id;
-                } else {
-                    params.user_id = dialog.uid;
-                }
+                if (dialog.chat_active) params.chat_id = dialog.chat_id;
+                else params.user_id = dialog.uid;
+
                 return Request.api({
                     code: 'return  API.messages.getHistory(' + JSON.stringify(params) + ');'
                 }).then(function (messages) {
@@ -67,21 +65,23 @@ require('angular').module('app')
                         //after fetching of news profiles,
                         //we must make sure that we have
                         //required profile objects
-                        return require('users/users.pu.js')
-                            .getProfilesById(messages.slice(1).map(function (message) {
-                                return message.uid;
-                            })).then(function (profiles) {
-                                return {messages: messages, profiles: profiles};
-                            });
-                    } else {
-                        return Vow.fulfill({messages: messages, profiles: []});
+                        return Users.getProfilesById(
+                            messages
+                                .slice(1)
+                                .map( message => message.uid)
+                        ).then( profiles => ({
+                            messages: messages,
+                            profiles: profiles
+                        }));
                     }
+                    else return Vow.fulfill({messages: messages, profiles: []});
                 });
             }
         };
     })
     .controller('ChatCtrl', function ($scope) {
         Mediator.pub('chat:data:get');
+
         Mediator.sub('chat:data', function (data) {
             $scope.$apply(function () {
                 $scope.dialogs = data.dialogs;
@@ -96,46 +96,49 @@ require('angular').module('app')
             Mediator.unsub('chat:data');
         });
     })
-    .controller('ChatItemCtrl', function ($scope, Chat) {
-        var dialog = $scope.dialog,
-            profilesColl = $scope.profilesColl,
-            online;
+    .controller('ChatItemCtrl', function ($scope, $Chat) {
+        const dialog     = $scope.dialog,
+            profilesColl = $scope.profilesColl;
+
+        let online;
 
         if (dialog.chat_id) {
+            console.log("ahah");
             $scope.owners = dialog.chat_active.map(function (uid) {
                 return profilesColl.get(uid).toJSON();
             });
         } else {
             $scope.owners = profilesColl.get(dialog.uid).toJSON();
 
-            $scope.$watch(function ($scope) {
-                online = $scope.profilesColl.get(dialog.uid).get('online');
+            $scope.$watch(() => {
+                    online = $scope.profilesColl
+                        .get(dialog.uid)
+                        .get('online');
 
-                return online;
-            }, function () {
-                $scope.owners.online = online;
-            });
+                    online;
+                }
+                , function () {
+                    $scope.owners.online = online;
+                });
         }
 
         $scope.$watch(function ($scope) {
-            var message = _($scope.dialog.messages).last();
+            const message = _($scope.dialog.messages).last();
             return [
                 $scope.dialog.messages.length,
                 message.mid,
                 message.read_state
             ].join();
         }, function () {
-            var dialog = $scope.dialog;
-
-            $scope.foldedMessages = Chat.foldMessagesByAuthor(dialog.messages, $scope.profilesColl);
+            const dialog = $scope.dialog;
+            $scope.foldedMessages = $Chat.foldMessagesByAuthor(dialog.messages, $scope.profilesColl);
             $scope.out = _($scope.foldedMessages).last().author.isSelf;
             $scope.unread = _(dialog.messages).last().read_state === 0;
         });
     })
-    .controller('ChatActionsCtrl', function ($scope, Chat) {
+    .controller('ChatActionsCtrl', function ($scope, $Chat) {
         $scope.showHistory = function (dialog) {
-            Chat.getHistory(dialog, dialog.messages.length).then(function (data) {
-                console.log(data);
+            $Chat.getHistory(dialog, dialog.messages.length).then(function (data) {
                 var messages = data.messages;
                 $scope.profilesColl.add(data.profiles);
                 $scope.$apply(function () {
@@ -153,7 +156,7 @@ require('angular').module('app')
                 //show tooltip
                 $(event.currentTarget).data('tooltip').toggle();
             } else {
-                Chat.markAsRead($scope.dialog.messages);
+                $Chat.markAsRead($scope.dialog.messages);
                 $(event.currentTarget).data('tooltip').hide();
             }
         };

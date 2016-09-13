@@ -1,46 +1,46 @@
-require('zepto.js');
-require('angular').module('app').directive('resize', function () {
-    var
-    MOVE_DEBOUCE = 10,
-    DEFAULT_WIDTH = 320,
-    MAX_WIDTH = 640,
-    MIN_WIDTH = 230,
-    DEFAULT_HEIGHT = 480,
-    MAX_HEIGHT = 600,
-    MIN_HEIGHT = 375,
-    DEFAULT_FONT_SIZE = 12,
+"use strict";
 
-    PersistentModel = require('../persistent-model/persistent-model.js'),
-    ProxyMethods = require('../proxy-methods/proxy-methods.js').forward(
+require('angular').module('app').directive('resize', function () {
+    const
+    MOVE_DEBOUCE       = 10,
+    DEFAULT_WIDTH      = 320,
+    MAX_WIDTH          = 640,
+    MIN_WIDTH          = 230,
+    DEFAULT_HEIGHT     = 480,
+    MAX_HEIGHT         = 600,
+    MIN_HEIGHT         = 375,
+    DEFAULT_FONT_SIZE  = 12,
+    root               = $('html'),
+    PersistentModel    = require('../persistent-model/persistent-model.js'),
+    _                  = require('../shim/underscore.js')._,
+    ProxyMethods       = require('../proxy-methods/proxy-methods.js').forward(
         '../resize/resize.bg.js',
         ['setPanelSize']
-    ),
-    model = new PersistentModel({
-        width: DEFAULT_WIDTH,
-        height: DEFAULT_HEIGHT,
+    );
+    const model        = new PersistentModel({
+        width   : DEFAULT_WIDTH,
+        height  : DEFAULT_HEIGHT,
         fontSize: DEFAULT_FONT_SIZE
-    }, {name: 'resize'}),
+    }, {name: 'resize'});
 
-    _ = require('../shim/underscore.js')._,
-    root = $('html'),
-    screenX, screenY,
-    dragMove = _.debounce(function (e) {
-        var dx = screenX - e.screenX,
-            dy = -screenY + e.screenY,
-            width, height, fontSize;
+
+    let screenX, screenY;
+    const dragMove = _.debounce(function (e) {
+        const dx = screenX - e.screenX;
+        const dy = -screenY + e.screenY;
 
         screenX = e.screenX;
         screenY = e.screenY;
 
-        width = Math.max(
+        const width = Math.max(
             MIN_WIDTH,
             Math.min(MAX_WIDTH, model.get('width') + dx)
         );
-        height = Math.max(
+        const height = Math.max(
             MIN_HEIGHT,
             Math.min(MAX_HEIGHT, model.get('height') + dy)
         );
-        fontSize = DEFAULT_FONT_SIZE + Math.round(
+        const fontSize = DEFAULT_FONT_SIZE + Math.round(
             (width / DEFAULT_WIDTH - 1) * DEFAULT_FONT_SIZE / 2
         );
         model.set('width', width);
@@ -70,12 +70,12 @@ require('angular').module('app').directive('resize', function () {
     ProxyMethods.setPanelSize(model.get('width'), model.get('height'));
 
     return {
-        template: '<div class="resize"><div class="resize__handle"></div></div>',
+        template  : '<div class="resize"><div class="resize__handle"></div></div>',
         transclude: false,
-        restrict: 'E',
-        scope: false,
-        replace: true,
-        link: function (scope, iElement) {
+        restrict  : 'E',
+        scope     : false,
+        replace   : true,
+        link      : function (scope, iElement) {
             iElement.bind('mousedown', dragStart);
         }
     };

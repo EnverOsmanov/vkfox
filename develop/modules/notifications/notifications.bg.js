@@ -1,13 +1,13 @@
-var
-_ = require('../shim/underscore.js')._,
-Backbone = require('backbone'),
-Browser = require('../browser/browser.bg.js'),
-Env = require('../env/env.js'),
-Mediator = require('../mediator/mediator.js'),
-Settings = require('../notifications/settings.js'),
-PersistentModel = require('../persistent-model/persistent-model.js'),
+"use strict";
+const _             = require('../shim/underscore.js')._,
+    Backbone        = require('backbone'),
+    Browser         = require('../browser/browser.bg.js'),
+    Env             = require('../env/env.js'),
+    Mediator        = require('../mediator/mediator.js'),
+    Settings        = require('../notifications/settings.js'),
+    PersistentModel = require('../persistent-model/persistent-model.js');
 
-audioInProgress = false, Notifications,
+let audioInProgress = false, Notifications,
 
 NotificationsSettings = PersistentModel.extend({
     initialize: function () {

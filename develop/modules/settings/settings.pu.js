@@ -1,7 +1,8 @@
-var _ = require('../shim/underscore.js')._,
-    Env = require('../env/env.js'),
+"use strict";
+const _                   = require('../shim/underscore.js')._,
+    Env                   = require('../env/env.js'),
     NotificationsSettings = require('../notifications/settings.js'),
-    Mediator = require('../mediator/mediator.js');
+    Mediator              = require('../mediator/mediator.js');
 
 require('../checkbox/checkbox.pu.js');
 require('angular')

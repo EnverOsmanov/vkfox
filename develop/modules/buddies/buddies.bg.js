@@ -1,18 +1,18 @@
-var
-_ = require('../shim/underscore.js')._,
-Vow = require('../shim/vow.js'),
-Backbone = require('backbone'),
-Request = require('../request/request.bg.js'),
-Mediator = require('../mediator/mediator.js'),
-Users = require('../users/users.bg.js'),
-I18N = require('../i18n/i18n.js'),
-Notifications = require('../notifications/notifications.bg.js'),
-PersistentSet = require('../persistent-set/persistent-set.bg.js'),
-ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
+"use strict";
+const _                   = require('../shim/underscore.js')._,
+    Vow                 = require('../shim/vow.js'),
+    Backbone            = require('backbone'),
+    Request             = require('../request/request.bg.js'),
+    Mediator            = require('../mediator/mediator.js'),
+    Users               = require('../users/users.bg.js'),
+    I18N                = require('../i18n/i18n.js'),
+    Notifications       = require('../notifications/notifications.bg.js'),
+    PersistentSet       = require('../persistent-set/persistent-set.bg.js'),
+    ProfilesCollection  = require('../profiles-collection/profiles-collection.bg.js'),
+    watchedBuddiesSet   = new PersistentSet('watchedBuddies');
 
-readyPromise,
-watchedBuddiesSet = new PersistentSet('watchedBuddies'),
-buddiesColl = new (ProfilesCollection.extend({
+let readyPromise;
+const buddiesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         idAttribute: 'uid',
         // Automatically set last activity time
@@ -50,75 +50,13 @@ buddiesColl = new (ProfilesCollection.extend({
             return buddie.get('originalIndex') || 0;
         }
     }
-}))(),
-publishData = _.debounce(function () {
+}))();
+
+var publishData = _.debounce(function () {
     Mediator.pub('buddies:data', buddiesColl.toJSON());
 }, 0);
 
-/**
-* Initialize all state
-*/
-function initialize() {
-    if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) {
-            readyPromise.reject();
-        }
-        readyPromise = Vow.promise();
-    }
-    readyPromise.then(publishData).done();
-}
 initialize();
-
-/**
-* After changing and unchanging any field of buddie,
-* we need to place it to original place in list,
-* So we add index property.
-* Runs once.
-*/
-function saveOriginalBuddiesOrder() {
-    var length = buddiesColl.length;
-
-    if (length && !buddiesColl.at(length - 1).get('originalIndex')) {
-        buddiesColl.forEach(function (buddie, i) {
-            buddie.set('originalIndex', i);
-        });
-    }
-}
-
-/**
-* Returns profiles from bookmarks,
-* and sets "isFave=true" on profile object
-*
-* @returns [jQuery.Deferred]
-*/
-function getFavouriteUsers() {
-    return Request.api({
-        code: 'return API.fave.getUsers()'
-    }).then(function (response) {
-        return Users.getProfilesById(
-            _.pluck(response.slice(1),
-            'uid'
-            )).then(function (profiles) {
-                profiles.forEach(function (profile) {
-                    profile.isFave = true;
-                });
-                return profiles;
-            });
-    });
-}
-
-/**
-* Extends buddiesColl with information
-* about watched persons
-*/
-function setWatchedBuddies() {
-    watchedBuddiesSet.toArray().forEach(function (uid) {
-        var model = buddiesColl.get(uid);
-        if (model) {
-            model.set('isWatched', true);
-        }
-    });
-}
 
 // entry point
 Mediator.sub('auth:success', function () {
@@ -178,3 +116,68 @@ Mediator.sub('buddies:watch:toggle', function (uid) {
         buddiesColl.get(uid).set('isWatched', true);
     }
 });
+
+/**
+ * Initialize all state
+ */
+function initialize() {
+    if (!readyPromise || readyPromise.isFulfilled()) {
+        if (readyPromise) {
+            readyPromise.reject();
+        }
+        readyPromise = Vow.promise();
+    }
+    readyPromise.then(publishData).done();
+}
+
+/**
+ * After changing and unchanging any field of buddie,
+ * we need to place it to original place in list,
+ * So we add index property.
+ * Runs once.
+ */
+function saveOriginalBuddiesOrder() {
+    var length = buddiesColl.length;
+
+    if (length && !buddiesColl.at(length - 1).get('originalIndex')) {
+        buddiesColl.forEach(function (buddie, i) {
+            buddie.set('originalIndex', i);
+        });
+    }
+}
+
+
+/**
+ * Returns profiles from bookmarks,
+ * and sets "isFave=true" on profile object
+ *
+ * @returns [jQuery.Deferred]
+ */
+function getFavouriteUsers() {
+    return Request
+        .api({ code: 'return API.fave.getUsers()' })
+        .then(function (response) {
+            const uids = _.pluck(response.slice(1), 'uid');
+            return Users
+                .getProfilesById(uids)
+                .then(function (profiles) {
+                    profiles.forEach(function (profile) {
+                        profile.isFave = true;
+                    });
+                    return profiles;
+                });
+        });
+}
+
+/**
+ * Extends buddiesColl with information
+ * about watched persons
+ */
+function setWatchedBuddies() {
+    watchedBuddiesSet.toArray().forEach(function (uid) {
+        var model = buddiesColl.get(uid);
+        if (model) {
+            model.set('isWatched', true);
+        }
+    });
+}

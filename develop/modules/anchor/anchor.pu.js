@@ -1,5 +1,6 @@
-require('zepto.js');
-var Browser = require('../browser/browser.js');
+"use strict";
+require('zepto');
+const Browser = require('../browser/browser.js');
 
 $(document).on('click', '[anchor]', function (e) {
     var jTarget = $(e.currentTarget);

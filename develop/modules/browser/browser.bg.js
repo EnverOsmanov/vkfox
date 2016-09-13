@@ -1,4 +1,5 @@
-var BADGE_COLOR = [231, 76, 60, 255],
+"use strict";
+const BADGE_COLOR = [231, 76, 60, 255],
     ICON_ONLINE = {
         "19": "./assets/logo19.png",
         "38": "./assets/logo38.png"
@@ -10,9 +11,9 @@ var BADGE_COLOR = [231, 76, 60, 255],
 
     Vow = require('../shim/vow.js'),
     Env = require('../env/env.js'),
-    _ = require('../shim/underscore.js')._,
+    _   = require('../shim/underscore.js')._;
 
-    Browser;
+let Browser;
 
 // Set up popup and popup comminication
 if (Env.firefox) {

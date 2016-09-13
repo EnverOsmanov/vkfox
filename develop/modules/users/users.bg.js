@@ -1,16 +1,16 @@
-var
-DROP_PROFILES_INTERVAL = 60000,
-USERS_GET_DEBOUNCE = 400,
+"use strict";
+const DROP_PROFILES_INTERVAL = 60000,
+    USERS_GET_DEBOUNCE       = 400,
+    Vow                      = require('../shim/vow.js'),
+    Backbone                 = require('backbone'),
+    Mediator                 = require('../mediator/mediator.js'),
+    Request                  = require('../request/request.bg.js'),
+    ProxyMethods             = require('../proxy-methods/proxy-methods.js'),
+    _                        = require('../shim/underscore.js')._;
 
-Vow = require('../shim/vow.js'),
-Backbone = require('backbone'),
-Mediator = require('../mediator/mediator.js'),
-Request = require('../request/request.bg.js'),
-ProxyMethods = require('../proxy-methods/proxy-methods.js'),
-_ = require('../shim/underscore.js')._,
+let inProgress, usersGetQueue, friendsProfilesDefer;
 
-inProgress, usersGetQueue, friendsProfilesDefer,
-usersColl = new (Backbone.Collection.extend({
+const usersColl = new (Backbone.Collection.extend({
     model: Backbone.Model.extend({
         idAttribute: 'uid'
     })
@@ -26,10 +26,10 @@ dropOldNonFriendsProfiles = _.debounce(function () {
 /**
  * Resolves items from provided queue
  *
- * @param [Array] queue
+ * @param {Array} queue
  */
 publishUids = function (queue) {
-    var data, queueItem;
+    let data, queueItem;
 
     function getProfileById(uid) {
         return _.clone(usersColl.get(Number(uid)));
@@ -45,38 +45,38 @@ publishUids = function (queue) {
     }
 },
 processGetUsersQueue = _.debounce(function () {
-    var processedQueue = usersGetQueue,
-        newUids = _.chain(processedQueue).pluck('uids').flatten()
-            .unique().difference(usersColl.pluck('uid')).value();
+    const processedQueue = usersGetQueue,
+        newUids = _
+            .chain(processedQueue)
+            .pluck('uids')
+            .flatten()
+            .unique()
+            .difference(usersColl.pluck('uid'))
+            .value();
+
 
     // start new queue
     usersGetQueue = [];
 
     if (newUids.length) {
         inProgress = true;
-        Request.api({
-            // TODO limit for uids.length
-            code: 'return API.users.get({uids: "' + newUids.join() + '", fields: "online,photo,sex,nickname,lists"})'
-        }).then(function (response) {
-            if (response && response.length) {
-                usersColl.add(response);
-                publishUids(processedQueue);
-                inProgress = false;
-            }
-        });
-    } else {
-        publishUids(processedQueue);
+
+        // TODO limit for uids.length
+        Request
+            .api({
+                code: 'return API.users.get({uids: "' + newUids.join() + '", fields: "online,photo,sex,nickname,lists"})'
+            })
+            .then(function (response) {
+                if (response && response.length) {
+                    usersColl.add(response);
+                    publishUids(processedQueue);
+                    inProgress = false;
+                }
+            });
     }
+    else publishUids(processedQueue);
 }, USERS_GET_DEBOUNCE);
-/**
- * Initialize all variables
- */
-function initialize() {
-    inProgress = false;
-    usersColl.reset();
-    usersGetQueue = [];
-    friendsProfilesDefer = null;
-}
+
 initialize();
 
 Mediator.sub('auth:success', function () {
@@ -105,16 +105,19 @@ module.exports = ProxyMethods.connect('../users/users.bg.js', _.extend({
     },
     /**
      * Returns profiles by ids
-     * @param [Array<<Number>>] uids Array of user's uds
+     * @param {Array<Number>} uids Array of user's uds
      *
      * @returns {Vow.promise} Returns promise that will be fulfilled with profiles
      */
     getProfilesById: function (uids) {
+        //communities have negative uids but they also can write a message
+        const positiveUids = uids.filter(x => x > 0);
+
         return this.getFriendsProfiles().then(function () {
-            var promise = Vow.promise();
+            const promise = Vow.promise();
 
             usersGetQueue.push({
-                uids: uids,
+                uids   : positiveUids,
                 promise: promise
             });
             processGetUsersQueue();
@@ -122,3 +125,13 @@ module.exports = ProxyMethods.connect('../users/users.bg.js', _.extend({
         });
     }
 }, require('../users/name.js')));
+
+/**
+ * Initialize all variables
+ */
+function initialize() {
+    inProgress = false;
+    usersColl.reset();
+    usersGetQueue = [];
+    friendsProfilesDefer = null;
+}

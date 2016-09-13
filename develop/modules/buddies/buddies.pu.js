@@ -1,21 +1,21 @@
-require('zepto.js');
-require('zepto/event');
-var Mediator = require('../mediator/mediator.js'),
+"use strict";
+const Mediator      = require('../mediator/mediator.js'),
     PersistentModel = require('../persistent-model/persistent-model.js'),
-    I18N = require('../i18n/i18n.js');
+    I18N            = require('../i18n/i18n.js'),
+    angular         = require('angular');
 
 require('../navigation/navigation.pu.js');
 require('../item-list/item-list.pu.js');
 require('../item/item.pu.js');
 require('../checkbox/checkbox.pu.js');
 require('bootstrapDropdown');
-require('angular').module('app')
-    .controller('buddiesCtrl', function ($scope, $element, $filter) {
-        var filtersModel = new PersistentModel({
-            male: true,
-            female: true,
+angular.module('app')
+    .controller('buddiesCtrl', function ($scope, $filter) {
+        const filtersModel = new PersistentModel({
+            male   : true,
+            female : true,
             offline: false,
-            faves: true
+            faves  : true
         }, {name: 'buddiesFilters'});
 
         $scope.filters = filtersModel.toJSON();
@@ -23,7 +23,7 @@ require('angular').module('app')
             filtersModel.set(filters);
         }, true);
 
-        $($element[0]).find('.dropdown-toggle').dropdown();
+        $(".dropdown-toggle").dropdown();
 
         $scope.toggleFriendWatching = function (profile) {
             profile.isWatched = !profile.isWatched;
@@ -34,7 +34,7 @@ require('angular').module('app')
         Mediator.sub('buddies:data', function (data) {
             $scope.$apply(function () {
                 data.filter(function (buddie) {
-                    return buddie.lastActivityTime;
+                    return buddie.hasOwnProperty("lastActivityTime");
                 }).forEach(function (buddie) {
                     var gender = buddie.sex === 1 ? 'female':'male';
 
@@ -55,8 +55,8 @@ require('angular').module('app')
          * Says if profile matched search clue.
          * Uses lowercasing of arguments
          *
-         * @params [Object] profile
-         * @param [String] searchClue
+         * @param {Object} profile
+         * @param {String} searchClue
          *
          * @returns [Boolean]
          */

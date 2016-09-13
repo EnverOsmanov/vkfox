@@ -1,3 +1,4 @@
+"use strict";
 if (typeof localStorage === 'undefined') {
     var ss = require('sdk/simple-storage');
 

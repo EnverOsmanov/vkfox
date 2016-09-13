@@ -1,13 +1,11 @@
-/* jshint esnext:true */
+"use strict";
 /**
  * Adapter for firefox internal preferences system.
  * @see about:config
  */
-var chromeModule  = require('chrome'),
-    Cc = chromeModule.Cc,
-    Ci = chromeModule.Ci,
-    prefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService),
-    prefBranch = prefService.getBranch("");
+const { Cc, Ci } = require('chrome'),
+    prefService  = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService),
+    prefBranch   = prefService.getBranch("");
 
 prefBranch.QueryInterface(Ci.nsIPrefBranch);
 

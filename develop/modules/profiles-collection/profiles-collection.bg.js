@@ -1,7 +1,7 @@
-var UPDATE_NON_FRIENDS_PERIOD = 10000,
-
-    Users = require('../users/users.bg.js'),
-    _ = require('../shim/underscore.js')._,
+"use strict";
+const UPDATE_NON_FRIENDS_PERIOD = 10000,
+    Users    = require('../users/users.bg.js'),
+    _        = require('../shim/underscore.js')._,
     Mediator = require('../mediator/mediator.js'),
     Backbone = require('backbone');
 
@@ -16,23 +16,20 @@ module.exports = Backbone.Collection.extend({
         this._updateNonFriends();
     },
     _updateNonFriends: function () {
-        var
-        self = this,
-        uids = this.where({
+        const self = this;
+
+        const uids = this.where({
             isFriend: undefined,
             // don't select groups profiles
-            gid: undefined
-        }).map(function (model) {
-            return model.get('uid');
-        });
+            gid     : undefined
+        }).map( model => model.get('uid') );
 
         if (uids.length) {
             Users.getProfilesById(uids).then(function (profiles) {
                 profiles.forEach(function (profile) {
                     var model = self.get(profile.uid);
-                    if (model) {
-                        model.set('online', profile.online);
-                    }
+
+                    if (model) model.set('online', profile.online);
                 });
             }).always(this._updateNonFriends.bind(this));
         } else {

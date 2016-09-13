@@ -1,18 +1,20 @@
-var angular = require('angular'),
-    Tracker, Mediator;
-
+"use strict";
+const angular = require('angular');
 angular.module('app', []);
-Tracker = require('../tracker/tracker.js');
-Mediator = require('../mediator/mediator.js');
+
+const Tracker = require('../tracker/tracker.js'),
+    Mediator  = require('../mediator/mediator.js');
 require('../anchor/anchor.pu.js');
 require('../filters/filters.pu.js');
-angular.module('app').controller('AppCtrl', function ($scope) {
-        var data = {
+
+angular.module('app')
+    .controller('AppCtrl', function ($scope) {
+        const data = {
             // authorization  step
             '0': {
                 mainText: 'Authorize VKfox with Vkontakte',
                 buttonLabels: {
-                    no: 'skip',
+                    no : 'skip',
                     yes: 'login'
                 },
                 onButtonClick: function (makeAuth) {
@@ -23,19 +25,16 @@ angular.module('app').controller('AppCtrl', function ($scope) {
                                 $scope.step++;
                             });
                         });
-                        console.log("before AUTH:SUCCESS");
                         Mediator.pub('auth:oauth');
-                        console.log("after AUTH:SUCCESS");
-                    } else {
-                        $scope.step++;
                     }
+                    else $scope.step++;
                 }
             },
             // licence agreement
             '1': {
                 mainText: 'Accept license agreement',
                 buttonLabels: {
-                    no: null,
+                    no : null,
                     yes: 'accept'
                 },
                 onButtonClick: function () {
@@ -47,7 +46,7 @@ angular.module('app').controller('AppCtrl', function ($scope) {
             '2': {
                 mainText: 'Install Yandex search',
                 buttonLabels: {
-                    no: 'no',
+                    no : 'no',
                     yes: 'install_verb'
                 },
                 onButtonClick: function (install) {
@@ -63,7 +62,7 @@ angular.module('app').controller('AppCtrl', function ($scope) {
             '3': {
                 mainText: 'Thank you!',
                 buttonLabels: {
-                    no: null,
+                    no : null,
                     yes: 'close'
                 },
                 onButtonClick: function () {
@@ -78,7 +77,7 @@ angular.module('app').controller('AppCtrl', function ($scope) {
         };
         $scope.$watch('step', function () {
             $scope.progress = Math.min(
-                100 * (1 / 6 + $scope.step * 1 / 3),
+                100 * (1 / 6 + $scope.step / 3),
                 100
             );
             angular.extend($scope, data[$scope.step]);

@@ -1,6 +1,5 @@
-require('zepto.js');
-require('zepto/event');
-var _ = require('../shim/underscore.js')._;
+"use strict";
+const _ = require('../shim/underscore.js')._;
 
 require('angular').module('app')
     /**
@@ -8,29 +7,28 @@ require('angular').module('app')
      * when scrolling (aka Instagram effect)
      */
     .directive('itemListFixedHeader', function () {
-        var HEADER_HEIGHT = 50;
+        const HEADER_HEIGHT = 50;
         return {
             link: function (scope, element) {
-                var element$ = $(element[0]),
-                    listTop = element$.offset().top,
-                    lastTopVisibleElement,
+                const element$      = $(element[0]),
+                    listTop         = element$.offset().top,
                     contentElement$ = element$.find('.item-list__content'),
-                    SCROLLBAR_WIDTH = contentElement$.width()
-                        - contentElement$.find('.item-list__scroll').width();
+                    SCROLLBAR_WIDTH = contentElement$.width() - contentElement$.find('.item-list__scroll').width();
+
+                let lastTopVisibleElement;
 
                 $('<style>.item_fixed_window .item__header,'
                     + ' .item_fixed_window .item__actions { right: '
                     + SCROLLBAR_WIDTH + 'px;}</style>').appendTo('head');
 
                 contentElement$.bind('scroll', _.debounce(function () {
-                    var topVisibleElement = document.elementFromPoint(0, listTop),
-                        topVisibleElement$ = $(topVisibleElement),
-                        itemBottom;
+                    const topVisibleElement = document.elementFromPoint(0, listTop),
+                        topVisibleElement$ = $(topVisibleElement);
 
                     if (!topVisibleElement$.hasClass('item')) {
                         return;
                     }
-                    itemBottom = topVisibleElement$.offset().top + topVisibleElement$.height();
+                    const itemBottom = topVisibleElement$.offset().top + topVisibleElement$.height();
 
                     if (topVisibleElement !== lastTopVisibleElement) {
                         if (lastTopVisibleElement) {
@@ -38,13 +36,12 @@ require('angular').module('app')
                         }
                         lastTopVisibleElement = topVisibleElement;
                     }
-                    if (itemBottom - listTop > HEADER_HEIGHT) {
+                    if (itemBottom - listTop > HEADER_HEIGHT)
                         topVisibleElement.className = 'item item_fixed_window';
-                    } else if (itemBottom - listTop > 0) {
+                    else if (itemBottom - listTop > 0)
                         topVisibleElement.className = 'item item_fixed_bottom';
-                    } else {
+                    else
                         topVisibleElement.className = 'item';
-                    }
                 }, 10));
             }
         };
@@ -52,18 +49,18 @@ require('angular').module('app')
     .directive('itemList', function () {
         return {
             templateUrl: 'modules/item-list/item-list.tmpl.html',
-            replace: true,
-            transclude: true,
-            restrict: 'E',
-            controller: function ($element) {
+            replace    : true,
+            transclude : true,
+            restrict   : 'E',
+            controller : function ($element) {
                 this.getElement = function () {
                     return $element;
                 };
             }
         };
     })
-    .directive('itemListRepeat', function ($parse, $animator, $timeout) {
-        var NG_REMOVED = '$$NG_REMOVED',
+    .directive('itemListRepeat', ['$parse', '$animate', '$timeout', function ($parse, $animate, $timeout) {
+        const NG_REMOVED   = '$$NG_REMOVED',
             RENDER_PADDING = 400,
             /**
              * This is the number of items,
@@ -83,8 +80,8 @@ require('angular').module('app')
          *         The resulting string key is in 'type:hashKey' format.
          */
         function hashKey(obj) {
-            var objType = typeof obj,
-            key;
+            const objType = typeof obj;
+            let key;
 
             if (objType === 'object' && obj !== null) {
                 if (typeof (key = obj.$$hashKey) === 'function') {
@@ -93,21 +90,20 @@ require('angular').module('app')
                 } else if (key === undefined) {
                     key = obj.$$hashKey = _.uniqueId();
                 }
-            } else {
-                key = obj;
             }
+            else key = obj;
 
             return objType + ':' + key;
         }
         return {
             transclude: 'element',
-            priority: 1000,
-            terminal: true,
-            require: '^itemList',
-            compile: function (element, attr, linker) {
+            priority  : 1000,
+            terminal  : true,
+            require   : '^itemList',
+            compile   : function (element, attr, linker) {
                 return function ($scope, $element, $attr, itemListController) {
-                    var animate = $animator($scope, $attr),
-                        expression = $attr.itemListRepeat,
+
+                    var expression = $attr.itemListRepeat,
                         match = expression.match(/^\s*([\$\w]+)\s+in\s+(.*?)\s*(\s+track\s+by\s+(.+)\s*)?$/),
                         collectionIdentifier, valueIdentifier,
                         trackByExp, trackByIdFn, trackByExpGetter,
@@ -179,7 +175,7 @@ require('angular').module('app')
                                     cursor = block.element;
                                 } else {
                                     // existing item which got moved
-                                    animate.move(block.element, null, cursor);
+                                    $animate.move(block.element, null, cursor);
                                     cursor = block.element;
                                 }
                             } else {
@@ -195,7 +191,7 @@ require('angular').module('app')
 
                             if (!block.element) {
                                 linker(childScope, function (clone) {
-                                    animate.enter(clone, null, cursor);
+                                    $animate.enter(clone, null, cursor);
                                     cursor = clone;
                                     block.scope = childScope;
                                     block.element = clone;
@@ -254,7 +250,7 @@ require('angular').module('app')
                         for (key in lastBlockMap) {
                             if (lastBlockMap.hasOwnProperty(key) && lastBlockMap[key].element) {
                                 block = lastBlockMap[key];
-                                animate.leave(block.element);
+                                $animate.leave(block.element);
                                 block.element[0][NG_REMOVED] = true;
                                 block.scope.$destroy();
                             }
@@ -267,4 +263,4 @@ require('angular').module('app')
                 };
             }
         };
-    });
+    }]);

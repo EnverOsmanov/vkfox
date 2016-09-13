@@ -1,16 +1,18 @@
+"use strict";
+
 /*jshint bitwise: false */
 /*global $ */
 var
-_ = require('../shim/underscore.js')._,
-PersistentModel = require('../persistent-model/persistent-model.js'),
-I18n = require('../i18n/i18n.js'),
-Env = require('../env/env.js'),
-Browser = require('../browser/browser.js'),
-Request = require('../request/request.js'),
-Config = require('../config/config.js');
+_                   = require('../shim/underscore.js')._,
+PersistentModel     = require('../persistent-model/persistent-model.js'),
+I18n                = require('../i18n/i18n.js'),
+Env                 = require('../env/env.js'),
+Browser             = require('../browser/browser.js'),
+Request             = require('../request/request.js'),
+Config              = require('../config/config.js'),
 
-url = 'http://www.google-analytics.com/collect',
-persistentModel = new PersistentModel({}, {name: 'tracker'}),
+url                 = 'http://www.google-analytics.com/collect',
+persistentModel     = new PersistentModel({}, {name: 'tracker'}),
 commonParamsPromise = Browser.getVkfoxVersion().then(function (version) {
     return {
         v: 1, // Version.
@@ -37,21 +39,17 @@ function getBrowserVersion() {
     if (Env.background && Env.firefox) {
         return require('sdk/system').platformVersion;
     } else {
-        // we don't user require('zepto.js')
+        // we don't user require('zepto')
         // to hack for Firefox's SDK syntax analyzer
         // But we do need, to somewhere include zepto
         return $.browser.version;
     }
 }
 function getPage() {
-    if (Env.background) {
-        return '/pages/background.html';
-    } else {
-        if (location.hash) {
-            return location.hash.replace('#', '');
-        } else {
-            return location.pathname;
-        }
+    if (Env.background) return '/pages/background.html';
+    else {
+        if (location.hash) return location.hash.replace('#', '');
+        else return location.pathname;
     }
 }
 
