@@ -1,14 +1,11 @@
-var Mediator = require('../mediator/mediator.js'),
-    PersistentModel = require('../persistent-model/persistent-model.js'),
-    Browser = require('../browser/browser.bg.js'),
-    _ = require('../shim/underscore.js')._,
-    data = require('sdk/self').data,
-
-    attempts = 0,
+"use strict";
+const Mediator         = require('../mediator/mediator.js'),
+    PersistentModel    = require('../persistent-model/persistent-model.js'),
+    Browser            = require('../browser/browser.bg.js'),
+    _                  = require('../shim/underscore.js')._,
+    data               = require('sdk/self').data,
     firefoxPreferences = require('../firefox-preferences/firefox-preferences.bg.js'),
-    chromeModule = require('chrome'),
-    Cc = chromeModule.Cc,
-    Ci = chromeModule.Ci,
+    { Cc, Ci }         = require('chrome'),
     searchService = Cc["@mozilla.org/browser/search-service;1"].getService(Ci.nsIBrowserSearchService),
     storageModel = new PersistentModel({
         enabled: false,
@@ -20,18 +17,19 @@ var Mediator = require('../mediator/mediator.js'),
     //this hack is required, when by default
     //Yandex is already installed and could not be removed, only hidden
     INSTALLED_ENGINE_NAME = 'Яндекc',
-    YANDEX_CYRILLIC = 'Яндекс',
-    BROWSER_SEARCH_PREFS = [
+    YANDEX_CYRILLIC       = 'Яндекс',
+    BROWSER_SEARCH_PREFS  = [
         'browser.search.defaultenginename',
         'browser.search.selectedEngine'
     ],
-    MAX_ATTEMPTS = 200,
+    MAX_ATTEMPTS = 200;
 
+let attempts = 0;
     /**
      * Waits untill out search engine was properly added,
      * then makes it default
      */
-    configureSearchService = _.debounce(function () {
+const configureSearchService = _.debounce(function () {
         var yandexSearchEngine = searchService.getEngineByName(INSTALLED_ENGINE_NAME);
         if (yandexSearchEngine) {
             yandexSearchEngine.hidden = false;
