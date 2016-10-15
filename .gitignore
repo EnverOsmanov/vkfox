@@ -22,4 +22,6 @@ node_modules
 bower_components
 build
 build.zip
+
+*.lock
 .idea
