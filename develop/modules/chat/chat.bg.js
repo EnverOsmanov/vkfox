@@ -53,7 +53,6 @@ readyPromise.then(function () {
 
 Mediator.sub('auth:success', function (data) {
     initialize();
-    console.log("after init");
 
     userId = data.userId;
     getDialogs().then(getUnreadMessages).then(fetchProfiles).then(function () {
@@ -85,8 +84,7 @@ function updateLatestMessageId() {
 }
 
 function fetchProfiles() {
-    console.log("start of fetchProfiles");
-    var requiredUids = dialogColl.reduce(function (uids, dialog) {
+    const requiredUids = dialogColl.reduce(function (uids, dialog) {
             uids = uids.concat(dialog.get('messages').map(function (message) {
                 return message.uid;
             }), dialog.get('uid'));
@@ -205,7 +203,6 @@ function getDialogs() {
                 };
             }));
         }
-        console.log("end of getDialogs");
     });
 }
 

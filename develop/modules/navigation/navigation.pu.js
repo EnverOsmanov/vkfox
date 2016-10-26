@@ -1,6 +1,9 @@
 "use strict";
-require('angular').module('app').directive('navigation', function ($routeParams) {
+require('angular').module('app').directive('navigation', ["$routeParams", function ($routeParams) {
     return {
+        templateUrl: 'modules/navigation/navigation.tmpl.html',
+        replace    : true,
+        restrict   : 'E',
         controller: function ($scope) {
             $scope.tabs = [
                 {
@@ -17,9 +20,6 @@ require('angular').module('app').directive('navigation', function ($routeParams)
                 }
             ];
             $scope.activeTab = $routeParams.tab;
-        },
-        templateUrl: 'modules/navigation/navigation.tmpl.html',
-        replace    : true,
-        restrict   : 'E'
+        }
     };
-});
+}]);

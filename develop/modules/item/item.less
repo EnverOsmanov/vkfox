@@ -21,7 +21,7 @@
         position: relative;
         opacity: 0.9;
         .box-shadow(inset 0px 0px 1px rgba(0,0,0,.07));
-        .border-radius(@itemIconSize / 2);
+        border-radius: @itemIconSize / 2;
 
         &:hover {
             opacity: 1;
@@ -52,8 +52,9 @@
        bottom: 0;
        height: 1em;
        margin: auto;
-       &:extend([class^="icon-"]);
-       content: @ok-sign;
+       &:extend([class^="fa fa-"]);
+       font-family: FontAwesome;
+       content: @fa-var-check-circle;
        display: block;
        color: @nephritis;
    }
@@ -122,7 +123,7 @@
             .box-sizing(border-box);
             margin: 0;
             padding: 0.25rem 0.5rem;
-            .border-radius(3px);
+            border-radius: 3px;
             border: 1px solid darken(@clouds, 15%);
 
             &:focus {

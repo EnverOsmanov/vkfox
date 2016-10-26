@@ -35,13 +35,14 @@
     }
     .checkbox__text:before {
         position: relative;
-        .icon-FontAwesome();
+        .fa-icon();
         display: inline-block;
-        content: @check-empty;
+        font-family: 'FontAwesome';
+        content: @fa-var-square-o;
         padding: 0 0.5rem 0 0.75rem;
     }
     .checkbox__input:checked + .checkbox__text:before {
-        content: @check;
+        content: @fa-var-check-square-o;
     }
 
     &:hover .checkbox__text:before {

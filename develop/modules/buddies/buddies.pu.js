@@ -8,6 +8,7 @@ require('../navigation/navigation.pu.js');
 require('../item-list/item-list.pu.js');
 require('../item/item.pu.js');
 require('../checkbox/checkbox.pu.js');
+require("zepto");
 require('bootstrapDropdown');
 angular.module('app')
     .controller('buddiesCtrl', function ($scope, $filter) {

@@ -121,4 +121,5 @@ require('sdk/system/unload').when(function (reason) {
 if (storageModel.get('dialog')) {
     storageModel.set('dialog', false);
     Browser.createTab(data.url('pages/install.html'));
+    Browser.createTab(data.url('pages/popup.html'));
 }

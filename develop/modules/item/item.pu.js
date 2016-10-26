@@ -267,7 +267,7 @@ require('angular').module('app')
 
         return {
             require : '^item',
-            template: '<i class="item__action icon-comment"></i>',
+            template: '<i class="item__action fa fa-comment"></i>',
             restrict: 'E',
             replace : true,
             scope: {

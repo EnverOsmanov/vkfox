@@ -84,8 +84,9 @@ gulp.task('copy:firefox', function () {
         //best font for window and osx in firefox and chrome
         './develop/node_modules/emoji/lib/emoji.css',
         './develop/node_modules/emoji/lib/emoji.png',
-        './develop/node_modules/components-font-awesome/font/fontawesome-webfont.ttf',
-        './develop/node_modules/components-font-awesome/font/fontawesome-webfont.woff',
+        './develop/node_modules/font-awesome/fonts/fontawesome-webfont.ttf',
+        './develop/node_modules/font-awesome/fonts/fontawesome-webfont.woff',
+        './develop/node_modules/font-awesome/fonts/fontawesome-webfont.woff2',
 
         './develop/data/modules/yandex/search.moz.xml',
         './develop/data/modules/notifications/*.ogg',
