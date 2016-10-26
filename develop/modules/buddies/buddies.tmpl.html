@@ -1,8 +1,10 @@
+<navigation></navigation>
+
 <div ng-controller="buddiesCtrl" class="buddies">
     <div class="navbar navbar_style_sub">
 
         <label class="buddies__search">
-            <i class="icon-search"></i>
+            <i class="fa fa-search"></i>
             <input
                     id="prependedInput"
                     type="text"
@@ -14,7 +16,7 @@
         <div
                 role="menu"
                 class="dropdown buddies__filter pull-right">
-            <i class="icon-reorder dropdown-toggle"></i>
+            <i class="fa fa-bars dropdown-toggle"></i>
             <ul class="dropdown-menu">
                 <li>
                     <checkbox class="buddies__checkbox" ng-model="filters.male">
@@ -58,12 +60,12 @@
                 <item-action
                         item-post-wall
                         uid="buddie.uid"
-                        ng-class="'icon-comment'">
+                        ng-class="'fa fa-comment'">
                 </item-action>
                 <item-action
                         ng-click="toggleFriendWatching(buddie)"
                         ng-class="{'buddies__item-action_active': buddie.isWatched}"
-                        class="icon-bell-alt"
+                        class="fa fa-bell"
                         title="{{'Monitor online status' | i18n}}">
                 </item-action>
             </item-actions>

@@ -103,7 +103,6 @@ require('angular').module('app')
         let online;
 
         if (dialog.chat_id) {
-            console.log("ahah");
             $scope.owners = dialog.chat_active.map(function (uid) {
                 return profilesColl.get(uid).toJSON();
             });

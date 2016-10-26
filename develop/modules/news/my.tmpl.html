@@ -18,10 +18,10 @@
                 <div ng-if="item.type == 'mention'" ng-bind-html="item.parent.text | rectify">
                 </div>
                 <div ng-if="item.type == 'follow'">
-                    {{'started following you' | i18n}} <i class="icon-user"></i>
+                    {{'started following you' | i18n}} <i class="fa fa-user"></i>
                 </div>
                 <div ng-if="item.type == 'friend_accepted'">
-                    {{'friend request accepted' | i18n}} <i class="icon-plus"></i>
+                    {{'friend request accepted' | i18n}} <i class="fa fa-plus"></i>
                 </div>
                 <div ng-if="['post', 'comment', 'wall'].indexOf(item.type) !== -1">
                     <p ng-if="item.parent.text" ng-bind-html="item.parent.text | rectify"></p>
@@ -38,12 +38,12 @@
                     <item-actions>
                         <i ng-click="unsubscribe(comment.type, comment.ownerId, comment.id)"
                            title="{{'unsubscribe' | i18n | capitalize}}"
-                           class="item__action icon-ban-circle"></i>
+                           class="item__action fa fa-ban"></i>
                         <item-action
                                 ng-if="open"
                                 anchor="{{open}}"
                                 title="{{'Open in New Tab' | i18n}}"
-                                ng-class="'icon-external-link-sign'">
+                                ng-class="'fa fa-external-link-square'">
                         </item-action>
                         <item-action-comment
                                 ng-if="comment"
@@ -87,11 +87,11 @@
                         </div>
                     </div>
                     <span ng-if="feedback.type == 'like'">
-                        {{'Liked' | i18n}} <i class="icon-heart"></i>
+                        {{'Liked' | i18n}} <i class="fa fa-heart"></i>
                     </span>
 
                     <span ng-if="feedback.type == 'copy'">
-                        {{'Reposted' | i18n}} <i class="icon-retweet"></i>
+                        {{'Reposted' | i18n}} <i class="fa fa-retweet"></i>
                     </span>
                 </item>
 

@@ -63,7 +63,7 @@
     }
     .checkbox__text:before,
     .checkbox__text:after {
-        .icon-FontAwesome();
+        .fa-icon();
         position: absolute;
         display: block;
         width: 3rem;
@@ -80,7 +80,8 @@
         background: @peterRiver;
     }
     .checkbox__text::after {
-        content: @remove;
+        font-family: 'FontAwesome';
+        content: @fa-var-close;
         background: @peterRiver;
         color: white;
         right: 0;
@@ -95,7 +96,8 @@
     }
     .checkbox__text::before {
         .border-left-radius(3px);
-        content: @ok;
+        font-family: 'FontAwesome';
+        content: @fa-var-check;
         background: @clouds;
         color: @asbestos;
         left: 0;

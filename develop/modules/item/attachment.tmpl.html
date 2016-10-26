@@ -3,20 +3,20 @@
     ng-switch on="type">
     <img ng-switch-when="app" ng-src="{{data.src}}"/>
     <div  ng-switch-when="audio">
-        <i class="icon-music"></i> {{data.performer}} - {{data.title}}
+        <i class="fa fa-music"></i> {{data.performer}} - {{data.title}}
     </div>
     <a ng-switch-when="note" anchor="/note{{data.owner_id}}_{{data.nid}}">
-        <i class="icon-file"></i> {{data.title}}
+        <i class="fa fa-file"></i> {{data.title}}
     </a>
     <a ng-switch-when="doc"  class="item__link" anchor="{{data | docViewPath}}">
-        <i class="icon-file"></i> {{data.title}}
+        <i class="fa fa-file"></i> {{data.title}}
     </a>
     <div ng-switch-when="poll">
-        <i class="icon-list-alt"></i> {{data.question}}
+        <i class="fa fa-list-alt"></i> {{data.question}}
     </div>
 
     <a ng-switch-when="link" class="item__link" anchor="{{data.url}}">
-        <i class="icon-share-alt"></i> {{data.url}}
+        <i class="fa fa-share"></i> {{data.url}}
     </a>
 
     <div

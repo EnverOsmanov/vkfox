@@ -2,14 +2,15 @@
     <a
         ng-repeat="tab in tabs"
         class="navbar__tab"
+        data-enver="b {{ activeTab }} a"
         ng-class="{navbar__tab_active: tab.href === activeTab}"
         href="pages/popup.html#/{{tab.href}}">{{tab.name | i18n}}</a>
     <div class="navigation__actions">
         <a class="navigation__action navigation__help" anchor="{{'/plugin_vkfox' | addVKBase}}">
-            <i class="icon-bug"></i>
+            <i class="fa fa-bug"></i>
         </a>
         <a class="navigation__action navigation__settings" href="pages/popup.html#/settings">
-            <i class="icon-cog"></i>
+            <i class="fa fa-cog"></i>
         </a>
     </div>
 </div>
