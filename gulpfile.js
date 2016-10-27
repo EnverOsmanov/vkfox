@@ -24,6 +24,9 @@ const plumber = require('gulp-plumber');
 const notify = require('gulp-notify');
 const eslint = require("gulp-eslint");
 
+var webpackConfig = require("./webpack.config.js");
+var gutil = require("gulp-util");
+
 gulp.task('env:firefox', function () {
     env({
         vars: {
@@ -56,7 +59,7 @@ gulp.task('preprocess:env', function () {
     return gulp.src('./develop/modules/env/env.raw.js')
         .pipe(preprocess())
         .pipe(rename('env.js'))
-        .pipe(gulp.dest('./build/firefox/data/modules/env'));
+        .pipe(gulp.dest('./develop/modules/env'));
 });
 
 gulp.task('preprocess:install', function () {
@@ -85,7 +88,7 @@ gulp.task('clean:firefox', function () {
 
 gulp.task('copy:firefox', function () {
     return gulp.src([
-        './develop/package.json',
+        "./develop/_locales",
         './develop/data/assets/**',
         './develop/node_modules/backbone/*',
         './develop/node_modules/underscore/*',
@@ -101,8 +104,8 @@ gulp.task('copy:firefox', function () {
         './develop/data/modules/notifications/*.ogg',
         './develop/data/modules/notifications/firefox.html',
         './develop/data/modules/*/*.js'
-    ], { base: './develop/'})
-        .pipe(gulp.dest('./build/firefox'))
+    ], {base: './develop/'})
+      .pipe(gulp.dest('./build/firefox'))
 });
 
 gulp.task('jpm:run', function (cb) {
@@ -114,68 +117,35 @@ gulp.task('jpm:run', function (cb) {
 });
 
 gulp.task('webpack', function (callback) {
-    let firstBuildReady = false;
+    const myConfig = Object.create(webpackConfig);
+    let firstCallback = true;
 
-    function done(err, stats) {
-        firstBuildReady = true;
+    webpack(myConfig, function(err, stats) {
+        if (firstCallback) {
+            firstCallback = false;
 
-        if (err) { // hard error, see https://webpack.github.io/docs/node.js-api.html#error-handling
-            return;  // emit('error', err) in webpack-stream
-        }
+            if (!err) err = stats.toJson.errors[0];
 
-        gulplog[stats.hasErrors() ? 'error' : 'info'](stats.toString({
-            colors: true
-        }));
+            if (err) {
+                notifier.notify({
+                    title: "Webpack",
+                    message: err
+                });
 
-    }
-
-    let options = {
-        output: {
-            path: __dirname + '/build',
-            filename: "[name].js"
-        },
-        watch  : true,
-        devtool: true ? "cheap-inline-module-source-map" : null,
-        plugins: [
-            new webpack.IgnorePlugin(/^sdk\//),
-            new webpack.IgnorePlugin(/^@loader\/options/),
-            new webpack.IgnorePlugin(/^toolkit\/loader/),
-            new webpack.IgnorePlugin(/^chrome$/),
-            new webpack.NoErrorsPlugin(),
-            new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
-            new webpack.optimize.CommonsChunkPlugin({
-                name: "vendor"
-            })
-        ],
-        resolve: {
-            alias: {
-                angularKeypress  : 'angular-ui-utils/modules/keypress/keypress.js',
-                bootstrapTooltip : 'bootstrap/js/tooltip.js',
-                bootstrapDropdown: 'bootstrap/js/dropdown.js',
-                'zepto/event'    : 'zepto/src/event',
-                'zepto/detect'   : 'zepto/src/detect',
-                'zepto/data'     : 'zepto/src/data',
-                'zepto/selector' : 'zepto/src/selector'
+                gulplog.error(err)
             }
-        }
-    };
+            else {
+                gulplog.info("[webpack:build]", stats.toString({
+                    colors: true
+                }));
+            }
 
-   return gulp.src(['./develop/modules/app/app.*.js'])
-       .pipe(plumber({
-           errorHandler: notify.onError( err => ({
-               title: 'Webpack',
-               message: err.message
-           }))
-       }))
-       .pipe(named())
-       .pipe(webpackStream(options, null, done))
-       .pipe(gulp.dest('build/firefox/data/pages'))
-       .on('data', function() {
-           if (firstBuildReady && !callback.called) {
-               callback.called = true;
-               callback();
-           }
-       });
+            if (!myConfig.watch && err) {
+                callback(err)
+            }
+            else callback();
+        }
+    });
 });
 
 gulp.task('lint', () => {
