@@ -24,7 +24,7 @@ require('angular').module('app')
         });
         $locationProvider.html5Mode(false);
 
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|chrome-extension|resource):/);
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|chrome-extension|moz-extension|resource):/);
 
         $routeProvider
             .when('/news', {
@@ -49,7 +49,7 @@ require('angular').module('app')
     })
     .run(function ($location, $rootScope) {
         // default tab is chat
-        var notificationsPromise = Vow.promise(),
+        const notificationsPromise = Vow.promise(),
             authPromise = Vow.promise(),
             READY = 2; //ready status from auth module
 

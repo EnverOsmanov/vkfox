@@ -1,6 +1,7 @@
 "use strict";
+const track = require('../tracker/tracker.js');
 try {
-    require('../tracker/tracker.js').trackPage();
+    track.trackPage();
     require('../browser/browser.bg.js');
     require('../auth/auth.bg.js');
     require('../auth-monitor/auth-monitor.bg.js');
@@ -19,6 +20,6 @@ try {
         require('../yandex/yandex.bg.js');
     }
 } catch (e)  {
-    require('../tracker/tracker.js').error(e.stack);
+    track.error(e.stack);
     throw e;
 }

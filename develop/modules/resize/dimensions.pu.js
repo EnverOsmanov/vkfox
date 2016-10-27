@@ -1,7 +1,8 @@
+"use strict";
 // Inits width and height of the popup,
 // Runs first, therefore without any external dependencies
 (function () {
-    var css, property;
+    let css, property;
 
     try {
         css = JSON.parse(localStorage.getItem('resize'));

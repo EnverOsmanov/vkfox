@@ -1,10 +1,7 @@
-(function () {
-    let port = chrome.runtime.connect();
+"use strict";
 
-    if (window.name === 'vkfox-login-iframe')
-        port.postMessage(['auth:iframe', decodeURIComponent(window.location.href)]);
-    else
-        port.postMessage(['auth:login', true]);
+const port = chrome.runtime.connect();
 
-    port.disconnect();
-})();
+port.postMessage(["auth:iframe", decodeURIComponent(window.location.href)]);
+
+port.disconnect();

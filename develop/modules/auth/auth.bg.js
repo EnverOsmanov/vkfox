@@ -3,49 +3,31 @@ const RETRY_INTERVAL = 10000, //ms
     CREATED          = 1,
     IN_PROGRESS      = 1,
     READY            = 2,
-    Config           = require('../config/config.js'),
-    Mediator         = require('../mediator/mediator.js'),
-    Env              = require('../env/env.js'),
-    Browser          = require('../browser/browser.bg.js'),
-    _                = require('../shim/underscore.js')._,
-    Backbone         = require('backbone'),
-    Vow              = require('../shim/vow.js'),
+    Config           = require("../config/config.js"),
+    Mediator         = require("../mediator/mediator.js"),
+    Browser          = require("../browser/browser.bg.js"),
+    _                = require("../shim/underscore.js")._,
+    Backbone         = require("backbone"),
+    Vow              = require("../shim/vow.js"),
     model            = new Backbone.Model();
 
 let Auth, page, iframe,
     state       = CREATED,
-    authPromise = Vow.promise(),
+    authPromise = Vow.promise();
 
-    tryLogin = (function () {
-        var tryLogin = Env.firefox ? function () {
-            page = require("sdk/page-worker").Page({
-                contentScript: 'self.postMessage(decodeURIComponent(window.location.href));',
-                contentURL: Config.AUTH_URI,
-                onMessage: function (url) {
-                    Mediator.pub('auth:iframe', url);
-                }
-            });
-        } : function () {
-            if (!iframe) {
-                iframe = document.createElement("iframe");
-                iframe.name = 'vkfox-login-iframe';
-                document.body.appendChild(iframe);
-            }
-            iframe.setAttribute('src', Config.AUTH_URI + '&time=' + Date.now());
-        };
+function tryLogin() {
+    if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.name = "vkfox-login-iframe";
+        document.body.appendChild(iframe);
+    }
+    iframe.setAttribute("src", Config.AUTH_URI + "&time=" + Date.now());
+}
 
-        return tryLogin;
-    })(),
-
-    freeLogin = (function () {
-        return Env.firefox ? function () {
-            page.destroy();
-            page = null;
-        } : function () {
-            document.body.removeChild(iframe);
-            iframe = null;
-        };
-    })();
+function freeLogin() {
+    document.body.removeChild(iframe);
+    iframe = null;
+}
 
 function onSuccess(data) {
     state = READY;
@@ -55,22 +37,12 @@ function onSuccess(data) {
 
 // We need to authorize in own window, after user was logined in a tab
 // In google chrome we use content-script for this purpose (declared in manifest.js)
-if (Env.firefox) {
-    require("sdk/page-mod").PageMod({
-        include: [
-            "http://oauth.vk.com/blank.html*",
-            "https://oauth.vk.com/blank.html*"
-        ],
-        onAttach: function () {
-            Auth.login(true);
-        }
-    });
-}
 
-Mediator.sub('auth:iframe', function (url) {
+Mediator.sub("auth:iframe", function (url) {
+    console.log("DOOOONE");
     try {
-        model.set('userId',  parseInt(url.match(/user_id=(\w+)(?:&|$)/i)[1], 10));
-        model.set('accessToken',  url.match(/access_token=(\w+)(?:&|$)/i)[1]);
+        model.set("userId",  parseInt(url.match(/user_id=(\w+)(?:&|$)/i)[1], 10));
+        model.set("accessToken",  url.match(/access_token=(\w+)(?:&|$)/i)[1]);
 
         // After successful login we should close all auth tabs
         Browser.closeTabs(Config.AUTH_DOMAIN);
@@ -80,20 +52,21 @@ Mediator.sub('auth:iframe', function (url) {
     }
 }.bind(this));
 
-Mediator.sub('auth:state:get', function () {
-    Mediator.pub('auth:state', state);
+Mediator.sub("auth:state:get", function () {
+    Mediator.pub("auth:state", state);
 });
 
-Mediator.sub('auth:oauth', function () {
+Mediator.sub("auth:oauth", function () {
     Browser.createTab(Config.AUTH_URI);
 });
 
-Mediator.sub('auth:login', function (force) {
+Mediator.sub("auth:login", function (force) {
+    console.log("sub AUTH:LOGIN " + force);
     Auth.login(force);
 });
 
-model.on('change:accessToken', function () {
-    Mediator.pub('auth:success', model.toJSON());
+model.on("change:accessToken", function () {
+    Mediator.pub("auth:success", model.toJSON());
 });
 
 
@@ -106,29 +79,32 @@ module.exports = Auth = {
     }, RETRY_INTERVAL),
     login           : function (force) {
         if (force || state === CREATED) {
+            console.log(1);
             Browser.setIconOffline();
             state = IN_PROGRESS;
 
             if (authPromise.isFulfilled()) {
+                console.log(2);
                 authPromise = Vow.promise();
             }
 
             tryLogin();
             Auth.retry();
 
-            Mediator.unsub('auth:success', onSuccess);
-            Mediator.once('auth:success', onSuccess);
+            console.log(3);
+            Mediator.unsub("auth:success", onSuccess);
+            Mediator.once("auth:success", onSuccess);
         }
         return authPromise;
     },
     getAccessToken  : function () {
         return Auth.login().then(function () {
-            return model.get('accessToken');
+            return model.get("accessToken");
         });
     },
     getUserId       : function () {
         return Auth.login().then(function () {
-            return model.get('userId');
+            return model.get("userId");
         });
     }
 };
