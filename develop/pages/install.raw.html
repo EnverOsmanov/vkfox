@@ -4,12 +4,7 @@
     <head>
         <meta charset="utf-8">
         <title>VKfox</title>
-        <!-- @if TARGET='FIREFOX' -->
-        <base href="/data/" />
-        <!-- @endif -->
-        <!-- @if TARGET!='FIREFOX' -->
         <base href="/" />
-        <!-- @endif -->
         <link rel="stylesheet" href="pages/install.css" />
     </head>
     <body class="app" ng-controller="AppCtrl">
@@ -49,7 +44,6 @@
             </div>
         </div>
         <script src="pages/vendor.js"></script>
-        <script src="pages/vendor.pu.js"></script>
         <script src="pages/app.install.js"></script>
     </body>
 </html>

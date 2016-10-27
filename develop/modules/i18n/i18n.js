@@ -13,13 +13,8 @@ let language, locale, messages;
 
 // Show russian locale for belorus
 i18n.be = i18n.ru;
-if (typeof navigator !== 'undefined') {
-    locale = navigator.language;
-} else {
-    const { Cc, Ci } = require("chrome");
-    locale = Cc["@mozilla.org/chrome/chrome-registry;1"]
-        .getService(Ci.nsIXULChromeRegistry).getSelectedLocale("global");
-}
+locale = navigator.language;
+
 try {
     language = locale.split('-')[0].toLowerCase();
 } catch (e) {}

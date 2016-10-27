@@ -2,24 +2,24 @@
 
 /*jshint bitwise: false */
 /*global $ */
-var
-_                   = require('../shim/underscore.js')._,
-PersistentModel     = require('../persistent-model/persistent-model.js'),
-I18n                = require('../i18n/i18n.js'),
-Env                 = require('../env/env.js'),
-Browser             = require('../browser/browser.js'),
-Request             = require('../request/request.js'),
-Config              = require('../config/config.js'),
+const _             = require('../shim/underscore.js')._,
+    PersistentModel = require('../persistent-model/persistent-model.js'),
+    I18n            = require('../i18n/i18n.js'),
+    Env             = require('../env/env.js'),
+    Browser         = require('../browser/browser.js'),
+    Request         = require('../request/request.js'),
+    Config          = require('../config/config.js'),
+    Vow             = require("vow"),
 
 url                 = 'http://www.google-analytics.com/collect',
 persistentModel     = new PersistentModel({}, {name: 'tracker'}),
 commonParamsPromise = Browser.getVkfoxVersion().then(function (version) {
     return {
-        v: 1, // Version.
+        v  : 1, // Version.
         tid: Config.TRACKER_ID, // Tracking ID / Web property / Property ID.
         cid: persistentModel.get('guid'), // Anonymous Client ID.
-        ul: I18n.getLang(), //user language
-        ap: version //app version
+        ul : I18n.getLang(), //user language
+        ap : version //app version
     };
 });
 
@@ -36,14 +36,8 @@ function guid() {
     });
 }
 function getBrowserVersion() {
-    if (Env.background && Env.firefox) {
-        return require('sdk/system').platformVersion;
-    } else {
-        // we don't user require('zepto')
-        // to hack for Firefox's SDK syntax analyzer
-        // But we do need, to somewhere include zepto
-        return $.browser.version;
-    }
+    return browser.runtime.getBrowserInfo()
+        .then( (info) => `${info.name} ${info.version} (${info.buildID})`)
 }
 function getPage() {
     if (Env.background) return '/pages/background.html';
@@ -76,7 +70,7 @@ module.exports = {
     trackEvent: function (category, action, label, value) {
         commonParamsPromise.then(function (params) {
             Request.post(url, _.extend({}, params, {
-                t: 'event', // Event hit type
+                t : 'event', // Event hit type
                 ec: category, // Event Category. Required.
                 ea: action, // Event Action. Required.
                 el: label, // Event label.
@@ -92,7 +86,7 @@ module.exports = {
      * that will be sent to Analytics
      */
     debug: function () {
-        var args = Array.prototype.slice.call(arguments);
+        const args = Array.prototype.slice.call(arguments);
 
         Browser.getVkfoxVersion().then(function (version) {
             this.trackEvent(
@@ -104,15 +98,16 @@ module.exports = {
     /**
      * Remotely track an error
      *
-     * @param {Error} error
+     * @param {Error} stack
      */
     error: function (stack) {
-        Browser.getVkfoxVersion().then(function (version) {
-            this.trackEvent(
-                'error;v' + version,
-                stack,
-                getBrowserVersion()
-            );
-        }.bind(this)).done();
+        Vow.all([Browser.getVkfoxVersion(), getBrowserVersion()])
+            .spread(function (vkfoxVersion, browserVersion) {
+                this.trackEvent(
+                    'error;v' + vkfoxVersion,
+                    stack,
+                    browserVersion
+                ).bind(this);
+            }).done();
     }
 };

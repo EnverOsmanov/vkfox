@@ -6,30 +6,5 @@
  * This loader solves this issues.
  * Is used to laod unserscore and shim/vow.js libs
  */
-const Env = require('../env/env.js');
-if (Env.background && Env.firefox) {
-    const toolkitLoader = require('toolkit/loader'),
-        Require         = toolkitLoader.Require,
-        Loader          = toolkitLoader.Loader,
-        timer           = require('sdk/timers'),
-        loader = Loader(toolkitLoader.override(require('@loader/options'), {
-            globals: toolkitLoader.override(require('sdk/system/globals'), {
-                setImmediate  : timer.setImmediate.bind(timer),
-                clearImmediate: timer.clearImmediate.bind(timer),
-                setTimeout    : timer.setTimeout.bind(timer),
-                setInterval   : timer.setInterval.bind(timer),
-                clearTimeout  : timer.clearTimeout.bind(timer),
-                clearInterval : timer.clearInterval.bind(timer),
-            })
-        }));
-
-    (function () {
-        var myRequire = Require(loader, module);
-
-        exports.vow = myRequire('vow');
-        exports.underscore = myRequire('underscore');
-    })();
-} else {
-    exports.vow = require('vow');
-    exports.underscore = require('underscore');
-}
+exports.vow = require('vow');
+exports.underscore = require('underscore');

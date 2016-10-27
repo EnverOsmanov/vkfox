@@ -143,32 +143,20 @@ module.exports = Notifications = {
     createPopup: (function () {
         var createPopup, notifications;
 
-        if (Env.firefox) {
-            notifications = require("sdk/notifications");
-
-            createPopup = function (options, text) {
-                notifications.notify({
-                    title: options.title,
-                    text: text,
-                    iconURL: options.image
-                });
-            };
-        } else {
-            createPopup = function (options, message) {
-                getBase64FromImage(options.image, function (base64) {
-                    try {
-                        chrome.notifications.create(_.uniqueId(), {
-                            type: 'basic',
-                            title: options.title,
-                            message: message,
-                            iconUrl: base64
-                        }, function () {});
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-            };
-        }
+        createPopup = function (options, message) {
+            getBase64FromImage(options.image, function (base64) {
+                try {
+                    chrome.notifications.create(_.uniqueId(), {
+                        type: 'basic',
+                        title: options.title,
+                        message: message,
+                        iconUrl: base64
+                    }, function () {});
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+        };
 
         return function (options) {
             var popups = notificationsSettings.get('popups');
@@ -181,44 +169,19 @@ module.exports = Notifications = {
     playSound: (function () {
         var soundWorker, play, data;
 
-        if (Env.firefox) {
-            data = require("sdk/self").data;
-            play = function (source, volume) {
-                if (!audioInProgress) {
-                    audioInProgress = true;
-                    soundWorker = require("sdk/page-worker").Page({
-                        contentScript: [
-                            'var audio = new Audio("../../', source, '");',
-                            'audio.volume = ', volume, ';',
-                            'audio.play();',
-                            'audio.addEventListener("ended", function () {',
-                            'self.postMessage("destroy");',
-                            '});'
-                        ].join(''),
-                        contentURL: data.url('modules/notifications/firefox.html'),
-                        onMessage: function () {
-                            soundWorker.destroy();
-                            soundWorker = null;
-                            audioInProgress = false;
-                        }
-                    });
-                }
-            };
-        } else {
-            play = function (source, volume) {
-                var audio;
+        play = function (source, volume) {
+            var audio;
 
-                if (!audioInProgress) {
-                    audioInProgress = true;
-                    audio = new Audio(source);
-                    audio.volume = volume;
-                    audio.play();
-                    audio.addEventListener('ended', function () {
-                        audioInProgress = false;
-                    });
-                }
-            };
-        }
+            if (!audioInProgress) {
+                audioInProgress = true;
+                audio = new Audio(source);
+                audio.volume = volume;
+                audio.play();
+                audio.addEventListener('ended', function () {
+                    audioInProgress = false;
+                });
+            }
+        };
         return function () {
             var sound = notificationsSettings.get('sound');
 

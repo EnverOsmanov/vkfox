@@ -9,10 +9,9 @@ else {
     const ProxyMethods = require('../proxy-methods/proxy-methods.js');
 
     module.exports = ProxyMethods.forward('browser/browser.bg.js', [
-        'createTab', 'getVkfoxVersion', 'closeFirefoxPanel'
+        'createTab', 'getVkfoxVersion'
     ]);
     module.exports.closePopup = function() {
-        if (Env.firefox) module.exports.closeFirefoxPanel();
-        else window.close();
+        window.close();
     };
 }
