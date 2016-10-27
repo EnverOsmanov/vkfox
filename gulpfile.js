@@ -1,11 +1,13 @@
 'use strict';
 
 const gulp                 = require('gulp'),
+    gulplog                = require('gulplog'),
     env                    = require('gulp-env'),
     less                   = require('gulp-less'),
     preprocess             = require('gulp-preprocess'),
     rename                 = require('gulp-rename'),
     inlineAngularTemplates = require('gulp-inline-angular-templates'),
+    uglify                 = require('gulp-uglify'),
     source                 = require('vinyl-source-stream'),
     del                    = require('del'),
     path                   = require('path'),
@@ -64,6 +66,13 @@ gulp.task('preprocess:install', function () {
         .pipe(gulp.dest('./build/firefox/data/pages'));
 });
 
+gulp.task('preprocess:manifest', function () {
+    return gulp.src('./develop/manifest.raw.json')
+        .pipe(preprocess())
+        .pipe(rename('manifest.json'))
+        .pipe(gulp.dest('./build/firefox'));
+});
+
 gulp.task('inline_angular_templates', function () {
     return gulp.src('./develop/modules/**/*.tmpl.html')
         .pipe(inlineAngularTemplates('./build/firefox/data/pages/popup.html', {base: './develop'}))
@@ -97,19 +106,35 @@ gulp.task('copy:firefox', function () {
 });
 
 gulp.task('jpm:run', function (cb) {
-    exec('jpm run', {cwd: './build/firefox'}, function (err, stdout, stderr) {
+    exec('web-ext run', {cwd: './build/firefox'}, function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
         cb(err);
     })
 });
 
-gulp.task('webpack', function () {
+gulp.task('webpack', function (callback) {
+    let firstBuildReady = false;
+
+    function done(err, stats) {
+        firstBuildReady = true;
+
+        if (err) { // hard error, see https://webpack.github.io/docs/node.js-api.html#error-handling
+            return;  // emit('error', err) in webpack-stream
+        }
+
+        gulplog[stats.hasErrors() ? 'error' : 'info'](stats.toString({
+            colors: true
+        }));
+
+    }
+
     let options = {
         output: {
             path: __dirname + '/build',
             filename: "[name].js"
         },
+        watch  : true,
         devtool: true ? "cheap-inline-module-source-map" : null,
         plugins: [
             new webpack.IgnorePlugin(/^sdk\//),
@@ -117,6 +142,7 @@ gulp.task('webpack', function () {
             new webpack.IgnorePlugin(/^toolkit\/loader/),
             new webpack.IgnorePlugin(/^chrome$/),
             new webpack.NoErrorsPlugin(),
+            new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
             new webpack.optimize.CommonsChunkPlugin({
                 name: "vendor"
             })
@@ -134,7 +160,7 @@ gulp.task('webpack', function () {
         }
     };
 
-   return gulp.src(['./develop/modules/app/app.*.js', '!./develop/modules/app/app.bg.js'])
+   return gulp.src(['./develop/modules/app/app.*.js'])
        .pipe(plumber({
            errorHandler: notify.onError( err => ({
                title: 'Webpack',
@@ -142,12 +168,18 @@ gulp.task('webpack', function () {
            }))
        }))
        .pipe(named())
-       .pipe(webpackStream(options))
+       .pipe(webpackStream(options, null, done))
        .pipe(gulp.dest('build/firefox/data/pages'))
+       .on('data', function() {
+           if (firstBuildReady && !callback.called) {
+               callback.called = true;
+               callback();
+           }
+       });
 });
 
 gulp.task('lint', () => {
-    return  gulp.src(['./develop/modules/**/*.js', '!./develop/modules/app/app.bg.js'])
+    return  gulp.src(['./develop/modules/**/*.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
@@ -155,14 +187,13 @@ gulp.task('lint', () => {
 
 gulp.task('default', function (cb) {
         runSequence(
-            ['env:firefox', 'env:development'],
-            'clean:firefox',
+            ['env:firefox', 'env:development', 'clean:firefox'],
             'less',
-            ['preprocess:env', 'preprocess:install', 'preprocess:popup'],
+            ['preprocess:env', 'preprocess:install', 'preprocess:popup', 'preprocess:manifest'],
             'inline_angular_templates',
             'webpack',
             'copy:firefox',
-            'jpm:run',
+            //'jpm:run',
             function () {
                 return cb();
             }

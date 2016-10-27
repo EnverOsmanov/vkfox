@@ -6,7 +6,7 @@
         "default_locale": "ru",
         "description": "__MSG_description__",
         "background": {
-            "page": "pages/background.html"
+            "scripts": [ "pages/app.bg.js" ]
         },
         "icons": {
             "16": "assets/logo16.png",

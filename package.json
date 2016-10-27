@@ -30,6 +30,7 @@
     "gulp-plumber": "^1.1.0",
     "gulp-preprocess": "^2.0.0",
     "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^2.0.0",
     "jpm": "^1.2.1",
     "less": "^2.7.1",
     "linkifyjs": "^2.1.0",
