@@ -92,15 +92,12 @@ gulp.task("copy:firefox", function () {
         "./develop/pages/background.html",
         "./develop/_locales/**",
         "./develop/assets/**",
-        "./develop/node_modules/backbone/*",
-        "./develop/node_modules/underscore/*",
-        "./develop/node_modules/vow/**/*",
         //best font for window and osx in firefox and chrome
         "./develop/node_modules/emoji/lib/emoji.css",
         "./develop/node_modules/emoji/lib/emoji.png",
-        "./develop/node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
-        "./develop/node_modules/font-awesome/fonts/fontawesome-webfont.woff",
-        "./develop/node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
+        "./node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
+        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
+        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
 
         "./develop/modules/yandex/search.moz.xml",
         "./develop/modules/notifications/*.ogg",
@@ -108,6 +105,15 @@ gulp.task("copy:firefox", function () {
         "./develop/modules/*/*.js"
     ], {base: "./develop/"})
       .pipe(gulp.dest("./build/firefox"))
+})
+
+;gulp.task("fonts", function () {
+    return gulp.src([
+        "./node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
+        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
+        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
+    ], {base: "./node_modules/font-awesome/"})
+      .pipe(gulp.dest("./build/firefox/assets"))
 });
 
 gulp.task("jpm:run", function (cb) {
@@ -164,11 +170,8 @@ gulp.task("default", function (cb) {
             ["preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"],
             "inline_angular_templates",
             "webpack",
-            "copy:firefox",
-            //"jpm:run",
-            function () {
-                return cb();
-            }
+            ["copy:firefox", "fonts"],
+             () => cb()
         )
     }
 );
