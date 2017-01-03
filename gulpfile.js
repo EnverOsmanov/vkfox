@@ -84,7 +84,7 @@ gulp.task("inline_angular_templates", function () {
 });
 
 gulp.task("clean:firefox", function () {
-    return del("./build/firefox")
+    return del("./build/firefox/**")
 });
 
 gulp.task("copy:firefox", function () {
