@@ -18,7 +18,7 @@ let persistentModel, userId,
 
 const dialogColl = new (Backbone.Collection.extend({
     comparator: function (dialog) {
-        var messages = dialog.get('messages');
+        const messages = dialog.get('messages');
         return - messages[messages.length - 1].date;
     }
 }))(),
@@ -55,9 +55,11 @@ Mediator.sub('auth:success', function (data) {
     initialize();
 
     userId = data.userId;
-    getDialogs().then(getUnreadMessages).then(fetchProfiles).then(function () {
-        readyPromise.fulfill();
-    }).done();
+    getDialogs()
+      .then(getUnreadMessages)
+      .then(fetchProfiles)
+      .then( () => readyPromise.fulfill() )
+      .done();
 });
 
 Mediator.sub('chat:data:get', function () {
@@ -71,7 +73,7 @@ Mediator.sub('chat:data:get', function () {
  * Should be called on every incoming message
  */
 function updateLatestMessageId() {
-    var messages;
+    let messages;
 
     if (dialogColl.size()) {
         messages = dialogColl.first().get('messages');
@@ -84,17 +86,23 @@ function updateLatestMessageId() {
 }
 
 function fetchProfiles() {
-    const requiredUids = dialogColl.reduce(function (uids, dialog) {
-            uids = uids.concat(dialog.get('messages').map(function (message) {
-                return message.uid;
-            }), dialog.get('uid'));
-            if (dialog.get('chat_active')) {
-                uids = uids.concat(dialog.get('chat_active'));
-            }
-            return uids;
-        }, [userId]),
+  function dialog2Uuids(uids, dialog) {
+    uids = uids
+      .concat(dialog.get('messages').map( message => message.uid ), dialog.get('uid'))
+      .filter( uid => uid > 0);
+
+    if (dialog.get('chat_active')) {
+      return uids.concat(dialog.get('chat_active'));
+    }
+    else return uids;
+  }
+
+    const requiredUids = dialogColl.reduce(dialog2Uuids, [userId]),
         cachesUids = profilesColl.pluck('uid'),
-        missingUids = _.chain(requiredUids).uniq().difference(cachesUids).value();
+        missingUids = _.chain(requiredUids)
+          .uniq()
+          .difference(cachesUids)
+          .value();
 
     profilesColl.remove(_(cachesUids).difference(requiredUids));
 
@@ -127,8 +135,8 @@ function initialize() {
         });
 
         persistentModel.on('change:latestMessageId', function () {
-            var messages = dialogColl.first().get('messages'),
-                message = messages[messages.length - 1];
+            const messages = dialogColl.first().get('messages'),
+              message = messages[messages.length - 1];
 
             // don't notify on first run,
             // when there is no previous value
@@ -141,9 +149,9 @@ function initialize() {
                 Browser.isVKSiteActive().then(function (active) {
                     if (!active) {
                         fetchProfiles().then(function () {
-                            var profile = profilesColl.get(message.uid).toJSON(),
-                                gender = profile.sex === 1 ? 'female':'male',
-                                chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
+                            const profile = profilesColl.get(message.uid).toJSON(),
+                              gender = profile.sex === 1 ? 'female' : 'male',
+                              chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
 
                             Notifications.notify({
                                 type: Notifications.CHAT,
@@ -173,9 +181,9 @@ function initialize() {
  * @param {Backbone.Model} dialog subject for mutation
  */
 function removeReadMessages(dialog) {
-    var messages = dialog.get('messages'),
-        result = [messages.pop()],
-        originalOut = result[0].out;
+    const messages = dialog.get('messages'),
+      result = [messages.pop()],
+      originalOut = result[0].out;
 
     messages.reverse().some(function (message) {
         if (message.out === originalOut && message.read_state === 0) {
@@ -193,22 +201,25 @@ function getDialogs() {
         code: 'return API.messages.getDialogs({preview_length: 0});'
     }).then(function (response) {
         if (response && response[0]) {
-            dialogColl.reset(response.slice(1).map(function (item) {
-                return {
+            dialogColl.reset(
+              response
+                .slice(1)
+                .filter( item => item.uid > 0)
+                .map( item => { return {
                     id: item.chat_id ? 'chat_id_' + item.chat_id:'uid_' + item.uid,
                     chat_id: item.chat_id,
                     chat_active: item.chat_active,
                     uid: item.uid,
                     messages: [item]
-                };
-            }));
+                };})
+            );
         }
     });
 }
 
 function onUpdates(updates) {
     updates.forEach(function (update) {
-        var messageId, mask, readState;
+        let messageId, mask, readState;
 
         // @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
         switch (update[0]) {
@@ -246,14 +257,16 @@ function onUpdates(updates) {
  */
 function getUnreadMessages() {
     // FIXME wtf models.filter?
-    var unreadDialogs = dialogColl.models.filter(function (dialog) {
-            return !dialog.get('chat_id') && !dialog.get('messages')[0].read_state;
-        }),
-        unreadHistoryRequests = unreadDialogs.map(function (dialog) {
-            return Request.api({code: 'return API.messages.getHistory({user_id: '
-            + dialog.get('uid') + ', count: '
-            + MAX_HISTORY_COUNT + '});'});
+    const unreadDialogs = dialogColl.models.filter(function (dialog) {
+        return !dialog.get('chat_id') && !dialog.get('messages')[0].read_state;
+      }),
+      unreadHistoryRequests = unreadDialogs.map(function (dialog) {
+        return Request.api({
+          code: 'return API.messages.getHistory({user_id: '
+          + dialog.get('uid') + ', count: '
+          + MAX_HISTORY_COUNT + '});'
         });
+      });
 
     return Vow.all(unreadHistoryRequests).spread(function () {
         _(arguments).each(function (historyMessages, index) {
@@ -272,23 +285,24 @@ function getUnreadMessages() {
  * @param {Object} update Update object from long poll
  */
 function addNewMessage(update) {
-    var messageId = update[1],
-        flags = update[2],
-        attachment = update[7],
-        dialog, messageDeferred,
-        dialogCompanionUid = update[3];
+    const messageId      = update[1],
+      flags              = update[2],
+      attachment         = update[7],
+      dialogCompanionUid = update[3];
+
+    let dialog, messageDeferred;
 
     // For messages from chat attachment contains "from" property
     if (_(attachment).isEmpty()) {
         // mimic response from server
         messageDeferred = Vow.promise([1, {
-            body: update[6],
-            title: update[5],
-            date: update[4],
-            uid: dialogCompanionUid,
+            body      : update[6],
+            title     : update[5],
+            date      : update[4],
+            uid       : dialogCompanionUid,
             read_state: +!(flags & 1),
-            mid: messageId,
-            out: +!!(flags & 2)
+            mid       : messageId,
+            out       : +!!(flags & 2)
         }]);
     } else {
         messageDeferred = Request.api({
@@ -297,8 +311,8 @@ function addNewMessage(update) {
     }
 
     messageDeferred.then(function (response) {
-        var message = response[1],
-            dialogId = message.chat_id ? 'chat_id_' + message.chat_id:'uid_' + dialogCompanionUid;
+        const message = response[1],
+          dialogId = message.chat_id ? 'chat_id_' + message.chat_id : 'uid_' + dialogCompanionUid;
 
         dialog = dialogColl.get(dialogId);
         if (dialog) {
@@ -306,11 +320,11 @@ function addNewMessage(update) {
             removeReadMessages(dialog);
         } else {
             dialogColl.add({
-                id: dialogId,
-                uid: message.uid,
-                chat_id: message.chat_id,
+                id         : dialogId,
+                uid        : message.uid,
+                chat_id    : message.chat_id,
                 chat_active: message.chat_active,
-                messages: [message]
+                messages   : [message]
             }, {silent: true});
         }
 

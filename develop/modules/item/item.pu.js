@@ -35,19 +35,21 @@ require('angular').module('app')
                  * @param {Function} onSend
                  * @param {String} placeholder
                  */
-                this.showReply = function (onSend, placeholder) {
+                this.showReply = (onSend, placeholder) => {
                     $scope.reply.onSend = onSend;
                     $scope.reply.placeholder = placeholder;
                     $scope.reply.visible = !$scope.reply.visible;
 
                     if ($scope.reply.visible) {
-                        $timeout(function () {
-                            $element[0].getElementsByTagName('textarea')[0].focus();
-                        });
+                        $timeout(() =>
+                            $element[0]
+                                .getElementsByTagName('textarea')[0]
+                                .focus()
+                        );
                     }
                 };
 
-                $scope.onReply = function (message) {
+                $scope.onReply = message => {
                     if (message.length > 1) {
                         $scope.reply.visible = false;
                         $scope.reply.onSend(message);

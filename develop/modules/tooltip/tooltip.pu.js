@@ -1,11 +1,4 @@
 "use strict";
-require('zepto');
-require('zepto/selector');
-require('zepto/data');
-require('zepto/detect');
-require('zepto/event');
-window.jQuery = window.$;
-jQuery.offset = jQuery.fn.offset;
 
 require('bootstrapTooltip');
 

@@ -25,15 +25,14 @@ require('angular').module('app')
                     const topVisibleElement = document.elementFromPoint(0, listTop),
                         topVisibleElement$ = $(topVisibleElement);
 
-                    if (!topVisibleElement$.hasClass('item')) {
-                        return;
-                    }
+                    if (!topVisibleElement$.hasClass('item')) return;
+
                     const itemBottom = topVisibleElement$.offset().top + topVisibleElement$.height();
 
                     if (topVisibleElement !== lastTopVisibleElement) {
-                        if (lastTopVisibleElement) {
-                            lastTopVisibleElement.className = 'item';
-                        }
+
+                        if (lastTopVisibleElement) lastTopVisibleElement.className = 'item';
+
                         lastTopVisibleElement = topVisibleElement;
                     }
                     if (itemBottom - listTop > HEADER_HEIGHT)
@@ -53,9 +52,7 @@ require('angular').module('app')
             transclude : true,
             restrict   : 'E',
             controller : function ($element) {
-                this.getElement = function () {
-                    return $element;
-                };
+                this.getElement = () => $element;
             }
         };
     })
@@ -103,15 +100,15 @@ require('angular').module('app')
             compile   : function (element, attr, linker) {
                 return function ($scope, $element, $attr, itemListController) {
 
-                    var expression = $attr.itemListRepeat,
+                    const expression = $attr.itemListRepeat,
                         match = expression.match(/^\s*([\$\w]+)\s+in\s+(.*?)\s*(\s+track\s+by\s+(.+)\s*)?$/),
-                        collectionIdentifier, valueIdentifier,
-                        trackByExp, trackByIdFn, trackByExpGetter,
-                        timeoutPromise,
                         hashFnLocals = {},
-                        lastBlockMap = {},
                         // wrap with zepto, to make available some additional methods
                         scrollElement$ = $('.item-list__content', itemListController.getElement()[0]);
+
+                    let collectionIdentifier, valueIdentifier, trackByExp,
+                        trackByIdFn, trackByExpGetter, timeoutPromise,
+                        lastBlockMap = {};
 
                     if (!match) {
                         throw new Error("Expected itemListRepeat in form of '_item_ in _collection_[ track by _id_]' but got '" +
@@ -124,27 +121,23 @@ require('angular').module('app')
 
                     if (trackByExp) {
                         trackByExpGetter = $parse(trackByExp);
-                        trackByIdFn = function (value) {
+                        trackByIdFn = value => {
                             hashFnLocals[valueIdentifier] = value;
                             return trackByExpGetter($scope, hashFnLocals);
                         };
-                    } else {
-                        trackByIdFn = function (value) {
-                            return hashKey(value);
-                        };
-                    }
+                    } else trackByIdFn = value => hashKey(value);
 
 
                     function updateScrolledBlocks(collection, cursor, nextBlockOrder, nextBlockMap, offset) {
-                        var index = offset || 0,
-                            cursor$ = $(cursor[0]),
+                        const cursor$ = $(cursor[0]),
                             length = Math.min(index + BLOCKS_PER_LOOP, collection.length),
-                            block, childScope, nextCursor,
                             scrollAreaBottom = scrollElement$.offset().top
                                 + scrollElement$.height() + scrollElement$.scrollTop();
 
+                        let block, childScope, nextCursor, index = offset || 0;
+
                         if (cursor[0].getBoundingClientRect && cursor$.offset().top > scrollAreaBottom + RENDER_PADDING) {
-                            scrollElement$.one('scroll.itemListRepeat', $scope.$apply.bind($scope, function () {
+                            scrollElement$.one('scroll.itemListRepeat', $scope.$apply.bind($scope, () => {
                                 updateScrolledBlocks(
                                     collection,
                                     cursor,
@@ -215,11 +208,12 @@ require('angular').module('app')
 
                     //watch props
                     $scope.$watchCollection(collectionIdentifier, function (collection) {
-                        var index, length, key, trackById,
-                            // Same as lastBlockMap but it has the current state. It will become the
+                        let index, length, key, trackById,
+                            block;
+                        // last object information {scope, element, id};
+                        // Same as lastBlockMap but it has the current state. It will become the
                             // lastBlockMap on the next iteration.
-                            nextBlockMap = {}, nextBlockOrder = [],
-                            block;       // last object information {scope, element, id}
+                            const nextBlockMap = {}, nextBlockOrder = [];
 
                         if (!collection) {
                             collection = [];

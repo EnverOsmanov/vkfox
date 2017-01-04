@@ -7,10 +7,10 @@ require('angular').module('app')
     .factory('News', function () {
         return {
             unsubscribe: function (type, ownerId, itemId) {
-                var options = {
-                    type: type,
-                    owner_id: ownerId,
-                    item_id: itemId
+                const options = {
+                  type: type,
+                  owner_id: ownerId,
+                  item_id: itemId
                 };
                 Mediator.pub('feedbacks:unsubscribe', options);
             },
@@ -21,7 +21,7 @@ require('angular').module('app')
              * @returns {String}
              */
             getSourceLink: function (item) {
-                var parent = item.parent;
+                const parent = item.parent;
 
                 switch (item.type) {
                     case 'wall':
@@ -35,7 +35,7 @@ require('angular').module('app')
                         return ['post', 'topic', 'photo', 'video']
                             .filter(Object.hasOwnProperty, parent)
                             .map(function (type) {
-                                var parentLink = this.getSourceLink({type: type, parent: parent[type]});
+                                const parentLink = this.getSourceLink({type: type, parent: parent[type]});
                                 // replace query params
                                 return parentLink.replace(/\?[^?]+$/, '?reply=' + item.parent.id);
                             }, this)[0];
@@ -52,7 +52,7 @@ require('angular').module('app')
                 }
             },
             getCommentsData: function (item) {
-                var parent = item.parent;
+                const { parent } = item;
 
                 switch (item.type) {
                     case 'wall':
@@ -125,14 +125,15 @@ require('angular').module('app')
     })
     .controller('MyNewsController', function ($scope) {
         Mediator.pub('feedbacks:data:get');
-        Mediator.sub('feedbacks:data', function (data) {
-            $scope.$apply(function () {
+
+        Mediator.sub('feedbacks:data', (data) => {
+            $scope.$apply( () => {
                 $scope.data = data;
+                window.enverData = data;
             });
         });
-        $scope.$on('$destroy', function () {
-            Mediator.unsub('feedbacks:data');
-        });
+
+        $scope.$on('$destroy', () => Mediator.unsub('feedbacks:data'));
     })
     .controller('MyNewsActionsCtrl', function ($scope, News) {
         $scope.unsubscribe = News.unsubscribe;

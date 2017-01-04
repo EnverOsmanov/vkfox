@@ -1,4 +1,5 @@
 "use strict";
+window.$ = window.jQuery = require('jquery');
 const angular = require('angular');
 angular.module('app', []);
 

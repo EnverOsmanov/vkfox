@@ -10,7 +10,7 @@ const PersistentModel = require('../persistent-model/persistent-model.js'),
 
 // Show install dialog only once, don't bother
 if (storageModel.get('dialog')) {
-    storageModel.set('dialog', false);
-    Browser.createTab("/pages/install.html");
+    //storageModel.set('dialog', false);
+   // Browser.createTab("/pages/install.html");
     Browser.createTab("/pages/popup.html");
 }
