@@ -56,7 +56,8 @@ publishData = _.debounce(function publishData() {
  * Should be called on every change
  */
 function updateLatestFeedbackId() {
-    var firstModel = itemsColl.first(), identifier;
+    let identifier;
+    const firstModel = itemsColl.first();
 
     if (firstModel) {
         identifier = firstModel.get('id');
@@ -98,12 +99,11 @@ function generateItemID(type, parent) {
  * @return {Object}
  */
 function createItemModel(type, parent) {
-    var itemModel = new Backbone.Model({
-        id: generateItemID(type, parent),
-        parent: parent,
-        type: type
+  return new Backbone.Model({
+      id: generateItemID(type, parent),
+      parent: parent,
+      type: type
     });
-    return itemModel;
 }
 
 /**
@@ -113,8 +113,10 @@ function createItemModel(type, parent) {
  * @param {Object} item
  */
 function addRawCommentsItem(item) {
-    var parentType = item.type,
-    parent = item, itemModel, itemID, lastCommentDate;
+    const parent = item,
+      parentType = item.type;
+
+    let itemModel, lastCommentDate;
 
     // do nothing if no comments
     if (!(item.comments.list && item.comments.list.length)) {
@@ -122,7 +124,9 @@ function addRawCommentsItem(item) {
     }
 
     parent.owner_id = Number(parent.from_id || parent.source_id);
-    itemID  = generateItemID(parentType, parent);
+
+    const itemID  = generateItemID(parentType, parent);
+
     if (!(itemModel = itemsColl.get(itemID))) {
         itemModel = createItemModel(parentType, parent);
         itemsColl.add(itemModel, {sort: false});
@@ -154,12 +158,12 @@ function addRawCommentsItem(item) {
  * @returns {Boolean}
  */
 function isSupportedType(type) {
-    var forbidden = [
-        'mention_comments',
-        'reply_comment',
-        'reply_comment_photo',
-        'reply_comment_video',
-        'reply_topic'
+    const forbidden = [
+      'mention_comments',
+      'reply_comment',
+      'reply_comment_photo',
+      'reply_comment_video',
+      'reply_topic'
     ];
 
     return forbidden.indexOf(type) === -1;
@@ -173,9 +177,9 @@ function isSupportedType(type) {
  * @param {Object} item
  */
 function addRawNotificationsItem(item) {
-    var parentType, parent = item.parent,
-    feedbackType, feedback = item.feedback,
-    itemID, itemModel, typeTokens;
+    let parentType, parent = item.parent,
+      feedbackType, feedback = item.feedback,
+      itemID, itemModel, typeTokens;
 
     if (!isSupportedType(item.type)) {
         return;
@@ -203,7 +207,7 @@ function addRawNotificationsItem(item) {
             itemModel.set('feedbacks', new FeedbacksCollection());
         }
         itemModel.get('feedbacks').add([].concat(feedback).map(function (feedback) {
-            var id;
+            let id;
 
             feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
 
@@ -228,7 +232,7 @@ function addRawNotificationsItem(item) {
     } else {
         //follows and friend_accepter types are array
         [].concat(feedback).forEach(function (feedback) {
-            var itemModel;
+            let itemModel;
             feedback.owner_id = Number(feedback.owner_id || feedback.from_id);
             itemModel = createItemModel(parentType, feedback);
             itemModel.set('date', item.date);
@@ -245,8 +249,8 @@ function fetchFeedbacks() {
         JSON.stringify(autoUpdateCommentsParams), ')',
         '};'
     ].join('')}).done(function (response) {
-        var notifications = response.notifications,
-            comments = response.comments;
+        const notifications = response.notifications,
+          comments = response.comments;
 
         autoUpdateNotificationsParams.start_time = response.time;
         autoUpdateCommentsParams.start_time = response.time;
@@ -271,9 +275,9 @@ fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
 
 
 function tryNotification() {
-    var itemModel = itemsColl.first(),
-    lastFeedback, notificationItem, type, parentType,
-    profile, ownerId, gender, title, message, name;
+    const itemModel = itemsColl.first();
+
+    let lastFeedback, notificationItem, type, parentType, profile, ownerId, gender, title, message, name;
 
     // don't notify on first run,
     // when there is no previous value
@@ -352,8 +356,7 @@ function tryNotification() {
         if (title) {
             // Don't notify, when active tab is vk.com
             Browser.isVKSiteActive().then(function (active) {
-                var feedbacksActive = Browser.isPopupOpened()
-                    && Router.isFeedbackTabActive();
+                const feedbacksActive = Browser.isPopupOpened() && Router.isFeedbackTabActive();
 
                 if (!active) {
                     Notifications.notify({
@@ -418,9 +421,9 @@ readyPromise.then(function () {
 }).done();
 
 Mediator.sub('likes:changed', function (params) {
-    var changedItemUniqueId = [
-        params.type, params.item_id,
-        'user', params.owner_id
+    const changedItemUniqueId = [
+      params.type, params.item_id,
+      'user', params.owner_id
     ].join(':'), changedModel = itemsColl.get(changedItemUniqueId);
 
     if (changedModel) {
@@ -430,9 +433,9 @@ Mediator.sub('likes:changed', function (params) {
 });
 
 Mediator.sub('feedbacks:unsubscribe', function (params) {
-    var unsubscribeFromId = [
-        params.type, params.item_id,
-        'user', params.owner_id
+    const unsubscribeFromId = [
+      params.type, params.item_id,
+      'user', params.owner_id
     ].join(':');
 
     Request.api({

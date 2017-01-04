@@ -21,12 +21,12 @@ require('angular').module('app')
          *
          * @returns {String}
          */
-        return function (seconds) {
+        return (seconds) => {
             if (seconds) return moment.unix(seconds).format('HH:mm');
         };
     })
     .filter('timeago', function () {
-        return function (timestamp) {
+        return (timestamp) => {
             if (timestamp) return moment(timestamp).fromNow();
         };
     })
@@ -54,7 +54,7 @@ require('angular').module('app')
          * @returns {Object}
          */
         return function (input, property, value) {
-            var obj;
+            let obj;
             if (input) {
                 obj = {};
                 obj[property] = value;
@@ -62,7 +62,7 @@ require('angular').module('app')
             }
         };
     })
-    .filter('name', function () {
+    .filter('name', () => {
         /**
          * Returns names from profile's data
          *
@@ -70,33 +70,40 @@ require('angular').module('app')
          *
          * @returns {String} String
          */
-        return function (input) {
+        return (input) => {
+            function owner2Name(owner) {
+                //group profile
+                //user profile
+                if (owner.name) return owner.name;
+                else return owner.first_name + ' ' + owner.last_name;
+            }
+
             if (input) {
-                return [].concat(input).map(function (owner) {
-                    //group profile
-                    //user profile
-                    if (owner.name) return owner.name;
-                    else return owner.first_name + ' ' + owner.last_name;
-                }).join(', ');
+                return [].concat(input).map(owner2Name).join(', ');
             }
         };
     })
-    .filter('addVKBase', function () {
-        return function (path) {
+    .filter('addVKBase', () => {
+        return (path) => {
             if (path.indexOf(Config.VK_BASE) === -1) {
                 if (path.charAt(0) === '/') path = path.substr(1);
-                path = Config.VK_BASE + path;
+
+                return Config.VK_BASE + path;
             }
-            return path;
+            else return path;
         };
     })
-    .filter('slice', function () {
-        return function (arr, start, end) {
-            if (arr) return arr.slice(start, end);
+    .filter('slice', () => {
+        return  (arr, start, end) => {
+            if (arr) {
+                if (arr["slice"] === undefined) {
+                    window.enverArr = arr;
+                    console.log("Bang!")
+                }
+                return arr.slice(start, end);
+            }
         };
     })
-    .filter('isArray', function () {
-        return function (input) {
-            return angular.isArray(input);
-        };
+    .filter('isArray', () => {
+        return input => angular.isArray(input);
     });

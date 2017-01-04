@@ -26,11 +26,7 @@ module.exports = {
     alias: {
       angularKeypress  : 'angular-ui-utils/modules/keypress/keypress.js',
       bootstrapTooltip : 'bootstrap/js/tooltip.js',
-      bootstrapDropdown: 'bootstrap/js/dropdown.js',
-      'zepto/event'    : 'zepto/src/event',
-      'zepto/detect'   : 'zepto/src/detect',
-      'zepto/data'     : 'zepto/src/data',
-      'zepto/selector' : 'zepto/src/selector'
+      bootstrapDropdown: 'bootstrap/js/dropdown.js'
     }
   }
 
