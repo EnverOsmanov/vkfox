@@ -18,11 +18,12 @@ require('../chat/chat.pu.js');
 require('angular').module('app')
     .config(function ($routeProvider, $locationProvider, $compileProvider, $provide) {
         // Make Addon SDK compatible
+
+      $locationProvider.hashPrefix('');
         $provide.decorator('$sniffer', function ($delegate) {
             $delegate.history = false;
             return $delegate;
         });
-        $locationProvider.html5Mode(false);
 
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|chrome-extension|moz-extension|resource):/);
 
@@ -54,7 +55,7 @@ require('angular').module('app')
             READY = 2; //ready status from auth module
 
         $rootScope.$on('$routeChangeSuccess', function (scope, current) {
-            var path;
+            let path;
             Mediator.pub('router:change', current.params);
             if (current.params.tab) {
                 Tracker.trackPage();

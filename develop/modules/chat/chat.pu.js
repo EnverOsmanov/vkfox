@@ -22,11 +22,11 @@ require('angular').module('app')
             * @returns {Array}
             */
             foldMessagesByAuthor: function (messages, profilesColl) {
-                var selfProfile = profilesColl.findWhere({isSelf: true}).toJSON();
+                const selfProfile = profilesColl.findWhere({isSelf: true}).toJSON();
 
                 return messages.reduce(function (memo, message) {
-                    var lastItem = memo[memo.length - 1],
-                    author = message.out ? selfProfile : profilesColl.get(message.uid).toJSON();
+                    const lastItem = memo[memo.length - 1],
+                      author = message.out ? selfProfile : profilesColl.get(message.uid).toJSON();
 
                     if (lastItem && (author.uid === lastItem.author.uid)) {
                         lastItem.items.push(message);
@@ -51,9 +51,9 @@ require('angular').module('app')
                     + _.pluck(messages, 'mid') + ']});'});
             },
             getHistory: function (dialog, offset) {
-                var params = {
-                    offset: offset,
-                    count : 5
+                const params = {
+                  offset: offset,
+                  count: 5
                 };
                 if (dialog.chat_active) params.chat_id = dialog.chat_id;
                 else params.user_id = dialog.uid;
@@ -109,16 +109,15 @@ require('angular').module('app')
         } else {
             $scope.owners = profilesColl.get(dialog.uid).toJSON();
 
-            $scope.$watch(() => {
-                    online = $scope.profilesColl
-                        .get(dialog.uid)
-                        .get('online');
+            $scope.$watch( () => {
+                online = $scope.profilesColl
+                  .get(dialog.uid)
+                  .get('online');
 
-                    online;
-                }
-                , function () {
-                    $scope.owners.online = online;
-                });
+                online;
+              }
+              , () => $scope.owners.online = online
+            );
         }
 
         $scope.$watch(function ($scope) {
@@ -138,7 +137,7 @@ require('angular').module('app')
     .controller('ChatActionsCtrl', function ($scope, $Chat) {
         $scope.showHistory = function (dialog) {
             $Chat.getHistory(dialog, dialog.messages.length).then(function (data) {
-                var messages = data.messages;
+                const messages = data.messages;
                 $scope.profilesColl.add(data.profiles);
                 $scope.$apply(function () {
                     // TODO else hide button - show history

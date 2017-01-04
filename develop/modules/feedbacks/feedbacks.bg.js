@@ -22,24 +22,18 @@ let persistentModel, userId,
 profilesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         parse: function (profile) {
-            if (profile.gid) {
-                profile.id = -profile.gid;
-            } else {
-                profile.id = profile.uid;
-            }
+            if (profile.gid) profile.id = -profile.gid;
+            else profile.id = profile.uid;
+
             return profile;
         }
     })
 }))(),
 FeedbacksCollection = Backbone.Collection.extend({
-    comparator: function (model) {
-        return model.get('date');
-    }
+    comparator: model => model.get('date')
 }),
 itemsColl = new (Backbone.Collection.extend({
-    comparator: function (model) {
-        return -model.get('date');
-    }
+    comparator: model => -model.get('date')
 }))(),
 /**
  * Notifies about current state of module.
@@ -48,7 +42,7 @@ itemsColl = new (Backbone.Collection.extend({
 publishData = _.debounce(function publishData() {
     Mediator.pub('feedbacks:data', {
         profiles: profilesColl.toJSON(),
-        items: itemsColl.toJSON()
+        items   : itemsColl.toJSON()
     });
 }, 0);
 /**
@@ -56,7 +50,8 @@ publishData = _.debounce(function publishData() {
  * Should be called on every change
  */
 function updateLatestFeedbackId() {
-    var firstModel = itemsColl.first(), identifier;
+    let identifier;
+    const firstModel = itemsColl.first();
 
     if (firstModel) {
         identifier = firstModel.get('id');
@@ -84,26 +79,23 @@ function generateItemID(type, parent) {
             parent.id || parent.pid || parent.cid || parent.post_id,
             'user', parent.owner_id
         ].join(':');
-    } else {
-        return _.uniqueId(type);
     }
+    else return _.uniqueId(type);
 }
 /**
  * Creates feedbacks item
  *
  * @param {String} type Type of parent: post, wall, topic, photo etc
  * @param {Object} parent
- * @param {Boolean} canHaveFeedbacks
  *
  * @return {Object}
  */
 function createItemModel(type, parent) {
-    var itemModel = new Backbone.Model({
-        id: generateItemID(type, parent),
-        parent: parent,
-        type: type
+  return new Backbone.Model({
+      id    : generateItemID(type, parent),
+      parent: parent,
+      type  : type
     });
-    return itemModel;
 }
 
 /**
@@ -113,8 +105,10 @@ function createItemModel(type, parent) {
  * @param {Object} item
  */
 function addRawCommentsItem(item) {
-    var parentType = item.type,
-    parent = item, itemModel, itemID, lastCommentDate;
+    const parent = item,
+      parentType = item.type;
+
+    let itemModel, lastCommentDate;
 
     // do nothing if no comments
     if (!(item.comments.list && item.comments.list.length)) {
@@ -122,23 +116,35 @@ function addRawCommentsItem(item) {
     }
 
     parent.owner_id = Number(parent.from_id || parent.source_id);
-    itemID  = generateItemID(parentType, parent);
+
+    const itemID  = generateItemID(parentType, parent);
+
     if (!(itemModel = itemsColl.get(itemID))) {
         itemModel = createItemModel(parentType, parent);
         itemsColl.add(itemModel, {sort: false});
     }
+
     if (!itemModel.has('feedbacks')) {
         itemModel.set('feedbacks', new FeedbacksCollection());
     }
-    itemModel.get('feedbacks').add(item.comments.list.slice(- MAX_COMMENTS_COUNT).map(function (feedback) {
+
+    function comment2Feedback(feedback) {
         feedback.owner_id = Number(feedback.from_id);
         return {
-            id: generateItemID('comment', feedback),
-            type: 'comment',
+            id      : generateItemID('comment', feedback),
+            type    : 'comment',
             feedback: feedback,
-            date: feedback.date
+            date    : feedback.date
         };
-    }));
+    }
+
+    itemModel
+        .get('feedbacks')
+        .add(
+            item.comments
+                .list.slice(- MAX_COMMENTS_COUNT)
+                .map(comment2Feedback)
+        );
 
     lastCommentDate = itemModel.get('feedbacks').last().get('date');
     if (!itemModel.has('date') || itemModel.get('date') < lastCommentDate) {
@@ -154,12 +160,12 @@ function addRawCommentsItem(item) {
  * @returns {Boolean}
  */
 function isSupportedType(type) {
-    var forbidden = [
-        'mention_comments',
-        'reply_comment',
-        'reply_comment_photo',
-        'reply_comment_video',
-        'reply_topic'
+    const forbidden = [
+      'mention_comments',
+      'reply_comment',
+      'reply_comment_photo',
+      'reply_comment_video',
+      'reply_topic'
     ];
 
     return forbidden.indexOf(type) === -1;
@@ -173,19 +179,18 @@ function isSupportedType(type) {
  * @param {Object} item
  */
 function addRawNotificationsItem(item) {
-    var parentType, parent = item.parent,
-    feedbackType, feedback = item.feedback,
-    itemID, itemModel, typeTokens;
+    const { feedback } = item;
 
-    if (!isSupportedType(item.type)) {
-        return;
-    }
+    let parentType, feedbackType,
+        { parent } = item;
+
+    if (!isSupportedType(item.type)) return;
 
     if (item.type === 'friend_accepted') {
         parentType = item.type;
         parent = item.feedback;
     } else if (item.type.indexOf('_') !== -1) {
-        typeTokens = item.type.split('_');
+        const typeTokens = item.type.split('_');
         feedbackType = typeTokens[0];
         parentType = typeTokens[1];
     } else {
@@ -193,17 +198,22 @@ function addRawNotificationsItem(item) {
     }
 
     if (feedbackType) {
+        let itemModel;
+
         parent.owner_id = Number(parent.from_id || parent.owner_id);
-        itemID  = generateItemID(parentType, parent);
+        const itemID = generateItemID(parentType, parent);
+
         if (!(itemModel = itemsColl.get(itemID))) {
             itemModel = createItemModel(parentType, parent);
             itemsColl.add(itemModel, {sort: false});
         }
+
         if (!itemModel.has('feedbacks')) {
             itemModel.set('feedbacks', new FeedbacksCollection());
         }
+
         itemModel.get('feedbacks').add([].concat(feedback).map(function (feedback) {
-            var id;
+            let id;
 
             feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
 
@@ -214,46 +224,51 @@ function addRawNotificationsItem(item) {
             } else {
                 id  = generateItemID(feedbackType, feedback);
             }
+
             return {
-                id: id,
-                type: feedbackType,
+                id      : id,
+                type    : feedbackType,
                 feedback: feedback,
-                date: item.date
+                date    : item.date
             };
         }));
+
         if (!itemModel.has('date') || itemModel.get('date') < item.date) {
             itemModel.set('date', item.date);
         }
+
         itemModel.trigger('change');
     } else {
         //follows and friend_accepter types are array
         [].concat(feedback).forEach(function (feedback) {
-            var itemModel;
+
             feedback.owner_id = Number(feedback.owner_id || feedback.from_id);
-            itemModel = createItemModel(parentType, feedback);
+
+            const itemModel = createItemModel(parentType, feedback);
+
             itemModel.set('date', item.date);
             itemsColl.add(itemModel, {sort: false});
         });
     }
 }
 function fetchFeedbacks() {
-    Request.api({code: [
+    const requestCode = [
         'return {time: API.utils.getServerTime(),',
-        ' notifications: API.notifications.get(',
-        JSON.stringify(autoUpdateNotificationsParams), '),',
-        ' comments: API.newsfeed.getComments(',
-        JSON.stringify(autoUpdateCommentsParams), ')',
+        ' notifications: API.notifications.get(', JSON.stringify(autoUpdateNotificationsParams), '),',
+        ' comments: API.newsfeed.getComments(', JSON.stringify(autoUpdateCommentsParams), ')',
         '};'
-    ].join('')}).done(function (response) {
-        var notifications = response.notifications,
-            comments = response.comments;
+    ].join('');
 
-        autoUpdateNotificationsParams.start_time = response.time;
-        autoUpdateCommentsParams.start_time = response.time;
+    function feedbackHandler(response) {
+        const { notifications, comments } = response;
+
+        autoUpdateNotificationsParams.start_time = autoUpdateCommentsParams.start_time = response.time;
 
         // first item in notifications contains quantity
-        if ((notifications.items && notifications.items.length > 1)
-            || (comments.items && comments.items.length)) {
+        if (
+            (notifications.items && notifications.items.length > 1) ||
+            (comments.items && comments.items.length)
+        ) {
             profilesColl.add(comments.profiles, {parse: true});
             profilesColl.add(comments.groups, {parse: true});
             profilesColl.add(notifications.profiles, {parse: true});
@@ -265,21 +280,21 @@ function fetchFeedbacks() {
         }
         readyPromise.fulfill();
         fetchFeedbacksDebounced();
-    });
+    }
+
+    Request.api({code: requestCode}).done(feedbackHandler);
 }
 fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
 
 
 function tryNotification() {
-    var itemModel = itemsColl.first(),
-    lastFeedback, notificationItem, type, parentType,
-    profile, ownerId, gender, title, message, name;
+    const itemModel = itemsColl.first();
+
+    let lastFeedback, notificationItem, type, parentType, profile, ownerId, gender, title, message, name;
 
     // don't notify on first run,
     // when there is no previous value
-    if (!this._previousAttributes.hasOwnProperty('latestFeedbackId')) {
-        return;
-    }
+    if (!this._previousAttributes.hasOwnProperty('latestFeedbackId')) return;
 
     if (itemModel.has('feedbacks')) { // notification has parent, e.g. comment to post, like to video etc
         lastFeedback = itemModel.get('feedbacks').last();
@@ -352,8 +367,7 @@ function tryNotification() {
         if (title) {
             // Don't notify, when active tab is vk.com
             Browser.isVKSiteActive().then(function (active) {
-                var feedbacksActive = Browser.isPopupOpened()
-                    && Router.isFeedbackTabActive();
+                const feedbacksActive = Browser.isPopupOpened() && Router.isFeedbackTabActive();
 
                 if (!active) {
                     Notifications.notify({
@@ -418,9 +432,9 @@ readyPromise.then(function () {
 }).done();
 
 Mediator.sub('likes:changed', function (params) {
-    var changedItemUniqueId = [
-        params.type, params.item_id,
-        'user', params.owner_id
+    const changedItemUniqueId = [
+      params.type, params.item_id,
+      'user', params.owner_id
     ].join(':'), changedModel = itemsColl.get(changedItemUniqueId);
 
     if (changedModel) {
@@ -430,9 +444,9 @@ Mediator.sub('likes:changed', function (params) {
 });
 
 Mediator.sub('feedbacks:unsubscribe', function (params) {
-    var unsubscribeFromId = [
-        params.type, params.item_id,
-        'user', params.owner_id
+    const unsubscribeFromId = [
+      params.type, params.item_id,
+      'user', params.owner_id
     ].join(':');
 
     Request.api({

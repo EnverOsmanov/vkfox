@@ -7,13 +7,13 @@
     "url": "https://github.com/metrofun/vkfox"
   },
   "scripts": {
-    "start": "web-ext run -s build/firefox/ --firefox=/Applications/FirefoxDeveloperEdition.app --firefox-profile=dev-edition-default"
+    "start": "web-ext run -s build/firefox/ --firefox=firefox-developer --firefox-profile=dev-edition-default"
   },
   "dependencies": {
-    "angular": "1.5.9",
-    "angular-animate": "1.5.9",
-    "angular-route": "1.5.9",
-    "angular-sanitize": "1.5.9",
+    "angular": "^1.6.0",
+    "angular-animate": "^1.6.0",
+    "angular-route": "^1.6.0",
+    "angular-sanitize": "^1.6.0",
     "angular-ui-utils": "0.1.1",
     "backbone": "^1.3.3",
     "bootstrap": "^3.3.7",
@@ -23,7 +23,7 @@
     "moment": "^2.15.1",
     "underscore": "^1.8.3",
     "vow": "^0.3.13",
-    "zepto": "1.1.7"
+    "jquery": "^3.1.1"
   },
   "devDependencies": {
     "del": "^2.2.2",
