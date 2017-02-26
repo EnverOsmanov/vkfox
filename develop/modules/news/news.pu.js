@@ -61,8 +61,8 @@ require('angular').module('app')
                         if (parent.comments.can_post) {
                             return {
                                 ownerId: parent.source_id || parent.owner_id,
-                                id: parent.id || parent.post_id,
-                                type: 'post'
+                                id     : parent.id || parent.post_id,
+                                type   : 'post'
                             };
                         }
                         break;
@@ -87,20 +87,20 @@ require('angular').module('app')
                     case 'topic':
                         return {
                             ownerId: parent.owner_id,
-                            id: parent.id || parent.tid || parent.post_id,
-                            type: 'topic'
+                            id     : parent.id || parent.tid || parent.post_id,
+                            type   : 'topic'
                         };
                     case 'photo':
                         return {
                             ownerId: parent.owner_id,
-                            id: parent.id || parent.pid,
-                            type: 'photo'
+                            id     : parent.id || parent.pid,
+                            type   : 'photo'
                         };
                     case 'video':
                         return {
                             ownerId: parent.owner_id,
-                            id: parent.id || parent.vid,
-                            type: 'video'
+                            id     : parent.id || parent.vid,
+                            type   : 'video'
                         };
                 }
             }
@@ -141,10 +141,12 @@ require('angular').module('app')
         $scope.open = News.getSourceLink($scope.item);
     })
     .controller('FriendNewsController', function ($scope) {
+        window.friendEnver = 33;
         Mediator.pub('newsfeed:friends:get');
         Mediator.sub('newsfeed:friends', function (data) {
             $scope.$apply(function () {
                 $scope.data = data;
+                window.enverMyData = data;
             });
         });
         $scope.$on('$destroy', function () {

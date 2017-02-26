@@ -15,11 +15,10 @@ const MAX_ITEMS_COUNT  = 50,
     Notifications      = require('../notifications/notifications.bg.js'),
     ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js');
 
-let persistentModel, userId,
-    autoUpdateNotificationsParams, autoUpdateCommentsParams,
-    fetchFeedbacksDebounced,
-    readyPromise = Vow.promise(),
-profilesColl = new (ProfilesCollection.extend({
+let persistentModel, userId, autoUpdateNotificationsParams, autoUpdateCommentsParams, fetchFeedbacksDebounced,
+    readyPromise = Vow.promise();
+
+let profilesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         parse: function (profile) {
             if (profile.gid) profile.id = -profile.gid;
@@ -28,23 +27,87 @@ profilesColl = new (ProfilesCollection.extend({
             return profile;
         }
     })
-}))(),
-FeedbacksCollection = Backbone.Collection.extend({
+}))();
+
+let FeedbacksCollection = Backbone.Collection.extend({
     comparator: model => model.get('date')
-}),
-itemsColl = new (Backbone.Collection.extend({
+});
+
+let itemsColl = new (Backbone.Collection.extend({
     comparator: model => -model.get('date')
-}))(),
+}))();
+
 /**
  * Notifies about current state of module.
  * Has a tiny debounce to make only one publish per event loop
  */
-publishData = _.debounce(function publishData() {
-    Mediator.pub('feedbacks:data', {
+let publishData = _.debounce(function publishData() {
+    function itemsCollJS() {
+        return itemsColl.map(item => {
+            const itemJS = item.toJSON();
+            itemJS["feedbacks"] = item.get("feedbacks").toJSON();
+            return itemJS
+        })
+    }
+
+    Mediator.pub("feedbacks:data", {
         profiles: profilesColl.toJSON(),
-        items   : itemsColl.toJSON()
+        items   : itemsCollJS()
     });
 }, 0);
+
+
+fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
+
+
+// entry point
+Mediator.sub('auth:success', data => {
+    userId = data.userId;
+    initialize();
+});
+
+readyPromise.then( () => {
+    itemsColl.on('add change remove', _.debounce( () => {
+        itemsColl.sort();
+        updateLatestFeedbackId();
+        publishData();
+    }));
+    profilesColl.on('change', publishData);
+}).done();
+
+Mediator.sub('likes:changed', params => {
+    const changedItemUniqueId = [ params.type, params.item_id, 'user', params.owner_id ].join(':'),
+        changedModel          = itemsColl.get(changedItemUniqueId);
+
+    if (changedModel) {
+        changedModel.get('parent').likes = params.likes;
+        itemsColl.trigger('change');
+    }
+});
+
+Mediator.sub('feedbacks:unsubscribe', params => {
+    const unsubscribeFromId = [
+        params.type, params.item_id,
+        'user', params.owner_id
+    ].join(':');
+
+    Request.api({
+        code: 'return API.newsfeed.unsubscribe('
+        + JSON.stringify(params)
+        + ');'
+    }).then( (response) => {
+        if (response) {
+            itemsColl.remove(itemsColl.get(unsubscribeFromId));
+        }
+    });
+});
+
+Mediator.sub('feedbacks:data:get', () => readyPromise.then(publishData).done() );
+
+//
+//
+// Functions:
+
 /**
  * Updates "latestFeedbackId" with current last item(parentId+feedbackId)
  * Should be called on every change
@@ -62,6 +125,7 @@ function updateLatestFeedbackId() {
         persistentModel.set('latestFeedbackId', identifier);
     }
 }
+
 /**
  * Generates uniq id for feedback item
  *
@@ -82,6 +146,7 @@ function generateItemID(type, parent) {
     }
     else return _.uniqueId(type);
 }
+
 /**
  * Creates feedbacks item
  *
@@ -110,24 +175,6 @@ function addRawCommentsItem(item) {
 
     let itemModel, lastCommentDate;
 
-    // do nothing if no comments
-    if (!(item.comments.list && item.comments.list.length)) {
-        return;
-    }
-
-    parent.owner_id = Number(parent.from_id || parent.source_id);
-
-    const itemID  = generateItemID(parentType, parent);
-
-    if (!(itemModel = itemsColl.get(itemID))) {
-        itemModel = createItemModel(parentType, parent);
-        itemsColl.add(itemModel, {sort: false});
-    }
-
-    if (!itemModel.has('feedbacks')) {
-        itemModel.set('feedbacks', new FeedbacksCollection());
-    }
-
     function comment2Feedback(feedback) {
         feedback.owner_id = Number(feedback.from_id);
         return {
@@ -138,21 +185,39 @@ function addRawCommentsItem(item) {
         };
     }
 
-    itemModel
-        .get('feedbacks')
-        .add(
-            item.comments
-                .list.slice(- MAX_COMMENTS_COUNT)
-                .map(comment2Feedback)
-        );
+    // do nothing if no comments
+    if (item.comments.list && item.comments.list.length) {
 
-    lastCommentDate = itemModel.get('feedbacks').last().get('date');
-    if (!itemModel.has('date') || itemModel.get('date') < lastCommentDate) {
-        itemModel.set('date', lastCommentDate);
+        parent.owner_id = Number(parent.from_id || parent.source_id);
+
+        const itemID = generateItemID(parentType, parent);
+
+        if (!(itemModel = itemsColl.get(itemID))) {
+            itemModel = createItemModel(parentType, parent);
+            itemsColl.add(itemModel, {sort: false});
+        }
+
+        if (!itemModel.has('feedbacks')) {
+            itemModel.set('feedbacks', new FeedbacksCollection());
+        }
+
+        itemModel
+            .get('feedbacks')
+            .add(
+                item.comments
+                    .list.slice(-MAX_COMMENTS_COUNT)
+                    .map(comment2Feedback)
+            );
+
+        lastCommentDate = itemModel.get('feedbacks').last().get('date');
+        if (!itemModel.has('date') || itemModel.get('date') < lastCommentDate) {
+            itemModel.set('date', lastCommentDate);
+        }
+
+        itemModel.trigger('change');
     }
-
-    itemModel.trigger('change');
 }
+
 /**
  * Returns true for supported feedback types
  * @param {String} type
@@ -170,6 +235,7 @@ function isSupportedType(type) {
 
     return forbidden.indexOf(type) === -1;
 }
+
 /**
  * Handles news' item.
  * If parent is already in collection,
@@ -251,6 +317,7 @@ function addRawNotificationsItem(item) {
         });
     }
 }
+
 function fetchFeedbacks() {
     const requestCode = [
         'return {time: API.utils.getServerTime(),',
@@ -284,7 +351,6 @@ function fetchFeedbacks() {
 
     Request.api({code: requestCode}).done(feedbackHandler);
 }
-fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
 
 
 function tryNotification() {
@@ -383,21 +449,21 @@ function tryNotification() {
         }
     }
 }
+
 /**
  * Initialize all variables
  */
 function initialize() {
     if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) {
-            readyPromise.reject();
-        }
+        if (readyPromise) readyPromise.reject();
+
         readyPromise = Vow.promise();
     }
-    readyPromise.then(function () {
+    readyPromise.then( () => {
         persistentModel = new PersistentModel({}, {
             name: ['feedbacks', 'background', userId].join(':')
         });
-        persistentModel.on('change:latestFeedbackId', tryNotification);
+        persistentModel.on("change:latestFeedbackId", tryNotification);
 
         updateLatestFeedbackId();
         publishData();
@@ -416,50 +482,3 @@ function initialize() {
     fetchFeedbacks();
 }
 
-// entry point
-Mediator.sub('auth:success', function (data) {
-    userId = data.userId;
-    initialize();
-});
-
-readyPromise.then(function () {
-    itemsColl.on('add change remove', _.debounce(function () {
-        itemsColl.sort();
-        updateLatestFeedbackId();
-        publishData();
-    }));
-    profilesColl.on('change', publishData);
-}).done();
-
-Mediator.sub('likes:changed', function (params) {
-    const changedItemUniqueId = [
-      params.type, params.item_id,
-      'user', params.owner_id
-    ].join(':'), changedModel = itemsColl.get(changedItemUniqueId);
-
-    if (changedModel) {
-        changedModel.get('parent').likes = params.likes;
-        itemsColl.trigger('change');
-    }
-});
-
-Mediator.sub('feedbacks:unsubscribe', function (params) {
-    const unsubscribeFromId = [
-      params.type, params.item_id,
-      'user', params.owner_id
-    ].join(':');
-
-    Request.api({
-        code: 'return API.newsfeed.unsubscribe('
-            + JSON.stringify(params)
-        + ');'
-    }).then(function (response) {
-        if (response) {
-            itemsColl.remove(itemsColl.get(unsubscribeFromId));
-        }
-    });
-});
-
-Mediator.sub('feedbacks:data:get', function () {
-    readyPromise.then(publishData).done();
-});

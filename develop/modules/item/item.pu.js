@@ -114,14 +114,16 @@ require('angular').module('app')
         const IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
 
         return function (photo) {
-            var sizes = [
+            const sizes = [
                 'src_xxxbig',
                 'src_xxbig',
                 'src_xbig',
                 'src_big',
                 'src_small',
                 'src'
-            ], i;
+            ];
+
+            let i;
             if (photo) {
                 for (i in sizes) {
                     if (sizes[i] in photo) {
@@ -150,7 +152,7 @@ require('angular').module('app')
      * Sends message on click and marks everything as read
      */
     .directive('itemSendMessage', function () {
-        var title =  I18N.get('Private message');
+        const title = I18N.get('Private message');
 
         return {
             transclude: true,
@@ -283,7 +285,8 @@ require('angular').module('app')
                 tAttrs.$set('title', title);
 
                 function onReply(scope, message) {
-                    var params = {}, method;
+                    const params = {};
+                    let method;
 
                     switch (scope.type) {
                     case 'wall':

@@ -15,12 +15,12 @@ module.exports = {
   watch  : true,
   devtool: true ? "cheap-inline-module-source-map" : null,
   plugins: [
-    new webpack.NoErrorsPlugin(),
-    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
-    new webpack.optimize.CommonsChunkPlugin({
+    new webpack.NoEmitOnErrorsPlugin(),/*
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),*/
+/*    new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
-      minChunks: Infinity
-    })
+      minChunks: 2
+    })*/
   ],
   resolve: {
     alias: {
