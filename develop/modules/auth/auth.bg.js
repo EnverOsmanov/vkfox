@@ -39,7 +39,6 @@ function onSuccess(data) {
 // In google chrome we use content-script for this purpose (declared in manifest.js)
 
 Mediator.sub("auth:iframe", function (url) {
-    console.log("DOOOONE");
     try {
         model.set("userId",  parseInt(url.match(/user_id=(\w+)(?:&|$)/i)[1], 10));
         model.set("accessToken",  url.match(/access_token=(\w+)(?:&|$)/i)[1]);
@@ -61,7 +60,6 @@ Mediator.sub("auth:oauth", function () {
 });
 
 Mediator.sub("auth:login", function (force) {
-    console.log("sub AUTH:LOGIN " + force);
     Auth.login(force);
 });
 
@@ -79,19 +77,16 @@ module.exports = Auth = {
     }, RETRY_INTERVAL),
     login           : function (force) {
         if (force || state === CREATED) {
-            console.log(1);
             Browser.setIconOffline();
             state = IN_PROGRESS;
 
             if (authPromise.isFulfilled()) {
-                console.log(2);
                 authPromise = Vow.promise();
             }
 
             tryLogin();
             Auth.retry();
 
-            console.log(3);
             Mediator.unsub("auth:success", onSuccess);
             Mediator.once("auth:success", onSuccess);
         }

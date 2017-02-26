@@ -6,11 +6,9 @@ const _    = require('../shim/underscore.js')._,
 
 require('../rectify/rectify.pu.js');
 require('angular').module('app')
-    .filter('i18n', function () {
+    .filter('i18n',  () => {
         return function (input) {
-            if (input) {
-                return I18N.get.apply(I18N, arguments);
-            }
+            if (input) return I18N.get.apply(I18N, arguments);
         };
     })
     .filter('duration', function () {
@@ -95,15 +93,7 @@ require('angular').module('app')
     })
     .filter('slice', () => {
         return  (arr, start, end) => {
-            if (arr) {
-                if (arr["slice"] === undefined) {
-                    window.enverArr = arr;
-                    console.log("Bang!")
-                }
-                return arr.slice(start, end);
-            }
+            if (arr) return arr.slice(start, end);
         };
     })
-    .filter('isArray', () => {
-        return input => angular.isArray(input);
-    });
+    .filter('isArray', () => input => angular.isArray(input));

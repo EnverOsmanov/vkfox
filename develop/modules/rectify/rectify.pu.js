@@ -4,7 +4,7 @@ const I18N  = require('../i18n/i18n.pu.js'),
     jEmoji  = require('emoji');
 
 require('angular').module('app')
-    .filter('rectify', function ($sanitize) {
+    .filter('rectify', function ($sanitize, $sce) {
         const MAX_TEXT_LENGTH = 300,
             TRUNCATE_LENGTH = 200,
 
@@ -35,11 +35,9 @@ require('angular').module('app')
         function linkifySanitizeEmoji(text, hasEmoji) {
             const sanitized = $sanitize(hasEmoji ? jEmoji.unifiedToHTML(text):text),
                 linkifiedText = linkifyHtml(sanitized, {
-                    callback: function (text, href) {
-                        //"text" and "href" are safe tokens of the already sanitized string,
-                        //which is passed to the "linkify" function above
-                        return href ? '<a anchor="' + href + '">' + text + '</a>' : text;
-                    }
+                    //"text" and "href" are safe tokens of the already sanitized string,
+                    //which is passed to the "linkify" function above
+                    callback: (text, href) => href ? '<a anchor="' + href + '">' + text + '</a>' : text
                 });
 
             //replace wiki layout,
@@ -56,9 +54,7 @@ require('angular').module('app')
                 "'": '&#39;'
             };
 
-            return String(string).replace(/["']/g, function (s) {
-                return entityMap[s];
-            });
+            return String(string).replace(/["']/g, s => entityMap[s] );
         }
         /**
          * Truncates long text, and add pseudo-link "show-more"
@@ -72,26 +68,26 @@ require('angular').module('app')
          * @returns {String} html-string
          */
         return function (text, hasEmoji) {
-            let spaceIndex;
 
             if (text) {
                 text = String(text);
                 if (text.length > MAX_TEXT_LENGTH) {
-                    spaceIndex = text.indexOf(' ', TRUNCATE_LENGTH);
+                    const spaceIndex = text.indexOf(' ', TRUNCATE_LENGTH);
 
                     if (spaceIndex !== -1) {
-                        return linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji) + [
+                        const resultText = linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji);
+                        const resultButton = [
                             ' <span class="show-more btn rectify__button" data-text="',
                             escapeQuotes(text.slice(spaceIndex)), '" ',
                             hasEmoji ? 'data-emoji="yes" ':'',
                             'type="button">', showMoreButtonLabel, '</span>'
                         ].join('');
-                    } else {
-                        return linkifySanitizeEmoji(text, hasEmoji);
+
+                        return $sce.trustAsHtml(resultText + resultButton);
                     }
-                } else {
-                    return linkifySanitizeEmoji(text, hasEmoji);
+                    else return linkifySanitizeEmoji(text, hasEmoji);
                 }
+                else return linkifySanitizeEmoji(text, hasEmoji);
             }
         };
     });

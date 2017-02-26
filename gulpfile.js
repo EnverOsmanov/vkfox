@@ -25,8 +25,7 @@ const plumber = require("gulp-plumber");
 const notify = require("gulp-notify");
 const eslint = require("gulp-eslint");
 
-var webpackConfig = require("./webpack.config.js");
-var gutil = require("gulp-util");
+const webpackConfig = require("./webpack.config.js");
 
 gulp.task("env:firefox", function () {
     env({

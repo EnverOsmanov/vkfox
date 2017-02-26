@@ -21,7 +21,7 @@ module.exports = {
      */
     connect: function (namespace, Module) {
         Mediator.sub('proxy-methods:' + namespace, function (params) {
-            var result = Module[params.method].apply(Module, params['arguments']);
+            const result = Module[params.method].apply(Module, params['arguments']);
 
             if (Vow.isPromise(result)) {
                 result.always(function (promise) {
@@ -48,7 +48,7 @@ module.exports = {
     forward: function (namespace, methodNames) {
         return methodNames.reduce(function (exports, methodName) {
             exports[methodName] = function () {
-                var ajaxPromise = new Vow.promise(),
+                const ajaxPromise = new Vow.promise(),
                     id = _.uniqueId();
 
                 Mediator.pub('proxy-methods:' + namespace, {

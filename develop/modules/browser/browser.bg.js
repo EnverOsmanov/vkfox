@@ -86,7 +86,6 @@ module.exports = Browser = {
      */
     closeTabs: (function () {
         return function (urlFragment) {
-            console.log("I WANT CLOSE: " + urlFragment)
             chrome.tabs.query({}, function (tabs) {
                 tabs.forEach(function (tab) {
                     if (~tab.url.indexOf(urlFragment)) {
