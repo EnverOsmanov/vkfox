@@ -235,9 +235,7 @@ function fetchNewsfeed() {
 * Initialize all variables
 */
 
-window.enverNewsfeedInit = 32;
 function initialize() {
-    window.enverNewsfeed = 32;
 
     if (!readyPromise || readyPromise.isFulfilled()) {
         if (readyPromise) readyPromise.reject();

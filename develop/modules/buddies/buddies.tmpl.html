@@ -16,7 +16,7 @@
         <div
                 role="menu"
                 class="dropdown buddies__filter pull-right">
-            <i class="fa fa-bars dropdown-toggle"></i>
+            <i class="fa fa-bars dropdown-toggle" data-toggle="dropdown"></i>
             <ul class="dropdown-menu">
                 <li>
                     <checkbox class="buddies__checkbox" ng-model="filters.male">
@@ -46,7 +46,7 @@
 
 
     <item-list>
-        <item ng-repeat="buddie in data"
+        <item ng-repeat="buddie in data | buddiesFilter:filters:searchClue track by buddie.uid"
             class="buddies__item {{buddie.isFave && 'buddies__item_is-fave'}}"
             description="{{buddie.description}}"
             owners="buddie">
