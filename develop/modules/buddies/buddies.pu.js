@@ -19,11 +19,9 @@ angular.module('app')
         }, {name: 'buddiesFilters'});
 
         $scope.filters = filtersModel.toJSON();
-        $scope.$watch('filters', function (filters) {
-            filtersModel.set(filters);
-        }, true);
+        $scope.$watch('filters', filters => filtersModel.set(filters), true);
 
-        $(".dropdown-toggle").dropdown();
+        $('.dropdown-menu').click( event => event.stopPropagation() );
 
         $scope.toggleFriendWatching = function (profile) {
             profile.isWatched = !profile.isWatched;
@@ -33,22 +31,20 @@ angular.module('app')
         Mediator.pub('buddies:data:get');
         Mediator.sub('buddies:data', function (data) {
             $scope.$apply(function () {
-                data.filter(function (buddie) {
-                    return buddie.hasOwnProperty("lastActivityTime");
-                }).forEach(function (buddie) {
-                    var gender = buddie.sex === 1 ? 'female':'male';
+                data.filter( buddie => buddie.hasOwnProperty("lastActivityTime") )
+                    .forEach(function (buddie) {
+                        const gender = buddie.sex === 1 ? 'female' : 'male';
 
-                    buddie.description = I18N.get(
-                        buddie.online ? 'is_online_short':'went_offline_short',
-                        {GENDER: gender}
-                    ) + ' ' + $filter('timeago')(buddie.lastActivityTime);
-                });
+                        buddie.description = I18N.get(
+                            buddie.online ? 'is_online_short':'went_offline_short',
+                                {GENDER: gender}
+                                ) + ' ' + $filter('timeago')(buddie.lastActivityTime);
+                    });
                 $scope.data = data;
             });
         }.bind(this));
-        $scope.$on('$destroy', function () {
-            Mediator.unsub('buddies:data');
-        });
+
+        $scope.$on('$destroy', () => Mediator.unsub('buddies:data') );
     })
     .filter('buddiesFilter', function ($filter) {
         /**
@@ -87,9 +83,8 @@ angular.module('app')
                             && ((filters.male || profile.sex !== 2) && (filters.female || profile.sex !== 1))
                             && (filters.faves || !profile.isFave)
                         );
-                    } else {
-                        return matchProfile(profile, searchClue);
                     }
+                    else return matchProfile(profile, searchClue);
                 });
             }
         };

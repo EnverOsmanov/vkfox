@@ -129,7 +129,6 @@ require('angular').module('app')
         Mediator.sub('feedbacks:data', (data) => {
             $scope.$apply( () => {
                 $scope.data = data;
-                window.enverData = data;
             });
         });
 
@@ -141,12 +140,10 @@ require('angular').module('app')
         $scope.open = News.getSourceLink($scope.item);
     })
     .controller('FriendNewsController', function ($scope) {
-        window.friendEnver = 33;
         Mediator.pub('newsfeed:friends:get');
         Mediator.sub('newsfeed:friends', function (data) {
             $scope.$apply(function () {
                 $scope.data = data;
-                window.enverMyData = data;
             });
         });
         $scope.$on('$destroy', function () {

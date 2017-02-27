@@ -6,7 +6,7 @@ $(document).tooltip({
     selector : '[title]',
     delay    : { show: 1000, hide: false},
     placement: function (tooltip) {
-        setTimeout(function () {
+        setTimeout( () => {
             const $tooltip = $(tooltip),
                 $inner     = $('.tooltip-inner', tooltip);
 
@@ -17,7 +17,7 @@ $(document).tooltip({
             if (offset < 0) {
                 $inner.css({
                     'position': 'relative',
-                    'left':  offset + 'px'
+                    'left'    :  offset + 'px'
                 });
             }
         });

@@ -21,8 +21,7 @@ const buddiesColl = new (ProfilesCollection.extend({
             this.on('change:isWatched', function (model) {
                 if (model.get('isWatched')) {
                     Request.api({
-                        code: 'return API.messages.getLastActivity({user_id: '
-                            + model.get('uid') + '})'
+                        code: 'return API.messages.getLastActivity({user_id: ' + model.get('uid') + '})'
                     }).then(function (response) {
                         model
                             .set('online', response.online)
@@ -30,31 +29,23 @@ const buddiesColl = new (ProfilesCollection.extend({
 
                         buddiesColl.sort();
                     }).done();
-                } else {
-                    model.unset('lastActivityTime');
                 }
+                else model.unset('lastActivityTime');
                 buddiesColl.sort();
             });
         }
     }),
     comparator: function (buddie) {
         if (buddie.get('isWatched')) {
-            if (buddie.get('lastActivityTime')) {
-                return -buddie.get('lastActivityTime');
-            } else {
-                return -2;
-            }
-        } else if (buddie.get('isFave')) {
-            return -1;
-        } else {
-            return buddie.get('originalIndex') || 0;
+            if (buddie.get('lastActivityTime')) return -buddie.get('lastActivityTime');
+            else return -2;
         }
+        else if (buddie.get('isFave')) return -1;
+        else return buddie.get('originalIndex') || 0;
     }
 }))();
 
-var publishData = _.debounce(function () {
-    Mediator.pub('buddies:data', buddiesColl.toJSON());
-}, 0);
+const publishData = _.debounce( () => Mediator.pub('buddies:data', buddiesColl.toJSON()), 0);
 
 initialize();
 
@@ -75,13 +66,12 @@ Mediator.sub('auth:success', function () {
     }).done();
 });
 
-Mediator.sub('buddies:data:get', function () {
-    readyPromise.then(publishData).done();
-});
+Mediator.sub('buddies:data:get', () => readyPromise.then(publishData).done() );
 
 readyPromise.then(function () {
     buddiesColl.on('change', function (model) {
-        var profile = model.toJSON(), gender;
+        let gender;
+        const profile = model.toJSON();
 
         if (profile.isWatched && model.changed.hasOwnProperty('online')) {
             model.set({
@@ -111,7 +101,8 @@ Mediator.sub('buddies:watch:toggle', function (uid) {
     if (watchedBuddiesSet.contains(uid)) {
         watchedBuddiesSet.remove(uid);
         buddiesColl.get(uid).unset('isWatched');
-    } else {
+    }
+    else {
         watchedBuddiesSet.add(uid);
         buddiesColl.get(uid).set('isWatched', true);
     }
@@ -122,9 +113,8 @@ Mediator.sub('buddies:watch:toggle', function (uid) {
  */
 function initialize() {
     if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) {
-            readyPromise.reject();
-        }
+        if (readyPromise) readyPromise.reject();
+
         readyPromise = Vow.promise();
     }
     readyPromise.then(publishData).done();
@@ -137,12 +127,12 @@ function initialize() {
  * Runs once.
  */
 function saveOriginalBuddiesOrder() {
-    var length = buddiesColl.length;
+    const length = buddiesColl.length;
 
     if (length && !buddiesColl.at(length - 1).get('originalIndex')) {
-        buddiesColl.forEach(function (buddie, i) {
-            buddie.set('originalIndex', i);
-        });
+        buddiesColl.forEach(
+            (buddie, i) => buddie.set('originalIndex', i)
+        );
     }
 }
 
@@ -156,14 +146,13 @@ function saveOriginalBuddiesOrder() {
 function getFavouriteUsers() {
     return Request
         .api({ code: 'return API.fave.getUsers()' })
-        .then(function (response) {
+        .then( response => {
             const uids = _.pluck(response.slice(1), 'uid');
+
             return Users
                 .getProfilesById(uids)
-                .then(function (profiles) {
-                    profiles.forEach(function (profile) {
-                        profile.isFave = true;
-                    });
+                .then( profiles => {
+                    profiles.forEach( profile => profile.isFave = true );
                     return profiles;
                 });
         });
@@ -174,10 +163,10 @@ function getFavouriteUsers() {
  * about watched persons
  */
 function setWatchedBuddies() {
-    watchedBuddiesSet.toArray().forEach(function (uid) {
-        var model = buddiesColl.get(uid);
-        if (model) {
-            model.set('isWatched', true);
-        }
-    });
+    watchedBuddiesSet
+        .toArray()
+        .forEach( uid => {
+            const model = buddiesColl.get(uid);
+            if (model) model.set('isWatched', true)
+        });
 }
