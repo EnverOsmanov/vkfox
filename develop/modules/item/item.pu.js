@@ -143,7 +143,7 @@ require('angular').module('app')
     })
     .directive('itemAction', function () {
         return {
-            template: '<i class="item__action"></i>',
+            template: '<i class="item__action" data-toggle="tooltip"></i>',
             replace : true,
             restrict: 'E'
         };

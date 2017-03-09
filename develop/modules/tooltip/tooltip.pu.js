@@ -2,7 +2,8 @@
 
 require('bootstrapTooltip');
 
-$(document).tooltip({
+$(document).ready( () =>
+    $("[data-toggle='tooltip']").tooltip({
     selector : '[title]',
     delay    : { show: 1000, hide: false},
     placement: function (tooltip) {
@@ -23,7 +24,8 @@ $(document).tooltip({
         });
         return 'bottom';
     }
-});
+})
+);
 
 // Hide popup on click
 $(document).on('show', '[title]', function (e) {
