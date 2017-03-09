@@ -15,6 +15,7 @@ const gulp                 = require("gulp"),
     runSequence            = require("run-sequence"),
     debug                  = require("gulp-debug"),
     notifier               = require("node-notifier"),
+    messageFormat          = require("gulp-messageformat"),
     FIREFOX_DIR            = "/usr/lib/firefox/firefox.sh",
     production             = (process.env.NODE_ENV === "production");
 
@@ -26,6 +27,7 @@ const notify = require("gulp-notify");
 const eslint = require("gulp-eslint");
 
 const webpackConfig = require("./webpack.config.js");
+const Locales = ["en", "ru", "uk"];
 
 gulp.task("env:firefox", function () {
     env({
@@ -162,11 +164,23 @@ gulp.task("lint", () => {
         .pipe(eslint.failAfterError());
 });
 
+function i18n(locale) {
+  gulp.task(`i18n-${locale}`, () => {
+    return gulp.src(`./develop/modules/i18n/${locale}/*.json`)
+      .pipe(messageFormat({locale: locale}))
+      .pipe(gulp.dest(`./develop/modules/i18n`))
+  });
+}
+
+Locales.forEach(i18n);
+
 gulp.task("default", function (cb) {
         runSequence(
             ["env:firefox", "env:development", "clean:firefox"],
             "less",
-            ["preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"],
+            ["preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"].concat(
+              Locales.map( locale => `i18n-${locale}`)
+            ),
             "inline_angular_templates",
             "webpack",
             ["copy:firefox", "fonts"],

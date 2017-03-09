@@ -1,5 +1,6 @@
+"use strict";
 // Set correct language for "moment" library
-var I18N = require('./i18n.js');
+const I18N = require('./i18n.js');
 
 require('moment').locale(I18N.getLang());
 

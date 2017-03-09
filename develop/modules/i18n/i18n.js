@@ -1,13 +1,11 @@
 "use strict";
-const DEFAULT_LANGUAGE = 'en',
-    _                  = require('../shim/underscore.js')._,
+const DEFAULT_LANGUAGE = 'en';
 
-    i18n = _.extend(
-        {},
-        require('./ru.js'),
-        require('./uk.js'),
-        require('./en.js')
-    );
+const i18n = {
+  ru: require('./ru.js'),
+  uk: require('./uk.js'),
+  en: require('./en.js')
+};
 
 let language, locale, messages;
 
@@ -17,13 +15,13 @@ locale = navigator.language;
 
 try {
     language = locale.split('-')[0].toLowerCase();
-} catch (e) {}
+} catch (e) { console.warn("Locale is unsplitable")}
 
 if (!i18n[language]) {
     language = DEFAULT_LANGUAGE;
 }
 
-messages = i18n[language];
+messages = i18n[language].i18n[language];
 
 module.exports = {
     /**
@@ -31,9 +29,7 @@ module.exports = {
      *
      * @returns {String}
      */
-    getLang: function () {
-        return language;
-    },
+    getLang: () => language,
     /**
      * Returns localized text
      *

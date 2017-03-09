@@ -7,7 +7,8 @@
     "url": "https://github.com/metrofun/vkfox"
   },
   "scripts": {
-    "start": "web-ext run -s build/firefox/ --firefox=firefox-developer --firefox-profile=dev-edition-default"
+    "start": "web-ext run -s build/firefox/ --firefox=firefox-developer --firefox-profile=dev-edition-default",
+    "startMac": "web-ext run -s build/firefox/ --firefox=/Applications/FirefoxDeveloperEdition.app --firefox-profile=dev-edition-default"
   },
   "dependencies": {
     "angular": "^1.6.0",
@@ -36,6 +37,7 @@
     "gulp-eslint": "^3.0.1",
     "gulp-inline-angular-templates": "^0.1.5",
     "gulp-less": "^3.1.0",
+    "gulp-messageformat": "0.0.10",
     "gulp-notify": "^3.0.0",
     "gulp-plumber": "^1.1.0",
     "gulp-preprocess": "^2.0.0",
