@@ -163,7 +163,7 @@ module.exports = Notifications = {
         };
     })(),
     playSound: (function () {
-        const play = function (source, volume) {
+        function play(source, volume) {
 
             if (!audioInProgress) {
                 audioInProgress = true;
@@ -173,7 +173,7 @@ module.exports = Notifications = {
                 audio.play();
                 audio.addEventListener('ended', () => { audioInProgress = false });
             }
-        };
+        }
 
         return () => {
             const sound = notificationsSettings.get('sound');
