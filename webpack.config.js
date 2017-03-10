@@ -6,7 +6,8 @@ module.exports = {
     "app.install"     : './modules/app/app.install.js',
     "app.pu"          : './modules/app/app.pu.js',
     "app.bg"          : './modules/app/app.bg.js',
-    "vendor"          : ["angular", "angular-animate", "angular-route", "angular-sanitize", "vow", "underscore", "backbone", "linkifyjs", "moment"]
+    "ng"              : ["angular", "angular-animate", "angular-route", "angular-sanitize"],
+    "vendor"          : ["vow", "underscore", "backbone", "linkifyjs", "moment"]
   },
   output: {
     path: __dirname + '/build/firefox/pages',
@@ -15,12 +16,12 @@ module.exports = {
   watch  : true,
   devtool: true ? "cheap-inline-module-source-map" : null,
   plugins: [
-    new webpack.NoEmitOnErrorsPlugin(),/*
-    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),*/
-/*    new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: ["vendor", "ng"],
       minChunks: 2
-    })*/
+    })
   ],
   resolve: {
     alias: {

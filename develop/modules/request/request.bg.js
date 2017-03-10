@@ -11,7 +11,6 @@ const API_QUERIES_PER_REQUEST = 15,
     _                         = require('../shim/underscore.js')._,
     ProxyMethods              = require('../proxy-methods/proxy-methods.js'),
     Auth                      = require('../auth/auth.bg.js'),
-    Env                       = require('../env/env.js'),
     apiQueriesQueue           = [];
 
 let Request;

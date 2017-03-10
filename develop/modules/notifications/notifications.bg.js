@@ -2,7 +2,6 @@
 const _             = require('../shim/underscore.js')._,
     Backbone        = require('backbone'),
     Browser         = require('../browser/browser.bg.js'),
-    Env             = require('../env/env.js'),
     Mediator        = require('../mediator/mediator.js'),
     Settings        = require('../notifications/settings.js'),
     PersistentModel = require('../persistent-model/persistent-model.js');
@@ -11,7 +10,8 @@ let audioInProgress = false, Notifications,
 
 NotificationsSettings = PersistentModel.extend({
     initialize: function () {
-        var sound, self = this;
+        const self = this;
+        let sound;
 
         PersistentModel.prototype.initialize.apply(this, arguments);
 
@@ -48,7 +48,8 @@ notificationsSettings = new NotificationsSettings({
 
 notificationQueue = new (Backbone.Collection.extend({
     initialize: function () {
-        var self = this;
+        const self = this;
+
         this
             .on('add remove reset', function () {
                 Notifications.setBadge(self.filter(function (model) {
@@ -95,22 +96,22 @@ notificationQueue = new (Backbone.Collection.extend({
 }))();
 
 function getBase64FromImage(url, onSuccess, onError) {
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
 
     xhr.responseType = "arraybuffer";
     xhr.open("GET", url);
 
     xhr.onload = function () {
-        var base64, binary, bytes, mediaType;
 
-        bytes = new Uint8Array(xhr.response);
+        const bytes = new Uint8Array(xhr.response);
         //NOTE String.fromCharCode.apply(String, ...
         //may cause "Maximum call stack size exceeded"
-        binary = [].map.call(bytes, function (byte) {
+        const binary = [].map.call(bytes, function (byte) {
             return String.fromCharCode(byte);
         }).join('');
-        mediaType = xhr.getResponseHeader('content-type');
-        base64 = [
+
+        const mediaType = xhr.getResponseHeader('content-type');
+        const base64 = [
             'data:',
             mediaType ? mediaType + ';':'',
             'base64,',
@@ -123,9 +124,9 @@ function getBase64FromImage(url, onSuccess, onError) {
 }
 
 module.exports = Notifications = {
-    CHAT: 'chat',
+    CHAT   : 'chat',
     BUDDIES: 'buddies',
-    NEWS: 'news',
+    NEWS   : 'news',
     /**
      * Create notifications. Usually you will need only this method
      *
@@ -137,14 +138,10 @@ module.exports = Notifications = {
      * @param {Boolean} [data.noBadge]
      * @param {Boolean} [data.noPopup]
      */
-    notify: function (data) {
-        notificationQueue.push(data);
-    },
+    notify: (data) => { notificationQueue.push(data) },
     createPopup: (function () {
-        var createPopup, notifications;
-
-        createPopup = function (options, message) {
-            getBase64FromImage(options.image, function (base64) {
+        function createPopup(options, message) {
+            getBase64FromImage(options.image, (base64) => {
                 try {
                     chrome.notifications.create(_.uniqueId(), {
                         type: 'basic',
@@ -152,14 +149,13 @@ module.exports = Notifications = {
                         message: message,
                         iconUrl: base64
                     }, function () {});
-                } catch (e) {
-                    console.log(e);
                 }
+                catch (e) { console.log(e) }
             });
-        };
+        }
 
-        return function (options) {
-            var popups = notificationsSettings.get('popups');
+        return (options) => {
+            const popups = notificationsSettings.get('popups');
 
             if (notificationsSettings.get('enabled') && popups.enabled) {
                 createPopup(options, (popups.showText && options.message) || '');
@@ -167,23 +163,20 @@ module.exports = Notifications = {
         };
     })(),
     playSound: (function () {
-        var soundWorker, play, data;
-
-        play = function (source, volume) {
-            var audio;
+        const play = function (source, volume) {
 
             if (!audioInProgress) {
                 audioInProgress = true;
-                audio = new Audio(source);
+
+                const audio = new Audio(source);
                 audio.volume = volume;
                 audio.play();
-                audio.addEventListener('ended', function () {
-                    audioInProgress = false;
-                });
+                audio.addEventListener('ended', () => { audioInProgress = false });
             }
         };
-        return function () {
-            var sound = notificationsSettings.get('sound');
+
+        return () => {
+            const sound = notificationsSettings.get('sound');
 
             if (notificationsSettings.get('enabled') && sound.enabled) {
                 play(Settings[sound.signal], sound.volume);
