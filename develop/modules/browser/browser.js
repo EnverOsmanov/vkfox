@@ -11,7 +11,5 @@ else {
     module.exports = ProxyMethods.forward('browser/browser.bg.js', [
         'createTab', 'getVkfoxVersion'
     ]);
-    module.exports.closePopup = function() {
-        window.close();
-    };
+    module.exports.closePopup = () => window.close();
 }

@@ -7,27 +7,18 @@ const gulp                 = require("gulp"),
     preprocess             = require("gulp-preprocess"),
     rename                 = require("gulp-rename"),
     inlineAngularTemplates = require("gulp-inline-angular-templates"),
-    uglify                 = require("gulp-uglify"),
-    source                 = require("vinyl-source-stream"),
     del                    = require("del"),
-    path                   = require("path"),
-    exec                   = require("child_process").exec,
     runSequence            = require("run-sequence"),
-    debug                  = require("gulp-debug"),
     notifier               = require("node-notifier"),
     messageFormat          = require("gulp-messageformat"),
-    FIREFOX_DIR            = "/usr/lib/firefox/firefox.sh",
-    production             = (process.env.NODE_ENV === "production");
-
-const webpackStream = require("webpack-stream");
-const webpack = webpackStream.webpack;
-const named = require("vinyl-named");
-const plumber = require("gulp-plumber");
-const notify = require("gulp-notify");
-const eslint = require("gulp-eslint");
+    webpack                = require("webpack"),
+    eslint                 = require("gulp-eslint");
 
 const webpackConfig = require("./webpack.config.js");
-const Locales = ["en", "ru", "uk"];
+
+const FIREFOX_DIR = "/usr/lib/firefox/firefox.sh";
+const Locales     = ["en", "ru", "uk"];
+
 
 gulp.task("env:firefox", function () {
     env({
@@ -44,51 +35,49 @@ gulp.task("env:development", function () {
     }})
 });
 
-gulp.task("less", function () {
+gulp.task("less", () => {
     return gulp.src("./pages/*.less", {cwd: "./develop"})
         .pipe(less())
         .pipe(gulp.dest("./build/firefox/pages"))
 });
 
-gulp.task("preprocess:popup", function () {
+gulp.task("preprocess:popup", () => {
     return gulp.src("./develop/pages/popup.raw.html")
         .pipe(preprocess())
         .pipe(rename("popup.html"))
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
-gulp.task("preprocess:env", function () {
+gulp.task("preprocess:env", () => {
     return gulp.src("./develop/modules/env/env.raw.js")
         .pipe(preprocess())
         .pipe(rename("env.js"))
         .pipe(gulp.dest("./develop/modules/env"));
 });
 
-gulp.task("preprocess:install", function () {
+gulp.task("preprocess:install", () => {
     return gulp.src("./develop/pages/install.raw.html")
         .pipe(preprocess())
         .pipe(rename("install.html"))
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
-gulp.task("preprocess:manifest", function () {
+gulp.task("preprocess:manifest", () => {
     return gulp.src("./develop/manifest.raw.json")
         .pipe(preprocess())
         .pipe(rename("manifest.json"))
         .pipe(gulp.dest("./build/firefox"));
 });
 
-gulp.task("inline_angular_templates", function () {
+gulp.task("inline_angular_templates", () => {
     return gulp.src("./develop/modules/**/*.tmpl.html")
         .pipe(inlineAngularTemplates("./build/firefox/pages/popup.html", {base: "./develop"}))
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
-gulp.task("clean:firefox", function () {
-    return del("./build/firefox/**")
-});
+gulp.task("clean:firefox", () => del("./build/firefox/**"));
 
-gulp.task("copy:firefox", function () {
+gulp.task("copy:firefox", () => {
     return gulp.src([
         "./develop/pages/background.html",
         "./develop/_locales/**",
@@ -108,7 +97,7 @@ gulp.task("copy:firefox", function () {
       .pipe(gulp.dest("./build/firefox"))
 })
 
-;gulp.task("fonts", function () {
+;gulp.task("fonts", () => {
     return gulp.src([
         "./node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
         "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
@@ -117,19 +106,11 @@ gulp.task("copy:firefox", function () {
       .pipe(gulp.dest("./build/firefox/assets"))
 });
 
-gulp.task("jpm:run", function (cb) {
-    exec("web-ext run", {cwd: "./build/firefox"}, function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        cb(err);
-    })
-});
-
-gulp.task("webpack", function (callback) {
+gulp.task("webpack", (callback) => {
     const myConfig = Object.create(webpackConfig);
     let firstCallback = true;
 
-    webpack(myConfig, function(err, stats) {
+    webpack(myConfig, (err, stats) => {
         if (firstCallback) {
             firstCallback = false;
 
@@ -149,9 +130,7 @@ gulp.task("webpack", function (callback) {
                 }));
             }
 
-            if (!myConfig.watch && err) {
-                callback(err)
-            }
+            if (!myConfig.watch && err) callback(err);
             else callback();
         }
     });

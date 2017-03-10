@@ -37,10 +37,10 @@ require('angular')
              * Notifications
              */
             Mediator.sub('notifications:settings', function () {
-                var onSoundAdjust = _.debounce(function (newValue, oldValue) {
+                const onSoundAdjust = _.debounce(function (newValue, oldValue) {
                     if (newValue !== oldValue) {
-                        var audio = new Audio(),
-                            sound = $scope.notifications.sound;
+                        const audio = new Audio(),
+                            sound   = $scope.notifications.sound;
 
                         audio.volume = sound.volume;
                         audio.src = NotificationsSettings[sound.signal];

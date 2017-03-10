@@ -1,5 +1,5 @@
 "use strict";
-var isPopup = typeof location !== 'undefined' && !~location.href.indexOf('background');
+const isPopup = typeof location !== 'undefined' && !~location.href.indexOf('background');
 
 module.exports = {
     // @if TARGET === 'FIREFOX'
