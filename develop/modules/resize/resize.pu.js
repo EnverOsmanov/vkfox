@@ -10,7 +10,7 @@ require('angular').module('app').directive('resize', function () {
     MAX_HEIGHT         = 600,
     MIN_HEIGHT         = 375,
     DEFAULT_FONT_SIZE  = 12,
-    root               = $('html'),
+    root               = $('body'),
     PersistentModel    = require('../persistent-model/persistent-model.js'),
     _                  = require('../shim/underscore.js')._,
     ProxyMethods       = require('../proxy-methods/proxy-methods.js').forward(
