@@ -1,6 +1,7 @@
 "use strict";
 try {
     window.$ = window.jQuery = require('jquery');
+    require("../resize/dimensions.pu.js");
     require('../tracker/tracker.js').trackPage();
     require('angular').module('app', ['ui.keypress', 'ngSanitize', 'ngRoute', 'ngAnimate']);
     require('angular-route');

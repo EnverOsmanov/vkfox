@@ -2,7 +2,6 @@
     <a
         ng-repeat="tab in tabs"
         class="navbar__tab"
-        data-enver="b {{ activeTab }} a"
         ng-class="{navbar__tab_active: tab.href === activeTab}"
         href="pages/popup.html#/{{tab.href}}">{{tab.name | i18n}}</a>
     <div class="navigation__actions">
