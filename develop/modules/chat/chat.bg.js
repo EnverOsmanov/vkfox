@@ -21,18 +21,20 @@ const dialogColl = new (Backbone.Collection.extend({
         const messages = dialog.get('messages');
         return - messages[messages.length - 1].date;
     }
-}))(),
-profilesColl = new (ProfilesCollection.extend({
+}))();
+
+const profilesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         idAttribute: 'uid'
     })
-}))(),
+}))();
 
 /**
  * Notifies about current state of module.
  * Has a tiny debounce to make only one publish per event loop
  */
-publishData = _.debounce(function publishData() {
+const publishData = _.debounce( () => {
+
     Mediator.pub('chat:data', {
         dialogs: dialogColl.toJSON(),
         profiles: profilesColl.toJSON()
@@ -40,18 +42,20 @@ publishData = _.debounce(function publishData() {
 }, 0);
 
 readyPromise.then(function () {
-    Mediator.sub('longpoll:updates', onUpdates);
-
-    // Notify about changes
-    dialogColl.on('change', function () {
+    function notifyAboutChange() {
         dialogColl.sort();
         updateLatestMessageId();
         publishData();
-    });
+    }
+
+    Mediator.sub("longpoll:updates", onUpdates);
+
+    // Notify about changes
+    dialogColl.on("change", notifyAboutChange);
     profilesColl.on('change', publishData);
 }).done();
 
-Mediator.sub('auth:success', function (data) {
+Mediator.sub('auth:success', data => {
     initialize();
 
     userId = data.userId;
@@ -62,9 +66,7 @@ Mediator.sub('auth:success', function (data) {
       .done();
 });
 
-Mediator.sub('chat:data:get', function () {
-    readyPromise.then(publishData).done();
-});
+Mediator.sub('chat:data:get', () => readyPromise.then(publishData).done() );
 
 
 //functions
@@ -73,10 +75,9 @@ Mediator.sub('chat:data:get', function () {
  * Should be called on every incoming message
  */
 function updateLatestMessageId() {
-    let messages;
 
     if (dialogColl.size()) {
-        messages = dialogColl.first().get('messages');
+        const messages = dialogColl.first().get('messages');
 
         persistentModel.set(
             'latestMessageId',
@@ -86,34 +87,32 @@ function updateLatestMessageId() {
 }
 
 function fetchProfiles() {
-  function dialog2Uuids(uids, dialog) {
-    uids = uids
-      .concat(dialog.get('messages').map( message => message.uid ), dialog.get('uid'))
-      .filter( uid => uid > 0);
+    function dialog2Uuids(uids, dialog) {
+        uids = uids
+            .concat(dialog.get('messages').map(message => message.uid), dialog.get('uid'))
+            .filter(uid => uid > 0);
 
-    if (dialog.get('chat_active')) {
-      return uids.concat(dialog.get('chat_active'));
+        if (dialog.get('chat_active')) return uids.concat(dialog.get('chat_active'));
+        else return uids;
     }
-    else return uids;
-  }
 
-    const requiredUids = dialogColl.reduce(dialog2Uuids, [userId]),
-        cachesUids = profilesColl.pluck('uid'),
-        missingUids = _.chain(requiredUids)
-          .uniq()
-          .difference(cachesUids)
-          .value();
+    function addProfile(data) {
+        profilesColl.add(data);
+        profilesColl.get(userId).set('isSelf', true);
+    }
+
+    const requiredUids = dialogColl.reduce(dialog2Uuids, [userId]);
+    const cachesUids = profilesColl.pluck('uid');
+    const missingUids = _
+        .chain(requiredUids)
+        .uniq()
+        .difference(cachesUids)
+        .value();
 
     profilesColl.remove(_(cachesUids).difference(requiredUids));
 
-    if (missingUids.length) {
-        return Users.getProfilesById(missingUids).then(function (data) {
-            profilesColl.add(data);
-            profilesColl.get(userId).set('isSelf', true);
-        });
-    } else {
-        return Vow.fulfill();
-    }
+    if (missingUids.length) return Users.getProfilesById(missingUids).then(addProfile);
+    else return Vow.fulfill();
 }
 
 /**
@@ -218,6 +217,7 @@ function getDialogs() {
 }
 
 function onUpdates(updates) {
+
     updates.forEach(function (update) {
         let messageId, mask, readState;
 
@@ -256,17 +256,21 @@ function onUpdates(updates) {
  * fetch dialog history and get last unread messages in a row
  */
 function getUnreadMessages() {
+    function getHistory(dialog) {
+        const code = "return API.messages.getHistory({" +
+            `user_id: ${dialog.get('uid')},` +
+            `count: ${MAX_HISTORY_COUNT} ` +
+            "});";
+
+        return Request.api({code: code});
+    }
+
     // FIXME wtf models.filter?
     const unreadDialogs = dialogColl.models.filter(function (dialog) {
         return !dialog.get('chat_id') && !dialog.get('messages')[0].read_state;
-      }),
-      unreadHistoryRequests = unreadDialogs.map(function (dialog) {
-        return Request.api({
-          code: 'return API.messages.getHistory({user_id: '
-          + dialog.get('uid') + ', count: '
-          + MAX_HISTORY_COUNT + '});'
-        });
-      });
+    });
+
+    const unreadHistoryRequests = unreadDialogs.map(getHistory);
 
     return Vow.all(unreadHistoryRequests).spread(function () {
         _(arguments).each(function (historyMessages, index) {
@@ -290,7 +294,7 @@ function addNewMessage(update) {
       attachment         = update[7],
       dialogCompanionUid = update[3];
 
-    let dialog, messageDeferred;
+    let messageDeferred;
 
     // For messages from chat attachment contains "from" property
     if (_(attachment).isEmpty()) {
@@ -304,32 +308,31 @@ function addNewMessage(update) {
             mid       : messageId,
             out       : +!!(flags & 2)
         }]);
-    } else {
-        messageDeferred = Request.api({
-            code: 'return API.messages.getById({chat_active: 1, mid: ' + messageId + '});'
-        });
+    }
+    else {
+        const code = `return API.messages.getById({chat_active: 1, mid: ${messageId}});`;
+        messageDeferred = Request.api({ code: code});
     }
 
     messageDeferred.then(function (response) {
         const message = response[1],
           dialogId = message.chat_id ? 'chat_id_' + message.chat_id : 'uid_' + dialogCompanionUid;
 
-        dialog = dialogColl.get(dialogId);
+        const dialog = dialogColl.get(dialogId);
         if (dialog) {
             dialog.get('messages').push(message);
             removeReadMessages(dialog);
-        } else {
-            dialogColl.add({
-                id         : dialogId,
-                uid        : message.uid,
-                chat_id    : message.chat_id,
-                chat_active: message.chat_active,
-                messages   : [message]
-            }, {silent: true});
         }
+        else dialogColl.add({
+            id: dialogId,
+            uid: message.uid,
+            chat_id: message.chat_id,
+            chat_active: message.chat_active,
+            messages: [message]
+        }, {silent: true});
 
         return fetchProfiles().then(function () {
-            // important to trogger change, when profiles are available
+            // important to trigger change, when profiles are available
             // because will cause an error, when creating notifications
             dialogColl.trigger('change');
             return message;

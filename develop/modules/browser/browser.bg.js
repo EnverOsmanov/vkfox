@@ -23,76 +23,50 @@ _.defer(function () {
     require('../proxy-methods/proxy-methods.js').connect('../browser/browser.bg.js', Browser);
 });
 module.exports = Browser = {
-    getVkfoxVersion: (function () {
-        return browser.management.getSelf().then( (info) => info.version);
-    }),
+    getVkfoxVersion: () => browser.management.getSelf().then( info => info.version),
     /**
      * Sets icon to online status
      */
-    setIconOnline: function () {
-        chrome.browserAction.setIcon({path: ICON_ONLINE});
-    },
+    setIconOnline: () => chrome.browserAction.setIcon({ path: ICON_ONLINE }),
     /**
      * Sets icon to offline status
      */
-    setIconOffline: function () {
-        chrome.browserAction.setIcon({path: ICON_OFFLINE});
-    },
+    setIconOffline: () => chrome.browserAction.setIcon({ path: ICON_OFFLINE }),
     /**
      * @param {String|Number} text
      */
-    setBadgeText: function (text) {
-        chrome.browserAction.setBadgeText({text: String(text)});
-    },
+    setBadgeText: text => chrome.browserAction.setBadgeText({ text: String(text) }),
     /**
      * Says whether popup is visible
      *
      * @returns {Boolean}
      */
-    isPopupOpened: function () {
-        return Boolean(chrome.extension.getViews({type: "popup"}).length);
-    },
+    isPopupOpened: () => Boolean(chrome.extension.getViews({type: "popup"}).length),
     /**
      * Says whether vk.com is currently active tab
      *
      * @returns {Vow.promise} Returns promise that resolves to Boolean
      */
-    isVKSiteActive: (function () {
-        var getActiveTabUrl, tabs;
-
-        getActiveTabUrl = function () {
-            var promise = Vow.promise();
-            chrome.tabs.query({active: true}, function (tabs) {
-                if (tabs.length) {
-                    promise.fulfill(tabs[0].url);
-                }
+    isVKSiteActive: () => {
+        function getActiveTabUrl() {
+            const promise = Vow.promise();
+            chrome.tabs.query( {active: true}, tabs => {
+                if (tabs.length) promise.fulfill(tabs[0].url);
             });
             return promise;
-        };
+        }
 
-        return function () {
-            return getActiveTabUrl().then(function (url) {
-                return ~url.indexOf('vk.com');
-            });
-        };
-    })(),
-    createTab: (function () {
-        return function (url) {
-            chrome.tabs.create({url: url});
-        };
-    })(),
+        return getActiveTabUrl().then( url => ~url.indexOf('vk.com') );
+    },
+    createTab: url => chrome.tabs.create({ url: url }),
     /**
      * Closes all tabs that contain urlFragment in its url
      */
-    closeTabs: (function () {
-        return function (urlFragment) {
-            chrome.tabs.query({}, function (tabs) {
-                tabs.forEach(function (tab) {
-                    if (~tab.url.indexOf(urlFragment)) {
-                        chrome.tabs.remove(tab.id);
-                    }
-                });
-            });
-        };
-    })()
+    closeTabs: urlFragment => {
+        function closeTab(tab) {
+            if (~tab.url.indexOf(urlFragment)) chrome.tabs.remove(tab.id);
+        }
+
+        chrome.tabs.query({}, tabs => tabs.forEach(closeTab) );
+    }
 };

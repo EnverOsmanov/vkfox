@@ -4,6 +4,7 @@ develop/manifest.json
 develop/modules/i18n/*.js
 !develop/modules/i18n/i18n.js
 !develop/modules/i18n/i18n.pu.js
+web-ext-artifacts
 develop/*/pages/*.html
 !develop/*/pages/*.raw.html
 develop/*/pages/*.js
