@@ -1,13 +1,14 @@
 "use strict";
 window.$ = window.jQuery = require('jquery');
 const angular = require('angular');
+const agnularInit = angular.module('app', []);
 
 const Tracker = require('../tracker/tracker.js'),
     Mediator  = require('../mediator/mediator.js');
 require('../anchor/anchor.pu.js');
 require('../filters/filters.pu.js');
 
-angular.module('app', [])
+agnularInit
     .controller('AppCtrl', function ($scope) {
         const data = {
             // authorization  step

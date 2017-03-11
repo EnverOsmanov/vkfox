@@ -9,11 +9,12 @@ const _             = require('../shim/underscore.js')._,
     Browser         = require('../browser/browser.js'),
     Request         = require('../request/request.js'),
     Config          = require('../config/config.js'),
-    Vow             = require("vow"),
+    Vow             = require("vow");
 
-url                 = 'http://www.google-analytics.com/collect',
-persistentModel     = new PersistentModel({}, {name: 'tracker'}),
-commonParamsPromise = Browser.getVkfoxVersion().then(function (version) {
+const url             = 'http://www.google-analytics.com/collect';
+const persistentModel = new PersistentModel({}, {name: 'tracker'});
+
+const commonParamsPromise = Browser.getVkfoxVersion().then( version => {
     return {
         v  : 1, // Version.
         tid: Config.TRACKER_ID, // Tracking ID / Web property / Property ID.
@@ -30,14 +31,14 @@ commonParamsPromise = Browser.getVkfoxVersion().then(function (version) {
  */
 function guid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-        v = c === 'x' ? r : (r&0x3|0x8);
+        const r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }
 function getBrowserVersion() {
     return browser.runtime.getBrowserInfo()
-        .then( (info) => `${info.name} ${info.version} (${info.buildID})`)
+        .then( info => `${info.name} ${info.version} (${info.buildID})`)
 }
 function getPage() {
     if (Env.background) return '/pages/background.html';
@@ -51,7 +52,8 @@ if (!persistentModel.has('guid')) {
     persistentModel.set('guid', guid());
 }
 
-module.exports = {
+let tracker;
+module.exports = tracker = {
     trackPage: function () {
         commonParamsPromise.then(function (params) {
             Request.post(url, _.extend({}, params, {
@@ -67,8 +69,8 @@ module.exports = {
     * @param {String} [label]
     * @param {Number} [value]
     */
-    trackEvent: function (category, action, label, value) {
-        commonParamsPromise.then(function (params) {
+    trackEvent: (category, action, label, value) => {
+        return commonParamsPromise.then(function (params) {
             Request.post(url, _.extend({}, params, {
                 t : 'event', // Event hit type
                 ec: category, // Event Category. Required.
@@ -89,11 +91,11 @@ module.exports = {
         const args = Array.prototype.slice.call(arguments);
 
         Browser.getVkfoxVersion().then(function (version) {
-            this.trackEvent(
+            tracker.trackEvent(
                 'debug;v' + version,
                 JSON.stringify(args)
             );
-        }.bind(this)).done();
+        }).done();
     },
     /**
      * Remotely track an error
