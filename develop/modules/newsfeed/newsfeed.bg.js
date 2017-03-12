@@ -1,12 +1,13 @@
 "use strict";
+const _      = require('../shim/underscore.js')._,
+    Vow      = require('../shim/vow.js'),
+    Backbone = require('backbone'),
+    Tracker  = require('../tracker/tracker.js'),
+    Request  = require('../request/request.bg.js'),
+    Mediator = require('../mediator/mediator.js');
+
 const MAX_ITEMS_COUNT = 50,
-    UPDATE_PERIOD     = 10000, //ms
-    _                 = require('../shim/underscore.js')._,
-    Vow               = require('../shim/vow.js'),
-    Backbone          = require('backbone'),
-    Tracker           = require('../tracker/tracker.js'),
-    Request           = require('../request/request.bg.js'),
-    Mediator          = require('../mediator/mediator.js');
+    UPDATE_PERIOD     = 10000; //ms
 
 const profilesColl = new (Backbone.Collection.extend({
     model: Backbone.Model.extend({
@@ -30,9 +31,10 @@ const ItemsColl = Backbone.Collection.extend({
             return item;
         }
     })
-}),
-groupItemsColl = new ItemsColl(),
-friendItemsColl = new ItemsColl();
+});
+
+const groupItemsColl = new ItemsColl();
+const friendItemsColl = new ItemsColl();
 
 let fetchNewsfeedDebounced,
     autoUpdateParams,
@@ -48,13 +50,13 @@ Mediator.sub('newsfeed:friends:get', () => readyPromise.then(publishNewsfeedFrie
 
 Mediator.sub('newsfeed:groups:get', () => readyPromise.then(publishNewsfeedGroups).done() );
 
-readyPromise.then(function () {
-    Mediator.sub('likes:changed', function (params) {
+readyPromise.then( () => {
+    Mediator.sub('likes:changed', params => {
         let model;
         const whereClause = {
-            type: params.type,
+            type     : params.type,
             source_id: params.owner_id,
-            post_id: params.item_id
+            post_id  : params.item_id
         };
 
         if (params.owner_id > 0) model = friendItemsColl.findWhere(whereClause);
@@ -121,9 +123,8 @@ function processRawItem(item) {
                 collection.add(collisionItem[propertyName].slice(1), {parse: true});
 
                 item[propertyName] = [collection.size()].concat(collection.toJSON());
-            } catch (event) {
-                Tracker.debug(collisionItem, item, event.stack);
             }
+            catch (event) { Tracker.debug(collisionItem, item, event.stack); }
         }
     }
 
@@ -213,18 +214,22 @@ function fetchNewsfeed() {
 
     function responseHandler(response) {
         const newsfeed = response.newsfeed;
+        console.debug(1);
 
         autoUpdateParams.start_time = response.time;
 
         profilesColl.add(newsfeed.profiles, {parse: true});
         profilesColl.add(newsfeed.groups, {parse: true});
 
-        discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
+        console.debug(2);
 
+        discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
+        console.debug(3);
         // try to remove old items, if new were inserted
         if (newsfeed.items.length) freeSpace();
-
+        console.debug(4);
         fetchNewsfeedDebounced();
+        console.debug(5);
         readyPromise.fulfill();
     }
 
@@ -256,13 +261,13 @@ function initialize() {
 function publishNewsfeedFriends() {
     Mediator.pub('newsfeed:friends', {
         profiles: profilesColl.toJSON(),
-        items: friendItemsColl.toJSON()
+        items   : friendItemsColl.toJSON()
     });
 }
 
 function publishNewsfeedGroups() {
     Mediator.pub('newsfeed:groups', {
         profiles: profilesColl.toJSON(),
-        items: groupItemsColl.toJSON()
+        items   : groupItemsColl.toJSON()
     });
 }

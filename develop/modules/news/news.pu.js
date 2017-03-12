@@ -126,10 +126,8 @@ require('angular').module('app')
     .controller('MyNewsController', function ($scope) {
         Mediator.pub('feedbacks:data:get');
 
-        Mediator.sub('feedbacks:data', (data) => {
-            $scope.$apply( () => {
-                $scope.data = data;
-            });
+        Mediator.sub('feedbacks:data', data => {
+            $scope.$apply( () => $scope.data = data );
         });
 
         $scope.$on('$destroy', () => Mediator.unsub('feedbacks:data'));
@@ -142,9 +140,7 @@ require('angular').module('app')
     .controller('FriendNewsController', function ($scope) {
         Mediator.pub('newsfeed:friends:get');
         Mediator.sub('newsfeed:friends', function (data) {
-            $scope.$apply(function () {
-                $scope.data = data;
-            });
+            $scope.$apply( () => $scope.data = data );
         });
         $scope.$on('$destroy', function () {
             Mediator.unsub('newsfeed:friends');

@@ -1,8 +1,5 @@
 "use strict";
-const MAX_ITEMS_COUNT  = 50,
-    MAX_COMMENTS_COUNT = 3,
-    UPDATE_PERIOD      = 2000, //ms
-    _                  = require('../shim/underscore.js')._,
+const _                = require('../shim/underscore.js')._,
     Vow                = require('../shim/vow.js'),
     Backbone           = require('backbone'),
     Request            = require('../request/request.bg.js'),
@@ -15,10 +12,24 @@ const MAX_ITEMS_COUNT  = 50,
     Notifications      = require('../notifications/notifications.bg.js'),
     ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js');
 
-let persistentModel, userId, autoUpdateNotificationsParams, autoUpdateCommentsParams, fetchFeedbacksDebounced,
+const MAX_ITEMS_COUNT  = 50,
+    MAX_COMMENTS_COUNT = 3,
+    UPDATE_PERIOD      = 2000; //ms
+
+let persistentModel, userId, fetchFeedbacksDebounced,
     readyPromise = Vow.promise();
 
-let profilesColl = new (ProfilesCollection.extend({
+const autoUpdateNotificationsParams = {
+    filters: 'wall,mentions,likes,reposts,followers,friends',
+    count  : MAX_ITEMS_COUNT
+};
+
+const autoUpdateCommentsParams = {
+    last_comments: 1,
+    count        : MAX_ITEMS_COUNT
+};
+
+const profilesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         parse: function (profile) {
             if (profile.gid) profile.id = -profile.gid;
@@ -29,11 +40,11 @@ let profilesColl = new (ProfilesCollection.extend({
     })
 }))();
 
-let FeedbacksCollection = Backbone.Collection.extend({
+const FeedbacksCollection = Backbone.Collection.extend({
     comparator: model => model.get('date')
 });
 
-let itemsColl = new (Backbone.Collection.extend({
+const itemsColl = new (Backbone.Collection.extend({
     comparator: model => -model.get('date')
 }))();
 
@@ -41,7 +52,7 @@ let itemsColl = new (Backbone.Collection.extend({
  * Notifies about current state of module.
  * Has a tiny debounce to make only one publish per event loop
  */
-let publishData = _.debounce(function publishData() {
+const publishData = _.debounce(function publishData() {
     function itemsCollJS() {
         return itemsColl.map(item => {
             const itemJS = item.toJSON();
@@ -92,9 +103,7 @@ Mediator.sub('feedbacks:unsubscribe', params => {
     ].join(':');
 
     Request.api({
-        code: 'return API.newsfeed.unsubscribe('
-        + JSON.stringify(params)
-        + ');'
+        code: `return API.newsfeed.unsubscribe(${JSON.stringify(params)});`
     }).then( (response) => {
         if (response) {
             itemsColl.remove(itemsColl.get(unsubscribeFromId));
@@ -152,12 +161,13 @@ function generateItemID(type, parent) {
  *
  * @param {String} type Type of parent: post, wall, topic, photo etc
  * @param {Object} parent
+ * @param {String} [itemID] pass if you already have ID
  *
  * @return {Object}
  */
-function createItemModel(type, parent) {
+function createItemModel(type, parent, itemID) {
   return new Backbone.Model({
-      id    : generateItemID(type, parent),
+      id    : itemID ? itemID : generateItemID(type, parent),
       parent: parent,
       type  : type
     });
@@ -254,57 +264,60 @@ function addRawNotificationsItem(item) {
 
     if (item.type === 'friend_accepted') {
         parentType = item.type;
-        parent = item.feedback;
-    } else if (item.type.indexOf('_') !== -1) {
-        const typeTokens = item.type.split('_');
-        feedbackType = typeTokens[0];
-        parentType = typeTokens[1];
-    } else {
-        parentType = item.type;
+        parent     = feedback;
     }
+    else if (item.type.indexOf('_') !== -1) {
+        const typeTokens = item.type.split('_');
+
+        feedbackType = typeTokens[0];
+        parentType   = typeTokens[1];
+    } if (item.type === "mention") {
+        feedbackType = item.type;
+        parentType   = item.type;
+        parent       = feedback;
+    }
+    else parentType = item.type;
 
     if (feedbackType) {
-        let itemModel;
 
         parent.owner_id = Number(parent.from_id || parent.owner_id);
         const itemID = generateItemID(parentType, parent);
 
+        let itemModel;
         if (!(itemModel = itemsColl.get(itemID))) {
-            itemModel = createItemModel(parentType, parent);
+            itemModel = createItemModel(parentType, parent, itemID);
             itemsColl.add(itemModel, {sort: false});
         }
 
-        if (!itemModel.has('feedbacks')) {
-            itemModel.set('feedbacks', new FeedbacksCollection());
-        }
+        if (!itemModel.has('feedbacks')) itemModel.set('feedbacks', new FeedbacksCollection());
 
-        itemModel.get('feedbacks').add([].concat(feedback).map(function (feedback) {
-            let id;
+        itemModel
+            .get('feedbacks')
+            .add([].concat(feedback).map(feedback => {
+                let id;
 
-            feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
+                feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
 
-            if (feedbackType === 'like' || feedbackType === 'copy') {
-                // 'like' and 'post', so we need to pass 'parent'
-                // to make difference for two likes from the same user to different objects
-                id  = generateItemID(feedbackType, parent);
-            } else {
-                id  = generateItemID(feedbackType, feedback);
-            }
+                if (feedbackType === 'like' || feedbackType === 'copy') {
+                    // 'like' and 'post', so we need to pass 'parent'
+                    // to make difference for two likes from the same user to different objects
+                    id = generateItemID(feedbackType, parent);
+                }
+                else id = generateItemID(feedbackType, feedback);
 
-            return {
-                id      : id,
-                type    : feedbackType,
-                feedback: feedback,
-                date    : item.date
-            };
-        }));
+                return {
+                    id      : id,
+                    type    : feedbackType,
+                    feedback: feedback,
+                    date    : item.date
+                };
+            }));
 
-        if (!itemModel.has('date') || itemModel.get('date') < item.date) {
-            itemModel.set('date', item.date);
-        }
+        if (!itemModel.has('date') || itemModel.get('date') < item.date) itemModel.set('date', item.date);
 
         itemModel.trigger('change');
-    } else {
+    }
+    else {
         //follows and friend_accepter types are array
         [].concat(feedback).forEach(function (feedback) {
 
@@ -356,23 +369,30 @@ function fetchFeedbacks() {
 function tryNotification() {
     const itemModel = itemsColl.first();
 
-    let lastFeedback, notificationItem, type, parentType, profile, ownerId, gender, title, message, name;
+    let notificationItem, type, parentType;
 
     // don't notify on first run,
     // when there is no previous value
     if (!this._previousAttributes.hasOwnProperty('latestFeedbackId')) return;
 
-    if (itemModel.has('feedbacks')) { // notification has parent, e.g. comment to post, like to video etc
-        lastFeedback = itemModel.get('feedbacks').last();
+    if (itemModel.has('feedbacks')) {
+        // notification has parent, e.g. comment to post, like to video etc
+        const lastFeedback = itemModel.get('feedbacks').last();
+
         notificationItem = lastFeedback.get('feedback');
-        type = lastFeedback.get('type');
-        parentType = itemModel.get('type');
-    } else { // notification is parent itself, e.g. wall post, friend request etc
+        type             = lastFeedback.get('type');
+        parentType       = itemModel.get('type');
+    }
+    else {
+        // notification is parent itself, e.g. wall post, friend request etc
         notificationItem = itemModel.get('parent');
-        type = itemModel.get('type');
+        type             = itemModel.get('type');
     }
 
-    ownerId = notificationItem.owner_id;
+    const ownerId = notificationItem.owner_id;
+    let profile, gender, title, message, name;
+
+    function makeTitle(i18nText) { return `${name} ${i18nText}` }
 
     // Don't show self messages
     if (ownerId !== userId) {
@@ -387,46 +407,34 @@ function tryNotification() {
 
         switch (type) {
             case 'friend_accepted':
-                title = name + ' ' + I18N.get('friend request accepted', {
-                    GENDER: gender
-                });
+                title = makeTitle(I18N.get('friend request accepted', { GENDER: gender }));
                 break;
             case 'follow':
-                title = name + ' ' + I18N.get('started following you', {
-                    GENDER: gender
-                });
+                title = makeTitle(I18N.get('started following you', { GENDER: gender }));
                 break;
             case 'mention':
-                title = name + ' ' + I18N.get('mentioned you', {
-                    GENDER: gender
-                });
+                title = makeTitle(I18N.get('mentioned you', { GENDER: gender }));
                 message = notificationItem.text;
                 break;
             case 'wall':
-                title = name + ' ' + I18N.get('posted on your wall', {
-                    GENDER: gender
-                });
+                title = makeTitle(I18N.get('posted on your wall', { GENDER: gender }));
                 message = notificationItem.text;
                 break;
             case 'like':
-                title = name + ' ' + I18N.get('liked your ' + parentType, {
-                    GENDER: gender
-                });
+                title = makeTitle(I18N.get('liked your ' + parentType, { GENDER: gender }));
                 break;
             case 'copy':
-                title = name + ' ' + I18N.get('shared your ' + parentType, {
-                    GENDER: gender
-                });
+                title = makeTitle(I18N.get('shared your ' + parentType, { GENDER: gender }));
                 break;
             case 'comment':
                 // 'mention_commentS' type in notifications
             case 'comments':
             case 'reply':
-                title = I18N.get('left a comment', {
-                    NAME: name,
-                    GENDER: gender
-                });
+                title = makeTitle( I18N.get('left a comment', { NAME: name, GENDER: gender }) );
                 message = notificationItem.text;
+                break;
+            default:
+                window.enverType = type;
                 break;
         }
 
@@ -437,10 +445,10 @@ function tryNotification() {
 
                 if (!active) {
                     Notifications.notify({
-                        type: Notifications.NEWS,
-                        title: title,
+                        type   : Notifications.NEWS,
+                        title  : title,
                         message: message,
-                        image: profile.photo,
+                        image  : profile.photo,
                         noBadge: feedbacksActive,
                         noPopup: feedbacksActive
                     });
@@ -469,14 +477,6 @@ function initialize() {
         publishData();
     }).done();
 
-    autoUpdateNotificationsParams = {
-        filters: 'wall,mentions,likes,reposts,followers,friends',
-        count: MAX_ITEMS_COUNT
-    };
-    autoUpdateCommentsParams = {
-        last_comments: 1,
-        count: MAX_ITEMS_COUNT
-    };
     itemsColl.reset();
     profilesColl.reset();
     fetchFeedbacks();

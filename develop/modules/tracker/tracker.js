@@ -90,12 +90,9 @@ module.exports = tracker = {
     debug: function () {
         const args = Array.prototype.slice.call(arguments);
 
-        Browser.getVkfoxVersion().then(function (version) {
-            tracker.trackEvent(
-                'debug;v' + version,
-                JSON.stringify(args)
-            );
-        }).done();
+        Browser
+            .getVkfoxVersion()
+            .then( version => tracker.trackEvent('debug;v' + version, JSON.stringify(args)) );
     },
     /**
      * Remotely track an error

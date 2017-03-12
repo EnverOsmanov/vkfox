@@ -187,10 +187,9 @@ function removeReadMessages(dialog) {
     messages.reverse().some(function (message) {
         if (message.out === originalOut && message.read_state === 0) {
             result.unshift(message);
-        } else {
-            // stop copying messages
-            return true;
         }
+        // stop copying messages
+        else return true;
     });
     dialog.set({'messages': result}, {silent: true});
 }
