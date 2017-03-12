@@ -19,7 +19,10 @@ develop/pages/vendor.js
 develop/pages/vendor.pu.js
 develop/tmp
 ff
+
 node_modules
+npm-debug.log
+
 bower_components
 build
 build.zip
