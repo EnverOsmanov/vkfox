@@ -9,7 +9,7 @@
   "scripts": {
     "start": "web-ext run -s build/firefox/ --firefox=firefox-developer --firefox-profile=dev-edition-default",
     "startMac": "web-ext run -s build/firefox/ --firefox=/Applications/FirefoxDeveloperEdition.app --firefox-profile=dev-edition-default",
-    "sign": "web-ext sign -s build/firefox/ --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET"
+    "sign": "web-ext sign -s build/firefox/ --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET --id='{41977694-5aed-4e30-8390-77a62a771360}'"
   },
   "dependencies": {
     "angular": "^1.6.0",
