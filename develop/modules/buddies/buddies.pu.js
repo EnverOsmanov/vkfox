@@ -2,7 +2,8 @@
 const Mediator      = require('../mediator/mediator.js'),
     PersistentModel = require('../persistent-model/persistent-model.js'),
     I18N            = require('../i18n/i18n.js'),
-    angular         = require('angular');
+    angular         = require('angular'),
+    Msg             = require("../mediator/messages.js");
 
 require('../navigation/navigation.pu.js');
 require('../item-list/item-list.pu.js');
@@ -25,11 +26,11 @@ angular.module('app')
 
         $scope.toggleFriendWatching = function (profile) {
             profile.isWatched = !profile.isWatched;
-            Mediator.pub('buddies:watch:toggle', profile.uid);
+            Mediator.pub(Msg.BuddiesWatchToggle, profile.uid);
         };
 
-        Mediator.pub('buddies:data:get');
-        Mediator.sub('buddies:data', function (data) {
+        Mediator.pub(Msg.BuddiesDataGet);
+        Mediator.sub(Msg.BuddiesData, function (data) {
             $scope.$apply(function () {
                 data.filter( buddie => buddie.hasOwnProperty("lastActivityTime") )
                     .forEach(function (buddie) {
@@ -44,7 +45,7 @@ angular.module('app')
             });
         }.bind(this));
 
-        $scope.$on('$destroy', () => Mediator.unsub('buddies:data') );
+        $scope.$on('$destroy', () => Mediator.unsub(Msg.BuddiesData) );
     })
     .filter('buddiesFilter', function ($filter) {
         /**

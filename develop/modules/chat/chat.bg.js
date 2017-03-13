@@ -1,23 +1,25 @@
 "use strict";
-const MAX_HISTORY_COUNT = 10,
-    _                   = require('../shim/underscore.js')._,
-    Vow                 = require('../shim/vow.js'),
-    Backbone            = require('backbone'),
-    Request             = require('../request/request.bg.js'),
-    Mediator            = require('../mediator/mediator.js'),
-    Users               = require('../users/users.bg.js'),
-    Router              = require('../router/router.bg.js'),
-    Browser             = require('../browser/browser.bg.js'),
-    I18N                = require('../i18n/i18n.js'),
-    Notifications       = require('../notifications/notifications.bg.js'),
-    PersistentModel     = require('../persistent-model/persistent-model.js'),
-    ProfilesCollection  = require('../profiles-collection/profiles-collection.bg.js');
+const _              = require('../shim/underscore.js')._,
+  Vow                = require('../shim/vow.js'),
+  Backbone           = require('backbone'),
+  Request            = require('../request/request.bg.js'),
+  Mediator           = require('../mediator/mediator.js'),
+  Users              = require('../users/users.bg.js'),
+  Router             = require('../router/router.bg.js'),
+  Browser            = require('../browser/browser.bg.js'),
+  I18N               = require('../i18n/i18n.js'),
+  Notifications      = require('../notifications/notifications.bg.js'),
+  PersistentModel    = require('../persistent-model/persistent-model.js'),
+  ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
+  Msg                = require("../mediator/messages.js");
+
+const MAX_HISTORY_COUNT = 10;
 
 let persistentModel, userId,
     readyPromise = Vow.promise();
 
 const dialogColl = new (Backbone.Collection.extend({
-    comparator: function (dialog) {
+    comparator: dialog => {
         const messages = dialog.get('messages');
         return - messages[messages.length - 1].date;
     }
@@ -35,7 +37,7 @@ const profilesColl = new (ProfilesCollection.extend({
  */
 const publishData = _.debounce( () => {
 
-    Mediator.pub('chat:data', {
+    Mediator.pub(Msg.ChatData, {
         dialogs: dialogColl.toJSON(),
         profiles: profilesColl.toJSON()
     });
@@ -48,14 +50,14 @@ readyPromise.then(function () {
         publishData();
     }
 
-    Mediator.sub("longpoll:updates", onUpdates);
+    Mediator.sub(Msg.LongpollUpdates, onUpdates);
 
     // Notify about changes
     dialogColl.on("change", notifyAboutChange);
     profilesColl.on('change', publishData);
 }).done();
 
-Mediator.sub('auth:success', data => {
+Mediator.sub(Msg.AuthSuccess, data => {
     initialize();
 
     userId = data.userId;
@@ -66,7 +68,7 @@ Mediator.sub('auth:success', data => {
       .done();
 });
 
-Mediator.sub('chat:data:get', () => readyPromise.then(publishData).done() );
+Mediator.sub(Msg.ChatDataGet, () => readyPromise.then(publishData).done() );
 
 
 //functions
@@ -234,7 +236,7 @@ function onUpdates(updates) {
                                 message.read_state = readState;
                                 removeReadMessages(dialog);
                                 if (readState) {
-                                    Mediator.pub('chat:message:read', message);
+                                    Mediator.pub(Msg.ChatMessageReed, message);
                                 }
                                 dialogColl.trigger('change');
                                 return true;

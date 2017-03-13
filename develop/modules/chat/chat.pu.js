@@ -4,7 +4,8 @@ const _      = require('../shim/underscore.js')._,
     Vow      = require('../shim/vow.js'),
     Request  = require('../request/request.js'),
     Mediator = require('../mediator/mediator.js'),
-    Users    = require('../users/users.pu.js');
+    Users    = require('../users/users.pu.js'),
+    Msg      = require("../mediator/messages.js");
 
 require('../navigation/navigation.pu.js');
 require('../item-list/item-list.pu.js');
@@ -80,9 +81,9 @@ require('angular').module('app')
         };
     })
     .controller('ChatCtrl', function ($scope) {
-        Mediator.pub('chat:data:get');
+        Mediator.pub(Msg.ChatDataGet);
 
-        Mediator.sub('chat:data', function (data) {
+        Mediator.sub(Msg.ChatData, function (data) {
             $scope.$apply(function () {
                 $scope.dialogs = data.dialogs;
                 $scope.profilesColl = new Backbone.Collection(data.profiles, {
@@ -93,7 +94,7 @@ require('angular').module('app')
             });
         });
         $scope.$on('$destroy', function () {
-            Mediator.unsub('chat:data');
+            Mediator.unsub(Msg.ChatData);
         });
     })
     .controller('ChatItemCtrl', function ($scope, $Chat) {
