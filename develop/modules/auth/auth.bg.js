@@ -9,7 +9,8 @@ const RETRY_INTERVAL = 10000, //ms
     _                = require("../shim/underscore.js")._,
     Backbone         = require("backbone"),
     Vow              = require("../shim/vow.js"),
-    model            = new Backbone.Model();
+    model            = new Backbone.Model(),
+    Msg              = require("../mediator/messages.js");
 
 let Auth, page, iframe,
     state       = CREATED,
@@ -38,7 +39,7 @@ function onSuccess(data) {
 // We need to authorize in own window, after user was logined in a tab
 // In google chrome we use content-script for this purpose (declared in manifest.js)
 
-Mediator.sub("auth:iframe", function (url) {
+Mediator.sub(Msg.AuthIframe, function (url) {
     try {
         model.set("userId",  parseInt(url.match(/user_id=(\w+)(?:&|$)/i)[1], 10));
         model.set("accessToken",  url.match(/access_token=(\w+)(?:&|$)/i)[1]);
@@ -51,21 +52,13 @@ Mediator.sub("auth:iframe", function (url) {
     }
 }.bind(this));
 
-Mediator.sub("auth:state:get", function () {
-    Mediator.pub("auth:state", state);
-});
+Mediator.sub(Msg.AuthStateGet, () => Mediator.pub(Msg.AuthState, state) );
 
-Mediator.sub("auth:oauth", function () {
-    Browser.createTab(Config.AUTH_URI);
-});
+Mediator.sub(Msg.AuthOauth, () => Browser.createTab(Config.AUTH_URI) );
 
-Mediator.sub("auth:login", function (force) {
-    Auth.login(force);
-});
+Mediator.sub(Msg.AuthLogin, force => Auth.login(force) );
 
-model.on("change:accessToken", function () {
-    Mediator.pub("auth:success", model.toJSON());
-});
+model.on("change:accessToken", () => Mediator.pub(Msg.AuthSuccess, model.toJSON()) );
 
 
 module.exports = Auth = {
@@ -87,21 +80,15 @@ module.exports = Auth = {
             tryLogin();
             Auth.retry();
 
-            Mediator.unsub("auth:success", onSuccess);
-            Mediator.once("auth:success", onSuccess);
+            Mediator.unsub(Msg.AuthSuccess, onSuccess);
+            Mediator.once(Msg.AuthSuccess, onSuccess);
         }
         return authPromise;
     },
-    getAccessToken  : function () {
-        return Auth.login().then(function () {
-            return model.get("accessToken");
-        });
-    },
-    getUserId       : function () {
-        return Auth.login().then(function () {
-            return model.get("userId");
-        });
-    }
+
+    getAccessToken  : () => Auth.login().then( () => model.get("accessToken") ),
+
+    getUserId       : () => Auth.login().then( () => model.get("userId") )
 };
 
 Auth.login();

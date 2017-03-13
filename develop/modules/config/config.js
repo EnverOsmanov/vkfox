@@ -2,13 +2,11 @@
 const Env = require('../env/env.js');
 
 exports.APP_ID = 3807372;
-if (Env.firefox) {
-    exports.TRACKER_ID = 'UA-9568575-4';
-} else if (Env.chrome) {
-    exports.TRACKER_ID = 'UA-9568575-2';
-} else {
-    exports.TRACKER_ID = 'UA-9568575-3';
-}
+
+if (Env.firefox) exports.TRACKER_ID = 'UA-9568575-4';
+else if (Env.chrome) exports.TRACKER_ID = 'UA-9568575-2';
+else exports.TRACKER_ID = 'UA-9568575-3';
+
 exports.VK_PROTOCOL = 'https://';
 exports.VK_BASE = exports.VK_PROTOCOL + 'vk.com/';
 // HTTPS only

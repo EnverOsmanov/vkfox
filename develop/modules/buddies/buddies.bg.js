@@ -9,7 +9,8 @@ const _                   = require('../shim/underscore.js')._,
     Notifications       = require('../notifications/notifications.bg.js'),
     PersistentSet       = require('../persistent-set/persistent-set.bg.js'),
     ProfilesCollection  = require('../profiles-collection/profiles-collection.bg.js'),
-    watchedBuddiesSet   = new PersistentSet('watchedBuddies');
+    watchedBuddiesSet   = new PersistentSet('watchedBuddies'),
+    Msg                 = require("../mediator/messages.js");
 
 let readyPromise;
 const buddiesColl = new (ProfilesCollection.extend({
@@ -45,18 +46,18 @@ const buddiesColl = new (ProfilesCollection.extend({
     }
 }))();
 
-const publishData = _.debounce( () => Mediator.pub('buddies:data', buddiesColl.toJSON()), 0);
+const publishData = _.debounce( () => Mediator.pub(Msg.BuddiesData, buddiesColl.toJSON()), 0);
 
 initialize();
 
 // entry point
-Mediator.sub('auth:success', function () {
+Mediator.sub(Msg.AuthSuccess, function () {
     initialize();
 
     Vow.all([
         Users.getFriendsProfiles(),
         getFavouriteUsers()
-    ]).spread(function (friends, favourites) {
+    ]).spread( (friends, favourites) => {
         buddiesColl.reset([].concat(favourites, friends));
 
         saveOriginalBuddiesOrder();
@@ -66,7 +67,7 @@ Mediator.sub('auth:success', function () {
     }).done();
 });
 
-Mediator.sub('buddies:data:get', () => readyPromise.then(publishData).done() );
+Mediator.sub(Msg.BuddiesDataGet, () => readyPromise.then(publishData).done() );
 
 readyPromise.then(function () {
     buddiesColl.on('change', function (model) {
@@ -97,7 +98,7 @@ readyPromise.then(function () {
     });
 }).done();
 
-Mediator.sub('buddies:watch:toggle', function (uid) {
+Mediator.sub(Msg.BuddiesWatchToggle, function (uid) {
     if (watchedBuddiesSet.contains(uid)) {
         watchedBuddiesSet.remove(uid);
         buddiesColl.get(uid).unset('isWatched');
