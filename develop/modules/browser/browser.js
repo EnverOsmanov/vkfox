@@ -8,7 +8,7 @@ if (Env.background) module.exports = require('../browser/browser.bg.js');
 else {
     const ProxyMethods = require('../proxy-methods/proxy-methods.js');
 
-    module.exports = ProxyMethods.forward('browser/browser.bg.js', [
+    module.exports = ProxyMethods.forward('../browser/browser.bg.js', [
         'createTab', 'getVkfoxVersion'
     ]);
     module.exports.closePopup = () => window.close();

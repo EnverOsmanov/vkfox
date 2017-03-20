@@ -434,7 +434,6 @@ function tryNotification() {
                 message = notificationItem.text;
                 break;
             default:
-                window.enverType = type;
                 break;
         }
 

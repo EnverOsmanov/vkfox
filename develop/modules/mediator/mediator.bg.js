@@ -5,25 +5,19 @@ const Dispatcher = require('./dispatcher.js'),
 
 let activePorts = [];
 
-chrome.runtime.onConnect.addListener(function (port) {
+browser.runtime.onConnect.addListener(function (port) {
     activePorts.push(port);
-    port.onMessage.addListener(function (messageData) {
-        Dispatcher.pub.apply(Mediator, messageData);
-    });
-    port.onDisconnect.addListener(function () {
-        activePorts = activePorts.filter(function (active) {
-            return active !== port;
-        });
-    });
+
+    port.onMessage.addListener( messageData => Dispatcher.pub.apply(Mediator, messageData) );
+
+    port.onDisconnect.addListener( () => activePorts = activePorts.filter( active => active !== port ) );
 });
 
 Mediator.pub = function () {
     const args = arguments;
     Dispatcher.pub.apply(Mediator, args);
 
-    activePorts.forEach(function (port) {
-        port.postMessage([].slice.call(args));
-    });
+    activePorts.forEach( port => port.postMessage([].slice.call(args)) );
 };
 
 module.exports = Mediator;
