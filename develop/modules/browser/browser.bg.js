@@ -15,7 +15,7 @@ const BADGE_COLOR = [231, 76, 60, 255],
 let Browser;
 
 // Set up popup and popup comminication
-chrome.browserAction.setBadgeBackgroundColor({color: BADGE_COLOR});
+browser.browserAction.setBadgeBackgroundColor({color: BADGE_COLOR});
 
 
 // overcome circular dependency through Mediator
@@ -27,21 +27,21 @@ module.exports = Browser = {
     /**
      * Sets icon to online status
      */
-    setIconOnline: () => chrome.browserAction.setIcon({ path: ICON_ONLINE }),
+    setIconOnline: () => browser.browserAction.setIcon({ path: ICON_ONLINE }),
     /**
      * Sets icon to offline status
      */
-    setIconOffline: () => chrome.browserAction.setIcon({ path: ICON_OFFLINE }),
+    setIconOffline: () => browser.browserAction.setIcon({ path: ICON_OFFLINE }),
     /**
      * @param {String|Number} text
      */
-    setBadgeText: text => chrome.browserAction.setBadgeText({ text: String(text) }),
+    setBadgeText: text => browser.browserAction.setBadgeText({ text: String(text) }),
     /**
      * Says whether popup is visible
      *
      * @returns {Boolean}
      */
-    isPopupOpened: () => Boolean(chrome.extension.getViews({type: "popup"}).length),
+    isPopupOpened: () => Boolean(browser.extension.getViews({type: "popup"}).length),
     /**
      * Says whether vk.com is currently active tab
      *
@@ -50,7 +50,7 @@ module.exports = Browser = {
     isVKSiteActive: () => {
         function getActiveTabUrl() {
             const promise = Vow.promise();
-            chrome.tabs.query( {active: true}, tabs => {
+            browser.tabs.query( {active: true}, tabs => {
                 if (tabs.length) promise.fulfill(tabs[0].url);
             });
             return promise;
@@ -58,15 +58,15 @@ module.exports = Browser = {
 
         return getActiveTabUrl().then( url => ~url.indexOf('vk.com') );
     },
-    createTab: url => chrome.tabs.create({ url: url }),
+    createTab: url => browser.tabs.create({ url: url }),
     /**
      * Closes all tabs that contain urlFragment in its url
      */
     closeTabs: urlFragment => {
         function closeTab(tab) {
-            if (~tab.url.indexOf(urlFragment)) chrome.tabs.remove(tab.id);
+            if (~tab.url.indexOf(urlFragment)) browser.tabs.remove(tab.id);
         }
 
-        chrome.tabs.query({}, tabs => tabs.forEach(closeTab) );
+        browser.tabs.query({}, tabs => tabs.forEach(closeTab) );
     }
 };

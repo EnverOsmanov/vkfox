@@ -214,22 +214,19 @@ function fetchNewsfeed() {
 
     function responseHandler(response) {
         const newsfeed = response.newsfeed;
-        console.debug(1);
 
         autoUpdateParams.start_time = response.time;
 
         profilesColl.add(newsfeed.profiles, {parse: true});
         profilesColl.add(newsfeed.groups, {parse: true});
 
-        console.debug(2);
-
         discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
-        console.debug(3);
+
         // try to remove old items, if new were inserted
         if (newsfeed.items.length) freeSpace();
-        console.debug(4);
+
         fetchNewsfeedDebounced();
-        console.debug(5);
+
         readyPromise.fulfill();
     }
 
