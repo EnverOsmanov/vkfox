@@ -5,8 +5,8 @@
  * ProxyMethods can proxy only methods that return promises or no value,
  * because use the asynchronous Mediator underneath.
  */
-const Vow    = require('../shim/vow.js'),
-    _        = require('../shim/underscore.js')._,
+const Vow    = require('vow'),
+    _        = require('underscore')._,
     Mediator = require('../mediator/mediator.js');
 
 module.exports = {

@@ -1,6 +1,6 @@
 "use strict";
 const Mediator = require('../mediator/mediator.js'),
-    _          = require('../shim/underscore.js')._,
+    _          = require('underscore')._,
     Request    = require('../request/request.bg.js');
 
 /**

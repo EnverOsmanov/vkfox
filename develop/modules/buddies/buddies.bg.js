@@ -1,18 +1,18 @@
 "use strict";
-const _                   = require('../shim/underscore.js')._,
-    Vow                 = require('../shim/vow.js'),
-    Backbone            = require('backbone'),
-    Request             = require('../request/request.bg.js'),
-    Mediator            = require('../mediator/mediator.js'),
-    Users               = require('../users/users.bg.js'),
-    I18N                = require('../i18n/i18n.js'),
-    Notifications       = require('../notifications/notifications.bg.js'),
-    PersistentSet       = require('../persistent-set/persistent-set.bg.js'),
-    ProfilesCollection  = require('../profiles-collection/profiles-collection.bg.js'),
-    watchedBuddiesSet   = new PersistentSet('watchedBuddies'),
-    Msg                 = require("../mediator/messages.js");
+const _                = require('underscore')._,
+    Vow                = require('vow'),
+    Backbone           = require('backbone'),
+    Request            = require('../request/request.bg.js'),
+    Mediator           = require('../mediator/mediator.js'),
+    Users              = require('../users/users.bg.js'),
+    I18N               = require('../i18n/i18n.js'),
+    Notifications      = require('../notifications/notifications.bg.js'),
+    PersistentSet      = require('../persistent-set/persistent-set.bg.js'),
+    ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
+    Msg                = require("../mediator/messages.js");
 
 let readyPromise;
+const watchedBuddiesSet = new PersistentSet('watchedBuddies');
 const buddiesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
         idAttribute: 'uid',

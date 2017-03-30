@@ -1,7 +1,7 @@
 "use strict";
-const _      = require('../shim/underscore.js')._,
+const _      = require('underscore')._,
     Backbone = require('backbone'),
-    Vow      = require('../shim/vow.js'),
+    Vow      = require('vow'),
     Request  = require('../request/request.js'),
     Mediator = require('../mediator/mediator.js'),
     Users    = require('../users/users.pu.js'),

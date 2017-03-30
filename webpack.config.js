@@ -14,14 +14,14 @@ module.exports = {
     filename: "[name].js"
   },
   watch  : true,
-  devtool: true ? "cheap-inline-module-source-map" : null,
+  devtool: true ? "cheap-inline-module-source-map" : false,
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
     new webpack.optimize.CommonsChunkPlugin({
       name: ["vendor", "ng"],
       minChunks: 2
-    })
+    }),
   ],
   resolve: {
     alias: {

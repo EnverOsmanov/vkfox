@@ -1,18 +1,20 @@
 "use strict";
+const Config = require("../config/config.js"),
+    Mediator = require("../mediator/mediator.js"),
+    Browser  = require("../browser/browser.bg.js"),
+    _        = require("underscore")._,
+    Backbone = require("backbone"),
+    Vow      = require("vow"),
+    Msg      = require("../mediator/messages.js");
+
 const RETRY_INTERVAL = 10000, //ms
     CREATED          = 1,
     IN_PROGRESS      = 1,
-    READY            = 2,
-    Config           = require("../config/config.js"),
-    Mediator         = require("../mediator/mediator.js"),
-    Browser          = require("../browser/browser.bg.js"),
-    _                = require("../shim/underscore.js")._,
-    Backbone         = require("backbone"),
-    Vow              = require("../shim/vow.js"),
-    model            = new Backbone.Model(),
-    Msg              = require("../mediator/messages.js");
+    READY            = 2;
 
-let Auth, page, iframe,
+const model = new Backbone.Model();
+
+let Auth, iframe,
     state       = CREATED,
     authPromise = Vow.promise();
 
@@ -48,7 +50,7 @@ Mediator.sub(Msg.AuthIframe, function (url) {
         Browser.closeTabs(Config.AUTH_DOMAIN);
         freeLogin();
     } catch (e) {
-        console.log(e);
+        console.error(`AuthIframe: ${e}`);
     }
 }.bind(this));
 

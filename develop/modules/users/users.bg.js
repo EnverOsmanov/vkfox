@@ -1,12 +1,14 @@
 "use strict";
+const Vow        = require('vow'),
+    Backbone     = require('backbone'),
+    Mediator     = require('../mediator/mediator.js'),
+    Request      = require('../request/request.bg.js'),
+    ProxyMethods = require('../proxy-methods/proxy-methods.js'),
+    _            = require('underscore')._,
+    Msg          = require("../mediator/messages.js");
+
 const DROP_PROFILES_INTERVAL = 60000,
-    USERS_GET_DEBOUNCE       = 400,
-    Vow                      = require('../shim/vow.js'),
-    Backbone                 = require('backbone'),
-    Mediator                 = require('../mediator/mediator.js'),
-    Request                  = require('../request/request.bg.js'),
-    ProxyMethods             = require('../proxy-methods/proxy-methods.js'),
-    _                        = require('../shim/underscore.js')._;
+    USERS_GET_DEBOUNCE       = 400;
 
 let inProgress, usersGetQueue, friendsProfilesDefer;
 
@@ -14,21 +16,23 @@ const usersColl = new (Backbone.Collection.extend({
     model: Backbone.Model.extend({
         idAttribute: 'uid'
     })
-}))(),
-dropOldNonFriendsProfiles = _.debounce(function () {
+}))();
+
+const dropOldNonFriendsProfiles = _.debounce(function () {
     if (!inProgress) {
         usersColl.remove(usersColl.filter(function (model) {
             return !model.get('isFriend');
         }));
     }
     dropOldNonFriendsProfiles();
-}, DROP_PROFILES_INTERVAL),
+}, DROP_PROFILES_INTERVAL);
+
 /**
  * Resolves items from provided queue
  *
  * @param {Array} queue
  */
-publishUids = function (queue) {
+const publishUids = function (queue) {
     let data, queueItem;
 
     function getProfileById(uid) {
@@ -37,22 +41,20 @@ publishUids = function (queue) {
 
     while (queue.length) {
         queueItem = queue.pop();
-        data = queueItem.uids.map(function (uid) {
-            return getProfileById(uid).toJSON();
-        });
+        data = queueItem.uids.map( uid => getProfileById(uid).toJSON() );
 
         queueItem.promise.fulfill(data);
     }
-},
-processGetUsersQueue = _.debounce(function () {
-    const processedQueue = usersGetQueue,
-        newUids = _
-            .chain(processedQueue)
-            .pluck('uids')
-            .flatten()
-            .unique()
-            .difference(usersColl.pluck('uid'))
-            .value();
+};
+
+const processGetUsersQueue = _.debounce(function (processedQueue) {
+    const newUids = _
+        .chain(processedQueue)
+        .pluck('uids')
+        .flatten()
+        .unique()
+        .difference(usersColl.pluck('uid'))
+        .value();
 
 
     // start new queue
@@ -79,9 +81,7 @@ processGetUsersQueue = _.debounce(function () {
 
 initialize();
 
-Mediator.sub('auth:success', function () {
-    initialize();
-});
+Mediator.sub(Msg.AuthSuccess, () => initialize() );
 
 dropOldNonFriendsProfiles();
 
@@ -92,9 +92,7 @@ module.exports = ProxyMethods.connect('../users/users.bg.js', _.extend({
                 code: 'return API.friends.get({ fields : "photo,sex,nickname,lists", order: "hints" })'
             }).then(function (response) {
                 if (response && response.length) {
-                    response.forEach(function (friendData) {
-                        friendData.isFriend = true;
-                    });
+                    response.forEach( friendData => friendData.isFriend = true );
                     usersColl.add(response);
                 }
                 return response;
@@ -120,7 +118,7 @@ module.exports = ProxyMethods.connect('../users/users.bg.js', _.extend({
                 uids   : positiveUids,
                 promise: promise
             });
-            processGetUsersQueue();
+            processGetUsersQueue(usersGetQueue);
             return promise;
         });
     }

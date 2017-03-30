@@ -1,8 +1,8 @@
 "use strict";
 // HTTPS only
 // @see http://vk.com/pages?oid=-1&p=%D0%92%D1%8B%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2_%D0%BA_API
-const Vow           = require('../shim/vow.js'),
-    _               = require('../shim/underscore.js')._,
+const Vow           = require('vow'),
+    _               = require('underscore')._,
     ProxyMethods    = require('../proxy-methods/proxy-methods.js'),
     Auth            = require('../auth/auth.bg.js'),
     apiQueriesQueue = [];
@@ -71,44 +71,50 @@ function xhrMy(type, url, data) {
      * XMLHttpRequest onload handler.
      * Checks for an expired accessToken (e.g. a request that completed after relogin)
      *
-     * @param {Vow.promise} ajaxPromise Will be resolved or rejected
      * @param {String} usedAccessToken
-     * @param {String} responseText
-     * @param {String} dataType Is ignored currently
+     * @param {Response} response
      */
-    function onLoad(ajaxPromise, usedAccessToken, responseText) {
-        Auth.getAccessToken().then(function (accessToken) {
+    function onLoad(usedAccessToken, response) {
+        return Auth.getAccessToken().then(function (accessToken) {
             if (accessToken === usedAccessToken) {
-                try {
-                    ajaxPromise.fulfill(JSON.parse(responseText));
-                }
-                catch (e) {
-                    ajaxPromise.fulfill(responseText)
-                }
+                    return response.text().then( text => {
+                        try {
+                            return JSON.parse(text)
+                        }
+                        catch (e) {
+                            console.error(`Not a JSON: ${e}`);
+                            return text
+                        }
+                    })
+
             }
-            else ajaxPromise.reject(new AccessTokenError());
+            else return new AccessTokenError();
         });
     }
 
-    return Auth.getAccessToken().then(function (accessToken) {
-        const ajaxPromise = Vow.promise();
+    function myFetch() {
         const encodedData = typeof data === 'string' ? data : querystring(data);
-        const xhr         = new XMLHttpRequest();
-
-        xhr.onload = () => onLoad(ajaxPromise, accessToken, xhr.responseText);
-        xhr.timeout = XHR_TIMEOUT;
-        xhr.onerror = xhr.ontimeout = e => ajaxPromise.reject(new HttpError(e));
-
         type = type.toUpperCase();
+
         if (type === 'POST') {
-            xhr.open(type, url, true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-            xhr.send(encodedData);
-        } else {
-            xhr.open(type, url + '?' + encodedData, true);
-            xhr.send();
+            const opts = {
+                method : type,
+                body   : encodedData,
+                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+            };
+
+            return fetch(url, opts);
         }
-        return ajaxPromise;
+        else return fetch(url + '?' + encodedData, {credentials: "include"});
+    }
+
+    return Auth.getAccessToken().then(function (accessToken) {
+
+        return myFetch()
+            .then( response => onLoad(accessToken, response))
+            .catch(e => {
+                console.error(`myFetch: ${e}`);
+                return e });
     });
 }
 
@@ -171,7 +177,7 @@ module.exports = Request = ProxyMethods.connect('../request/request.bg.js', {
                 function handleFailure(e) {
                     // force relogin on API error
                     forceReauth();
-                    console.warn(e);
+                    console.error(e);
                 }
 
                 const params = {

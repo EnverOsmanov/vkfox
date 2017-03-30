@@ -1,5 +1,5 @@
 "use strict";
-const _                   = require('../shim/underscore.js')._,
+const _                   = require('underscore')._,
     Env                   = require('../env/env.js'),
     NotificationsSettings = require('../notifications/settings.js'),
     Mediator              = require('../mediator/mediator.js');

@@ -9,8 +9,8 @@ const BADGE_COLOR = [231, 76, 60, 255],
         "38": "../../assets/logo38_offline.png"
     },
 
-    Vow = require('../shim/vow.js'),
-    _   = require('../shim/underscore.js')._;
+    Vow = require('vow'),
+    _   = require('underscore')._;
 
 let Browser;
 
@@ -58,7 +58,7 @@ module.exports = Browser = {
 
         return getActiveTabUrl().then( url => ~url.indexOf('vk.com') );
     },
-    createTab: url => browser.tabs.create({ url: url }),
+    createTab: url => browser.tabs.create({ url }),
     /**
      * Closes all tabs that contain urlFragment in its url
      */

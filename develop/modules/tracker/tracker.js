@@ -1,8 +1,6 @@
 "use strict";
 
-/*jshint bitwise: false */
-/*global $ */
-const _             = require('../shim/underscore.js')._,
+const _             = require('underscore')._,
     PersistentModel = require('../persistent-model/persistent-model.js'),
     I18n            = require('../i18n/i18n.js'),
     Env             = require('../env/env.js'),

@@ -1,10 +1,11 @@
 "use strict";
-const _      = require('../shim/underscore.js')._,
-    Vow      = require('../shim/vow.js'),
+const _      = require('underscore')._,
+    Vow      = require('vow'),
     Backbone = require('backbone'),
     Tracker  = require('../tracker/tracker.js'),
     Request  = require('../request/request.bg.js'),
-    Mediator = require('../mediator/mediator.js');
+    Mediator = require('../mediator/mediator.js'),
+    Msg      = require("../mediator/messages.js");
 
 const MAX_ITEMS_COUNT = 50,
     UPDATE_PERIOD     = 10000; //ms
@@ -36,40 +37,12 @@ const ItemsColl = Backbone.Collection.extend({
 const groupItemsColl = new ItemsColl();
 const friendItemsColl = new ItemsColl();
 
-let fetchNewsfeedDebounced,
-    autoUpdateParams,
-    readyPromise = Vow.promise();
-
-fetchNewsfeedDebounced = _.debounce(fetchNewsfeed, UPDATE_PERIOD);
+let autoUpdateParams;
 
 // entry point
-Mediator.sub('auth:success', () => initialize() );
+Mediator.sub(Msg.AuthSuccess, () => initialize() );
 
-// Subscribe to events from popup
-Mediator.sub('newsfeed:friends:get', () => readyPromise.then(publishNewsfeedFriends).done() );
 
-Mediator.sub('newsfeed:groups:get', () => readyPromise.then(publishNewsfeedGroups).done() );
-
-readyPromise.then( () => {
-    Mediator.sub('likes:changed', params => {
-        let model;
-        const whereClause = {
-            type     : params.type,
-            source_id: params.owner_id,
-            post_id  : params.item_id
-        };
-
-        if (params.owner_id > 0) model = friendItemsColl.findWhere(whereClause);
-        else model = groupItemsColl.findWhere(whereClause);
-
-        if (model) model.set('likes', params.likes);
-    });
-}).done();
-
-readyPromise.then( () => {
-    groupItemsColl.on('change add', _.debounce(publishNewsfeedGroups), 0);
-    friendItemsColl.on('change add', _.debounce(publishNewsfeedFriends), 0);
-}).done();
 
 //
 //
@@ -84,10 +57,10 @@ function processRawItem(item) {
     let propertyName, collisionItem;
     const typeToPropertyMap = {
         'wall_photo': 'photos',
-        'photo': 'photos',
-        'photo_tag': 'photo_tags',
-        'note': 'notes',
-        'friend': 'friends'
+        'photo'     : 'photos',
+        'photo_tag' : 'photo_tags',
+        'note'      : 'notes',
+        'friend'    : 'friends'
     };
 
     // used to eliminate duplicate items during merge
@@ -207,7 +180,7 @@ function freeSpace() {
     }
 }
 
-function fetchNewsfeed() {
+function fetchNewsfeed(readyPromise) {
     const requestCode = [
         'return {newsfeed: API.newsfeed.get(', JSON.stringify(autoUpdateParams), '), time: API.utils.getServerTime()};'
     ].join('');
@@ -225,7 +198,7 @@ function fetchNewsfeed() {
         // try to remove old items, if new were inserted
         if (newsfeed.items.length) freeSpace();
 
-        fetchNewsfeedDebounced();
+        setTimeout(() => fetchNewsfeed(readyPromise), UPDATE_PERIOD);
 
         readyPromise.fulfill();
     }
@@ -239,11 +212,34 @@ function fetchNewsfeed() {
 
 function initialize() {
 
-    if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) readyPromise.reject();
+    const readyPromise = Vow.promise();
 
-        readyPromise = Vow.promise();
-    }
+// Subscribe to events from popup
+    Mediator.sub(Msg.NewsfeedFriendsGet, () => readyPromise.then(publishNewsfeedFriends).done() );
+
+    Mediator.sub(Msg.NewsfeedGroupsGet, () => readyPromise.then(publishNewsfeedGroups).done() );
+
+    readyPromise.then( () => {
+        Mediator.sub(Msg.LikesChanged, params => {
+            let model;
+            const whereClause = {
+                type     : params.type,
+                source_id: params.owner_id,
+                post_id  : params.item_id
+            };
+
+            if (params.owner_id > 0) model = friendItemsColl.findWhere(whereClause);
+            else model = groupItemsColl.findWhere(whereClause);
+
+            if (model) model.set('likes', params.likes);
+        });
+    }).done();
+
+    readyPromise.then( () => {
+        groupItemsColl.on('change add', _.debounce(publishNewsfeedGroups), 0);
+        friendItemsColl.on('change add', _.debounce(publishNewsfeedFriends), 0);
+    }).done();
+
     readyPromise.then(() => {publishNewsfeedFriends(); publishNewsfeedGroups()} ).done();
 
     autoUpdateParams = {
@@ -252,18 +248,18 @@ function initialize() {
     profilesColl.reset();
     groupItemsColl.reset();
     friendItemsColl.reset();
-    fetchNewsfeed();
+    fetchNewsfeed(readyPromise);
 }
 
 function publishNewsfeedFriends() {
-    Mediator.pub('newsfeed:friends', {
+    Mediator.pub(Msg.NewsfeedFriends, {
         profiles: profilesColl.toJSON(),
         items   : friendItemsColl.toJSON()
     });
 }
 
 function publishNewsfeedGroups() {
-    Mediator.pub('newsfeed:groups', {
+    Mediator.pub(Msg.NewsfeedGroups, {
         profiles: profilesColl.toJSON(),
         items   : groupItemsColl.toJSON()
     });

@@ -1,7 +1,8 @@
 "use strict";
-const _      = require('../shim/underscore.js')._,
+const _      = require('underscore')._,
     Request  = require('../request/request.bg.js'),
-    Mediator = require('../mediator/mediator.js');
+    Mediator = require('../mediator/mediator.js'),
+    Msg      = require("../mediator/messages.js");
 
 const LONG_POLL_WAIT = 20,
     DEBOUNCE_RATE    = 1000;
@@ -22,7 +23,7 @@ const fetchUpdates = _.debounce(function (params) {
             return;
         }
         else if (response.updates.length) {
-            Mediator.pub('longpoll:updates', response.updates);
+            Mediator.pub(Msg.LongpollUpdates, response.updates);
         }
 
         params.ts = response.ts;
