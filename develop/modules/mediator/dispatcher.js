@@ -1,5 +1,5 @@
 "use strict";
-const _        = require('../shim/underscore.js')._,
+const _        = require('underscore')._,
     Backbone   = require('backbone'),
     dispatcher = _.clone(Backbone.Events);
 

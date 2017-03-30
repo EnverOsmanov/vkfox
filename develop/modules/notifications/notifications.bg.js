@@ -1,5 +1,5 @@
 "use strict";
-const _             = require('../shim/underscore.js')._,
+const _             = require('underscore')._,
     Backbone        = require('backbone'),
     Browser         = require('../browser/browser.bg.js'),
     Mediator        = require('../mediator/mediator.js'),

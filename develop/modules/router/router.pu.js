@@ -1,5 +1,5 @@
 "use strict";
-const Vow           = require('../shim/vow.js'),
+const Vow           = require('vow'),
     Mediator        = require('../mediator/mediator.js'),
     Browser         = require('../browser/browser.js'),
     Tracker         = require('../tracker/tracker.js'),

@@ -1,6 +1,7 @@
 "use strict";
 const Config = require('../config/config.js'),
-    Mediator = require('../mediator/mediator.js');
+    Mediator = require('../mediator/mediator.js'),
+    Msg      = require("../mediator/messages.js");
 
 require('../navigation/navigation.pu.js');
 require('angular').module('app')
@@ -12,7 +13,7 @@ require('angular').module('app')
                   owner_id: ownerId,
                   item_id: itemId
                 };
-                Mediator.pub('feedbacks:unsubscribe', options);
+                Mediator.pub(Msg.FeedbacksUnsubscribe, options);
             },
             /**
              * Returns link to the original item on vk.com
@@ -124,13 +125,13 @@ require('angular').module('app')
         $scope.activeSubTab = $routeParams.subtab;
     })
     .controller('MyNewsController', function ($scope) {
-        Mediator.pub('feedbacks:data:get');
+        Mediator.pub(Msg.FeedbacksDataGet);
 
-        Mediator.sub('feedbacks:data', data => {
+        Mediator.sub(Msg.FeedbacksData, data => {
             $scope.$apply( () => $scope.data = data );
         });
 
-        $scope.$on('$destroy', () => Mediator.unsub('feedbacks:data'));
+        $scope.$on('$destroy', () => Mediator.unsub(Msg.FeedbacksData));
     })
     .controller('MyNewsActionsCtrl', function ($scope, News) {
         $scope.unsubscribe = News.unsubscribe;
@@ -138,22 +139,20 @@ require('angular').module('app')
         $scope.open = News.getSourceLink($scope.item);
     })
     .controller('FriendNewsController', function ($scope) {
-        Mediator.pub('newsfeed:friends:get');
-        Mediator.sub('newsfeed:friends', function (data) {
+        Mediator.pub(Msg.NewsfeedFriendsGet);
+        Mediator.sub(Msg.NewsfeedFriends, function (data) {
             $scope.$apply( () => $scope.data = data );
         });
         $scope.$on('$destroy', function () {
-            Mediator.unsub('newsfeed:friends');
+            Mediator.unsub(Msg.NewsfeedFriends);
         });
     })
     .controller('GroupNewsController', function ($scope) {
-        Mediator.pub('newsfeed:groups:get');
-        Mediator.sub('newsfeed:groups', function (data) {
-            $scope.$apply(function () {
-                $scope.data = data;
-            });
+        Mediator.pub(Msg.NewsfeedGroupsGet);
+        Mediator.sub(Msg.NewsfeedGroups, function (data) {
+            $scope.$apply( () => $scope.data = data );
         });
         $scope.$on('$destroy', function () {
-            Mediator.unsub('newsfeed:groups');
+            Mediator.unsub(Msg.NewsfeedGroups);
         });
     });

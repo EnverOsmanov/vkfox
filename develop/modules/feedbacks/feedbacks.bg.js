@@ -1,6 +1,6 @@
 "use strict";
-const _                = require('../shim/underscore.js')._,
-    Vow                = require('../shim/vow.js'),
+const _                = require('underscore')._,
+    Vow                = require('vow'),
     Backbone           = require('backbone'),
     Request            = require('../request/request.bg.js'),
     User               = require('../users/users.bg.js'),

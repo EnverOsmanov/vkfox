@@ -1,5 +1,5 @@
 "use strict";
-const _    = require('../shim/underscore.js')._,
+const _    = require('underscore')._,
     Config = require('../config/config.js'),
     moment = require('moment'),
     I18N   = require('../i18n/i18n.pu.js');

@@ -1,8 +1,7 @@
 "use strict";
-const storage = require('../storage/storage.js');
 
 const constructor = function (name) {
-    var item = storage.getItem(name);
+    const item = localStorage.getItem(name);
 
     if (item) {
         this._set = JSON.parse(item);
@@ -13,7 +12,7 @@ const constructor = function (name) {
 };
 constructor.prototype = {
     _save: function () {
-        storage.setItem(
+        localStorage.setItem(
             this._name,
             JSON.stringify(this._set)
         );
@@ -31,7 +30,7 @@ constructor.prototype = {
         return this._set.indexOf(value) !== -1;
     },
     remove: function (value) {
-        var position = this._set.indexOf(value);
+        const position = this._set.indexOf(value);
         if (position !== -1) {
             this._set.splice(position, 1);
             this._save();

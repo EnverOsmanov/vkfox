@@ -1,27 +1,28 @@
 "use strict";
+const PersistentModel = require('../persistent-model/persistent-model.js'),
+    _                 = require('underscore')._,
+    angular           = require('angular');
 
-require('angular').module('app').directive('resize', function () {
-    const
-    MOVE_DEBOUCE       = 10,
-    DEFAULT_WIDTH      = 320,
-    MAX_WIDTH          = 640,
-    MIN_WIDTH          = 230,
-    DEFAULT_HEIGHT     = 480,
-    MAX_HEIGHT         = 600,
-    MIN_HEIGHT         = 375,
-    DEFAULT_FONT_SIZE  = 12,
-    root               = $('body'),
-    PersistentModel    = require('../persistent-model/persistent-model.js'),
-    _                  = require('../shim/underscore.js')._,
-    ProxyMethods       = require('../proxy-methods/proxy-methods.js').forward(
-        '../resize/resize.bg.js',
-        ['setPanelSize']
-    );
-    const model        = new PersistentModel({
-        width   : DEFAULT_WIDTH,
-        height  : DEFAULT_HEIGHT,
-        fontSize: DEFAULT_FONT_SIZE
-    }, {name: 'resize'});
+const MOVE_DEBOUCE    = 10,
+    DEFAULT_WIDTH     = 320,
+    MAX_WIDTH         = 640,
+    MIN_WIDTH         = 230,
+    DEFAULT_HEIGHT    = 480,
+    MAX_HEIGHT        = 600,
+    MIN_HEIGHT        = 375,
+    DEFAULT_FONT_SIZE = 12,
+    root              = $('body');
+
+const model = new PersistentModel({
+    width   : DEFAULT_WIDTH,
+    height  : DEFAULT_HEIGHT,
+    fontSize: DEFAULT_FONT_SIZE
+}, {name: 'resize'});
+
+angular.module('app').directive('resize', function () {
+
+
+
 
 
     let screenX, screenY;
@@ -47,7 +48,6 @@ require('angular').module('app').directive('resize', function () {
         model.set('height', height);
         model.set('fontSize', fontSize);
         root.css(model.toJSON());
-        ProxyMethods.setPanelSize(width, height);
     }, MOVE_DEBOUCE);
 
     function dragStart(e) {
@@ -65,9 +65,6 @@ require('angular').module('app').directive('resize', function () {
             .off('mousemove', dragMove);
     }
 
-    // TODO resize.bg.js should have accessors for width/height
-    // and browser.bg.js should use it to create proper panel
-    ProxyMethods.setPanelSize(model.get('width'), model.get('height'));
 
     return {
         template  : '<div class="resize"><div class="resize__handle"></div></div>',
@@ -75,8 +72,6 @@ require('angular').module('app').directive('resize', function () {
         restrict  : 'E',
         scope     : false,
         replace   : true,
-        link      : function (scope, iElement) {
-            iElement.bind('mousedown', dragStart);
-        }
+        link      : (scope, iElement) => iElement.bind('mousedown', dragStart)
     };
 });
