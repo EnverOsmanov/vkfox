@@ -11,6 +11,14 @@ require('angular').module('app')
             if (input) return I18N.get.apply(I18N, arguments);
         };
     })
+    .filter('i18nHtml',  ($sce) => {
+        return function (input) {
+            if (input) {
+                const text = I18N.get.apply(I18N, arguments)
+                return $sce.trustAsHtml(text);
+            }
+        };
+    })
     .filter('duration', function () {
         /**
          * Returns time duration in format 'HH:mm'
