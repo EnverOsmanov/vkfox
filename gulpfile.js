@@ -85,19 +85,14 @@ gulp.task("copy:firefox", () => {
         //best font for window and osx in firefox and chrome
         "./develop/node_modules/emoji/lib/emoji.css",
         "./develop/node_modules/emoji/lib/emoji.png",
-        "./node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
-        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
-        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
 
-        "./develop/modules/yandex/search.moz.xml",
         "./develop/modules/notifications/*.ogg",
-        "./develop/modules/notifications/firefox.html",
-        "./develop/modules/*/*.js"
+        "./develop/modules/auth/oauth.vk.com.js"
     ], {base: "./develop/"})
       .pipe(gulp.dest("./build/firefox"))
-})
+});
 
-;gulp.task("fonts", () => {
+gulp.task("fonts", () => {
     return gulp.src([
         "./node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
         "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
@@ -106,7 +101,7 @@ gulp.task("copy:firefox", () => {
       .pipe(gulp.dest("./build/firefox/assets"))
 });
 
-gulp.task("webpack", (callback) => {
+gulp.task("webpack", callback => {
     const myConfig = Object.create(webpackConfig);
     let firstCallback = true;
 

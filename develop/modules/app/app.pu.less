@@ -16,17 +16,12 @@ p {
 textarea {
     font-family: @sansFontFamily;
 }
-::-webkit-input-placeholder {
+::placeholder {
     font-family: "Roboto";
     line-height: @baseLineHeight;
     font-size: calc(~'1rem + 2px');
 }
-::-moz-placeholder {
-    font-family: "Roboto";
-    line-height: @baseLineHeight;
-    font-size: calc(~'1rem + 2px');
-}
-input:-moz-placeholder {
+input::placeholder {
     font-family: "Roboto";
     line-height: @baseLineHeight;
     font-size: calc(~'1rem + 2px');
