@@ -32,12 +32,9 @@ html {
         .resize__active &,
         .resize:hover &,
         &:hover {
-            -webkit-animation-duration: 0.15s;
-            -moz-animation-duration: 0.15s;
-            -webkit-animation-name: shake;
-            -moz-animation-name: shake;
-            -webkit-animation-fill-mode: both;
-            -moz-animation-fill-mode: both;
+            animation-duration: 0.15s;
+            animation-name: shake;
+            animation-fill-mode: both;
             opacity: 1;
         }
         .resize__active & {
@@ -49,18 +46,7 @@ html {
         border-color: transparent;
     }
 }
-@-webkit-keyframes shake {
-    0%, 100% {
-        .translate(0, 0);
-    }
-    10%, 30%, 50%, 70%, 90% {
-        .translate(-2px, 0);
-    }
-    20%, 40%, 60%, 80% {
-        .translate(2px, 0);
-    }
-}
-@-moz-keyframes shake {
+@keyframes shake {
     0%, 100% {
         .translate(0, 0);
     }
