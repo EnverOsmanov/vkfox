@@ -32,15 +32,21 @@ const fetchUpdates = _.debounce(function (params) {
 
     Request
         .get(`https://${params.server}`, data, "json")
-        .then(handleSuccess, enableLongPollUpdates)
-        .done();
+        .catch(enableLongPollUpdates)
+        .then(handleSuccess);
 }, DEBOUNCE_RATE);
 
 Mediator.sub("auth:success", () => enableLongPollUpdates() );
 
 const enableLongPollUpdates = _.debounce( () => {
-    Request
+    const ap = Request
         .api({ code: 'return API.messages.getLongPollServer();' })
-        .then(fetchUpdates, enableLongPollUpdates)
-        .done();
+
+        if (!(typeof ap.catch === "function")) {
+        console.error("Catch not a function");
+        debugger;
+        }
+        else ap
+        .catch(enableLongPollUpdates)
+        .then(fetchUpdates);
 }, DEBOUNCE_RATE);

@@ -23,13 +23,20 @@ module.exports = {
         Mediator.sub('proxy-methods:' + namespace, function (params) {
             const result = Module[params.method].apply(Module, params['arguments']);
 
-            if (Vow.isPromise(result)) {
-                result.always(function (promise) {
-                    Mediator.pub('proxy-methods:' + params.id, {
-                        method: promise.isFulfilled() ? 'fulfill':'reject',
-                        'arguments': [promise.valueOf()]
+            if (typeof result.then === "function") {
+                result
+                    .then(function (value) {
+                        Mediator.pub('proxy-methods:' + params.id, {
+                            method: 'resolve',
+                            'arguments': [value]
+                        });
+                    })
+                    .catch(function (value) {
+                        Mediator.pub('proxy-methods:' + params.id, {
+                            method: 'reject',
+                            'arguments': [value]
+                        });
                     });
-                }).done();
             }
         });
 
@@ -48,19 +55,22 @@ module.exports = {
     forward: function (namespace, methodNames) {
         return methodNames.reduce(function (exports, methodName) {
             exports[methodName] = function () {
-                const ajaxPromise = new Vow.promise(),
-                    id = _.uniqueId();
+                const id = _.uniqueId();
 
                 Mediator.pub('proxy-methods:' + namespace, {
                     method: methodName,
                     id: id,
                     'arguments': [].slice.apply(arguments)
                 });
-                Mediator.once('proxy-methods:' + id, function (data) {
-                    ajaxPromise[data.method].apply(ajaxPromise, data['arguments']);
-                });
 
-                return ajaxPromise;
+                function promisify(resolve, reject) {
+                    Mediator.once('proxy-methods:' + id, function (data) {
+                        if (data.method === "resolve") resolve(data['arguments']);
+                        else reject(data['arguments']);
+                    });
+                }
+
+                return new Vow.Promise(promisify);
             };
             return exports;
         }, {});

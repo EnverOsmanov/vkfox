@@ -48,15 +48,13 @@ module.exports = Browser = {
      * @returns {Vow.promise} Returns promise that resolves to Boolean
      */
     isVKSiteActive: () => {
-        function getActiveTabUrl() {
-            const promise = Vow.promise();
-            browser.tabs.query( {active: true}, tabs => {
-                if (tabs.length) promise.fulfill(tabs[0].url);
+        return browser.tabs
+            .query({active: true})
+            .then(tabs => {
+                if (tabs.length) return ~tabs[0].url.indexOf('vk.com');
+                else return false;
             });
-            return promise;
-        }
 
-        return getActiveTabUrl().then( url => ~url.indexOf('vk.com') );
     },
     createTab: url => browser.tabs.create({ url }),
     /**

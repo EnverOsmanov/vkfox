@@ -11,7 +11,7 @@ const _                = require('underscore')._,
     ProfilesCollection = require('../profiles-collection/profiles-collection.bg.js'),
     Msg                = require("../mediator/messages.js");
 
-let readyPromise;
+
 const watchedBuddiesSet = new PersistentSet('watchedBuddies');
 const buddiesColl = new (ProfilesCollection.extend({
     model: Backbone.Model.extend({
@@ -29,7 +29,7 @@ const buddiesColl = new (ProfilesCollection.extend({
                             .set('lastActivityTime', response.time * 1000);
 
                         buddiesColl.sort();
-                    }).done();
+                    });
                 }
                 else model.unset('lastActivityTime');
                 buddiesColl.sort();
@@ -51,52 +51,7 @@ const publishData = _.debounce( () => Mediator.pub(Msg.BuddiesData, buddiesColl.
 initialize();
 
 // entry point
-Mediator.sub(Msg.AuthSuccess, function () {
-    initialize();
-
-    Vow.all([
-        Users.getFriendsProfiles(),
-        getFavouriteUsers()
-    ]).spread( (friends, favourites) => {
-        buddiesColl.reset([].concat(favourites, friends));
-
-        saveOriginalBuddiesOrder();
-        setWatchedBuddies();
-
-        readyPromise.fulfill();
-    }).done();
-});
-
-Mediator.sub(Msg.BuddiesDataGet, () => readyPromise.then(publishData).done() );
-
-readyPromise.then(function () {
-    buddiesColl.on('change', function (model) {
-        let gender;
-        const profile = model.toJSON();
-
-        if (profile.isWatched && model.changed.hasOwnProperty('online')) {
-            model.set({
-                'lastActivityTime': Date.now()
-            }, {silent: true});
-            gender = profile.sex === 1 ? 'female':'male';
-
-            Notifications.notify({
-                type: Notifications.BUDDIES,
-                title: [
-                    Users.getName(profile),
-                    I18N.get(profile.online ? 'is online':'went offline', {
-                        GENDER: gender
-                    })
-                ].join(' '),
-                image: model.get('photo'),
-                noBadge: true
-            });
-
-            buddiesColl.sort();
-        }
-        publishData();
-    });
-}).done();
+Mediator.sub(Msg.AuthSuccess, () => initialize() );
 
 Mediator.sub(Msg.BuddiesWatchToggle, function (uid) {
     if (watchedBuddiesSet.contains(uid)) {
@@ -113,12 +68,48 @@ Mediator.sub(Msg.BuddiesWatchToggle, function (uid) {
  * Initialize all state
  */
 function initialize() {
-    if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) readyPromise.reject();
+    const readyPromise = Vow.all([
+        Users.getFriendsProfiles(),
+        getFavouriteUsers()
+    ]).then( ([friends, favourites]) => {
+        buddiesColl.reset([].concat(favourites, friends));
 
-        readyPromise = Vow.promise();
-    }
-    readyPromise.then(publishData).done();
+        saveOriginalBuddiesOrder();
+        setWatchedBuddies();
+    });
+
+    readyPromise.then(publishData);
+
+    Mediator.sub(Msg.BuddiesDataGet, () => readyPromise.then(publishData) );
+
+    readyPromise.then(function () {
+        buddiesColl.on('change', function (model) {
+            let gender;
+            const profile = model.toJSON();
+
+            if (profile.isWatched && model.changed.hasOwnProperty('online')) {
+                model.set({
+                    'lastActivityTime': Date.now()
+                }, {silent: true});
+                gender = profile.sex === 1 ? 'female':'male';
+
+                Notifications.notify({
+                    type: Notifications.BUDDIES,
+                    title: [
+                        Users.getName(profile),
+                        I18N.get(profile.online ? 'is online':'went offline', {
+                            GENDER: gender
+                        })
+                    ].join(' '),
+                    image: model.get('photo'),
+                    noBadge: true
+                });
+
+                buddiesColl.sort();
+            }
+            publishData();
+        });
+    });
 }
 
 /**

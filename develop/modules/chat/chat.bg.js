@@ -15,8 +15,7 @@ const _              = require('underscore')._,
 
 const MAX_HISTORY_COUNT = 10;
 
-let persistentModel, userId,
-    readyPromise = Vow.promise();
+let persistentModel, userId;
 
 const dialogColl = new (Backbone.Collection.extend({
     comparator: dialog => {
@@ -43,32 +42,8 @@ const publishData = _.debounce( () => {
     });
 }, 0);
 
-readyPromise.then(function () {
-    function notifyAboutChange() {
-        dialogColl.sort();
-        updateLatestMessageId();
-        publishData();
-    }
 
-    Mediator.sub(Msg.LongpollUpdates, onUpdates);
-
-    // Notify about changes
-    dialogColl.on("change", notifyAboutChange);
-    profilesColl.on('change', publishData);
-}).done();
-
-Mediator.sub(Msg.AuthSuccess, data => {
-    initialize();
-
-    userId = data.userId;
-    getDialogs()
-      .then(getUnreadMessages)
-      .then(fetchProfiles)
-      .then( () => readyPromise.fulfill() )
-      .done();
-});
-
-Mediator.sub(Msg.ChatDataGet, () => readyPromise.then(publishData).done() );
+Mediator.sub(Msg.AuthSuccess, data => initialize(data) );
 
 
 //functions
@@ -113,23 +88,41 @@ function fetchProfiles() {
 
     profilesColl.remove(_(cachesUids).difference(requiredUids));
 
-    if (missingUids.length) return Users.getProfilesById(missingUids).then(addProfile);
-    else return Vow.fulfill();
+    if (missingUids.length) {
+        return Users.getProfilesById(missingUids).then(addProfile);
+    }
+    else return Vow.resolve();
 }
 
 /**
  * Initialize all internal state
  */
-function initialize() {
+function initialize(data) {
     dialogColl.reset();
     profilesColl.reset();
 
-    if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) {
-            readyPromise.reject();
+    const readyPromise = getDialogs()
+        .then(getUnreadMessages)
+        .then(fetchProfiles);
+
+    readyPromise.then(function () {
+        function notifyAboutChange() {
+            dialogColl.sort();
+            updateLatestMessageId();
+            publishData();
         }
-        readyPromise = Vow.promise();
-    }
+
+        Mediator.sub(Msg.LongpollUpdates, onUpdates);
+
+        // Notify about changes
+        dialogColl.on("change", notifyAboutChange);
+        profilesColl.on('change', publishData);
+    });
+
+    Mediator.sub(Msg.ChatDataGet, () => readyPromise.then(publishData) );
+
+    userId = data.userId;
+
     readyPromise.then(function () {
         persistentModel = new PersistentModel({}, {
             name: ['chat', 'background', userId].join(':')
@@ -172,7 +165,7 @@ function initialize() {
         });
         updateLatestMessageId();
         publishData();
-    }).done();
+    });
 }
 
 /**
@@ -300,7 +293,7 @@ function addNewMessage(update) {
     // For messages from chat attachment contains "from" property
     if (_(attachment).isEmpty()) {
         // mimic response from server
-        messageDeferred = Vow.promise([1, {
+        messageDeferred = Vow.resolve([1, {
             body      : update[6],
             title     : update[5],
             date      : update[4],
@@ -338,5 +331,5 @@ function addNewMessage(update) {
             dialogColl.trigger('change');
             return message;
         });
-    }).done();
+    }).catch(e => console.error(`Error during AddNewMessage`, e));
 }

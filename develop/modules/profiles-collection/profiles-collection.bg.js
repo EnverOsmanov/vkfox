@@ -31,7 +31,7 @@ module.exports = Backbone.Collection.extend({
 
                     if (model) model.set('online', profile.online);
                 });
-            }).always(this._updateNonFriends.bind(this));
+            }).then(this._updateNonFriends.bind(this));
         }
         else this._updateNonFriends();
     },

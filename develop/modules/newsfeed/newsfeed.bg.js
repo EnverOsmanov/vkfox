@@ -1,6 +1,5 @@
 "use strict";
 const _      = require('underscore')._,
-    Vow      = require('vow'),
     Backbone = require('backbone'),
     Tracker  = require('../tracker/tracker.js'),
     Request  = require('../request/request.bg.js'),
@@ -180,7 +179,7 @@ function freeSpace() {
     }
 }
 
-function fetchNewsfeed(readyPromise) {
+function fetchNewsfeed() {
     const requestCode = [
         'return {newsfeed: API.newsfeed.get(', JSON.stringify(autoUpdateParams), '), time: API.utils.getServerTime()};'
     ].join('');
@@ -198,12 +197,10 @@ function fetchNewsfeed(readyPromise) {
         // try to remove old items, if new were inserted
         if (newsfeed.items.length) freeSpace();
 
-        setTimeout(() => fetchNewsfeed(readyPromise), UPDATE_PERIOD);
-
-        readyPromise.fulfill();
+        setTimeout(() => fetchNewsfeed(), UPDATE_PERIOD);
     }
 
-    Request.api({code: requestCode}).done(responseHandler);
+    return Request.api({code: requestCode}).then(responseHandler);
 }
 
 /**
@@ -212,12 +209,12 @@ function fetchNewsfeed(readyPromise) {
 
 function initialize() {
 
-    const readyPromise = Vow.promise();
+    const readyPromise = fetchNewsfeed();
 
 // Subscribe to events from popup
-    Mediator.sub(Msg.NewsfeedFriendsGet, () => readyPromise.then(publishNewsfeedFriends).done() );
+    Mediator.sub(Msg.NewsfeedFriendsGet, () => readyPromise.then(publishNewsfeedFriends) );
 
-    Mediator.sub(Msg.NewsfeedGroupsGet, () => readyPromise.then(publishNewsfeedGroups).done() );
+    Mediator.sub(Msg.NewsfeedGroupsGet, () => readyPromise.then(publishNewsfeedGroups) );
 
     readyPromise.then( () => {
         Mediator.sub(Msg.LikesChanged, params => {
@@ -233,14 +230,14 @@ function initialize() {
 
             if (model) model.set('likes', params.likes);
         });
-    }).done();
+    });
 
     readyPromise.then( () => {
         groupItemsColl.on('change add', _.debounce(publishNewsfeedGroups), 0);
         friendItemsColl.on('change add', _.debounce(publishNewsfeedFriends), 0);
-    }).done();
+    });
 
-    readyPromise.then(() => {publishNewsfeedFriends(); publishNewsfeedGroups()} ).done();
+    readyPromise.then(() => {publishNewsfeedFriends(); publishNewsfeedGroups()} );
 
     autoUpdateParams = {
         count: MAX_ITEMS_COUNT
@@ -248,7 +245,6 @@ function initialize() {
     profilesColl.reset();
     groupItemsColl.reset();
     friendItemsColl.reset();
-    fetchNewsfeed(readyPromise);
 }
 
 function publishNewsfeedFriends() {

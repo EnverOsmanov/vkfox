@@ -124,13 +124,14 @@ module.exports = Request = ProxyMethods.connect('../request/request.bg.js', {
     post: (url, data, dataType) => xhrMy('post', url, data, dataType),
 
     api: params => {
-        const promise = Vow.promise();
-        apiQueriesQueue.push({
-            params : params,
-            promise: promise
-        });
+        function promisify(resolve) {
+            apiQueriesQueue.push({
+                params: params,
+                promise: resolve
+            });
+        }
         Request._processApiQueries();
-        return promise;
+        return new Vow.Promise(promisify);
     },
 
     _processApiQueries: _.debounce(function () {
@@ -163,7 +164,7 @@ module.exports = Request = ProxyMethods.connect('../request/request.bg.js', {
                     const response = data.response;
                     if (Array.isArray(response)) {
                         for (let i = 0; i < response.length; i++) {
-                            queriesToProcess[i].promise.fulfill(response[i]);
+                            queriesToProcess[i].promise(response[i]);
                         }
                         Request._processApiQueries();
                     }
@@ -187,11 +188,11 @@ module.exports = Request = ProxyMethods.connect('../request/request.bg.js', {
                     v           : API_VERSION
                 };
 
-                Request
+                return Request
                     .post(`${API_DOMAIN}method/${method}`, params)
-                    .then(handleSuccess, handleFailure)
-                    .done();
-            }).done();
+                    .then(handleSuccess)
+                    .catch(handleFailure);
+            });
         }
     }, API_REQUESTS_DEBOUNCE)
 });

@@ -1,6 +1,5 @@
 "use strict";
 const _                = require('underscore')._,
-    Vow                = require('vow'),
     Backbone           = require('backbone'),
     Request            = require('../request/request.bg.js'),
     User               = require('../users/users.bg.js'),
@@ -16,8 +15,7 @@ const MAX_ITEMS_COUNT  = 50,
     MAX_COMMENTS_COUNT = 3,
     UPDATE_PERIOD      = 2000; //ms
 
-let persistentModel, userId, fetchFeedbacksDebounced,
-    readyPromise = Vow.promise();
+let persistentModel, userId, fetchFeedbacksDebounced;
 
 const autoUpdateNotificationsParams = {
     filters: 'wall,mentions,likes,reposts,followers,friends',
@@ -77,14 +75,6 @@ Mediator.sub('auth:success', data => {
     initialize();
 });
 
-readyPromise.then( () => {
-    itemsColl.on('add change remove', _.debounce( () => {
-        itemsColl.sort();
-        updateLatestFeedbackId();
-        publishData();
-    }));
-    profilesColl.on('change', publishData);
-}).done();
 
 Mediator.sub('likes:changed', params => {
     const changedItemUniqueId = [ params.type, params.item_id, 'user', params.owner_id ].join(':'),
@@ -110,8 +100,6 @@ Mediator.sub('feedbacks:unsubscribe', params => {
         }
     });
 });
-
-Mediator.sub('feedbacks:data:get', () => readyPromise.then(publishData).done() );
 
 //
 //
@@ -358,11 +346,13 @@ function fetchFeedbacks() {
             comments.items.forEach(addRawCommentsItem);
             itemsColl.sort();
         }
-        readyPromise.fulfill();
         fetchFeedbacksDebounced();
     }
 
-    Request.api({code: requestCode}).done(feedbackHandler);
+    return Request
+        .api({code: requestCode})
+        .then(feedbackHandler)
+        .catch(e => console.error("Unsuccessful fetchFeedbacks", e));
 }
 
 
@@ -452,7 +442,7 @@ function tryNotification() {
                         noPopup: feedbacksActive
                     });
                 }
-            }).done();
+            });
         }
     }
 }
@@ -461,11 +451,8 @@ function tryNotification() {
  * Initialize all variables
  */
 function initialize() {
-    if (!readyPromise || readyPromise.isFulfilled()) {
-        if (readyPromise) readyPromise.reject();
+    const readyPromise = fetchFeedbacks();
 
-        readyPromise = Vow.promise();
-    }
     readyPromise.then( () => {
         persistentModel = new PersistentModel({}, {
             name: ['feedbacks', 'background', userId].join(':')
@@ -474,10 +461,20 @@ function initialize() {
 
         updateLatestFeedbackId();
         publishData();
-    }).done();
+    });
+
+    readyPromise.then( () => {
+        itemsColl.on('add change remove', _.debounce( () => {
+            itemsColl.sort();
+            updateLatestFeedbackId();
+            publishData();
+        }));
+        profilesColl.on('change', publishData);
+    });
+
+    Mediator.sub('feedbacks:data:get', () => readyPromise.then(publishData) );
 
     itemsColl.reset();
     profilesColl.reset();
-    fetchFeedbacks();
 }
 

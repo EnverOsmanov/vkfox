@@ -50,9 +50,7 @@ require('angular').module('app')
     })
     .run(function ($location, $rootScope) {
         // default tab is chat
-        const notificationsPromise = Vow.promise(),
-            authPromise = Vow.promise(),
-            READY = 2; //ready status from auth module
+        const READY = 2; //ready status from auth module
 
         $rootScope.$on('$routeChangeSuccess', function (scope, current) {
             let path;
@@ -64,24 +62,32 @@ require('angular').module('app')
                 Mediator.pub('router:lastPath:put', path);
             }
         });
-        Mediator.sub('notifications:queue', function (queue) {
-            notificationsPromise.fulfill(queue);
-        });
-        Mediator.sub('auth:state', function (state) {
-            authPromise.fulfill(state);
-        });
-        Vow.all([notificationsPromise, authPromise]).spread(function (queue, state) {
-            $rootScope.$apply(function () {
-                if (state === READY) {
-                    if (queue.length) {
-                        // queue contains updates from tabs.
-                        // Property 'type' holds value
-                        $location.path('/' + queue[queue.length - 1].type);
-                        $location.replace();
+
+        function notificationsPromisify(resolve) {
+            Mediator.sub('notifications:queue', resolve);
+        }
+
+        function authPromisify(resolve) {
+            Mediator.sub('auth:state', resolve);
+        }
+
+        const notificationsPromise = new Vow.Promise(notificationsPromisify);
+        const authPromise = new Vow.Promise(authPromisify);
+
+        Vow.all([notificationsPromise, authPromise])
+            .then(([queue, state]) => {
+                $rootScope.$apply(function () {
+                    if (state === READY) {
+                        if (queue.length) {
+                            // queue contains updates from tabs.
+                            // Property 'type' holds value
+                            $location.path('/' + queue[queue.length - 1].type);
+                            $location.replace();
+                        }
                     }
-                }
+                });
             });
-        });
+
         authPromise.then(function (state) {
             if (state !== READY) {
                 Mediator.pub('auth:oauth');
