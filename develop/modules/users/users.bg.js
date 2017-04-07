@@ -43,7 +43,7 @@ const publishUids = function (queue) {
         queueItem = queue.pop();
         data = queueItem.uids.map( uid => getProfileById(uid).toJSON() );
 
-        queueItem.promise.fulfill(data);
+        queueItem.promise(data);
     }
 };
 
@@ -112,14 +112,15 @@ module.exports = ProxyMethods.connect('../users/users.bg.js', _.extend({
         const positiveUids = uids.filter(x => x > 0);
 
         return this.getFriendsProfiles().then(function () {
-            const promise = Vow.promise();
 
-            usersGetQueue.push({
-                uids   : positiveUids,
-                promise: promise
-            });
-            processGetUsersQueue(usersGetQueue);
-            return promise;
+            function promisify(resolve) {
+                usersGetQueue.push({
+                    uids: positiveUids,
+                    promise: resolve
+                });
+                processGetUsersQueue(usersGetQueue);
+            }
+            return new Vow.Promise(promisify);
         });
     }
 }, require('../users/name.js')));

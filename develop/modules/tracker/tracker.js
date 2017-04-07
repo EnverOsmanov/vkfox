@@ -105,6 +105,6 @@ module.exports = tracker = {
                     stack,
                     browserVersion
                 ).bind(this);
-            }).done();
+            });
     }
 };

@@ -16,7 +16,7 @@ const model = new Backbone.Model();
 
 let Auth, iframe,
     state       = CREATED,
-    authPromise = Vow.promise();
+    authPromise = Vow.resolve();
 
 function tryLogin() {
     if (!iframe) {
@@ -32,10 +32,10 @@ function freeLogin() {
     iframe = null;
 }
 
-function onSuccess(data) {
+function onSuccess(data, resolve) {
     state = READY;
     Browser.setIconOnline();
-    authPromise.fulfill(data);
+    resolve(data);
 }
 
 // We need to authorize in own window, after user was logined in a tab
@@ -75,15 +75,12 @@ module.exports = Auth = {
             Browser.setIconOffline();
             state = IN_PROGRESS;
 
-            if (authPromise.isFulfilled()) {
-                authPromise = Vow.promise();
-            }
+
+            authPromise = new Vow.Promise(promisify);
 
             tryLogin();
             Auth.retry();
 
-            Mediator.unsub(Msg.AuthSuccess, onSuccess);
-            Mediator.once(Msg.AuthSuccess, onSuccess);
         }
         return authPromise;
     },
@@ -94,3 +91,10 @@ module.exports = Auth = {
 };
 
 Auth.login();
+
+
+function promisify(resolve) {
+
+    Mediator.unsub(Msg.AuthSuccess, data => onSuccess(data, resolve));
+    Mediator.once(Msg.AuthSuccess, data => onSuccess(data, resolve));
+}

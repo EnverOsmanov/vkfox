@@ -75,7 +75,7 @@ require('angular').module('app')
                             profiles: profiles
                         }));
                     }
-                    else return Vow.fulfill({messages: messages, profiles: []});
+                    else return Vow.resolve({messages: messages, profiles: []});
                 });
             }
         };
@@ -148,7 +148,7 @@ require('angular').module('app')
                         [].unshift.apply(dialog.messages, messages.reverse());
                     }
                 });
-            }).done();
+            });
         };
         $scope.unreadHandler = function (event) {
             if ($scope.out) {
