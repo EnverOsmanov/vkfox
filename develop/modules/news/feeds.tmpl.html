@@ -60,5 +60,14 @@
                 --><span ng-if="!$last">, </span>
             </span>
         </div>
+        <div ng-switch-when="audio">
+            <!-- TODO add plurals and gender-->
+            {{"New music:" | i18n}}
+        </div>
+
+        <div ng-switch-when="video">
+            <!-- TODO add plurals and gender-->
+            {{"New video:" | i18n}}
+        </div>
     </ng-switch>
 </item>

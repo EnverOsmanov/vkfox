@@ -24,6 +24,8 @@
     "Liked": "Понравилось",
     "Reposted": "Поделился записью",
     "New friends:": "Новые друзья:",
+    "New music:": "Добавил аудио",
+    "New video:": "Добавил видео",
     "started following you": "хочет добавить в друзья",
     "friend request accepted": "заявка в друзья подтверждена",
     "sent a message": "{NAME} {GENDER, select, male{прислал} female{прислала} other{прислал}} сообщение",

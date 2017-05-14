@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "sourceMap": true,
+    "allowJs": true,
+    "lib": ["es6", "dom"],
+    "typeRoots": ["node_modules/web-ext-types", "node_modules/@types"]
+  }
+}

@@ -1,6 +1,6 @@
 "use strict";
 
-const port = chrome.runtime.connect();
+const port = browser.runtime.connect();
 
 port.postMessage(["auth:iframe", decodeURIComponent(window.location.href)]);
 

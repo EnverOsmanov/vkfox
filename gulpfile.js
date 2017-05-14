@@ -38,7 +38,7 @@ gulp.task("env:development", function () {
 gulp.task("less", () => {
     return gulp.src("./pages/*.less", {cwd: "./develop"})
         .pipe(less())
-        .pipe(gulp.dest("./build/firefox/pages"))
+        .pipe(gulp.dest("./build/firefox/assets"))
 });
 
 gulp.task("preprocess:popup", () => {
@@ -81,10 +81,7 @@ gulp.task("copy:firefox", () => {
     return gulp.src([
         "./develop/pages/background.html",
         "./develop/_locales/**",
-        "./develop/assets/**",
         //best font for window and osx in firefox and chrome
-        "./develop/node_modules/emoji/lib/emoji.css",
-        "./develop/node_modules/emoji/lib/emoji.png",
 
         "./develop/modules/notifications/*.ogg",
         "./develop/modules/auth/oauth.vk.com.js"
@@ -98,6 +95,14 @@ gulp.task("fonts", () => {
         "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
         "./node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
     ], {base: "./node_modules/font-awesome/"})
+      .pipe(gulp.dest("./build/firefox/assets"))
+});
+
+gulp.task("assets", () => {
+    return gulp.src([
+        "./develop/assets/**",
+        "./node_modules/emoji/lib/emoji.png",
+    ])
       .pipe(gulp.dest("./build/firefox/assets"))
 });
 
@@ -151,13 +156,10 @@ Locales.forEach(i18n);
 gulp.task("default", function (cb) {
         runSequence(
             ["env:firefox", "env:development", "clean:firefox"],
-            "less",
-            ["preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"].concat(
-              Locales.map( locale => `i18n-${locale}`)
-            ),
-            "inline_angular_templates",
-            "webpack",
-            ["copy:firefox", "fonts"],
+            ["less", "assets", "fonts",
+                "preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"]
+                .concat(Locales.map( locale => `i18n-${locale}`)),
+            ["inline_angular_templates", "webpack", "copy:firefox"],
              () => cb()
         )
     }
