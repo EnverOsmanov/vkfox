@@ -42,19 +42,26 @@ export const notificationsSettings = new NotificationsSettings({
 }, {name: 'notificationsSettings'});
 
 
-export enum NotifType {
-    CHAT,
-    BUDDIES,
-    NEWS,
+export class NotifType {
+    static CHAT = "chat";
+    static BUDDIES = "buddies";
+    static NEWS = "news"
 }
 
-export class VKNotification extends Model{
-    type: NotifType;
-    title: string;
-    image: string;
-    noBadge: boolean;
-    message: string;
-    noPopup: boolean
+export interface VKNotificationI {
+    type    : NotifType;
+    title   : string;
+    image   : string;
+    noBadge : boolean;
+    message?: string;
+    noPopup?: boolean
+}
+
+class VKNotification extends Model{
+
+    get noBadge(): boolean {
+        return super.get("noBadge")
+    }
 }
 
 export class NotificationQueue extends Collection<VKNotification> {
@@ -66,7 +73,7 @@ export class NotificationQueue extends Collection<VKNotification> {
         this
             .on('add remove reset', () => {
                 Notifications.setBadge(
-                    self.filter( model => !model.get('noBadge'))
+                    self.filter( model => !model.noBadge)
                         .length
                 );
             })

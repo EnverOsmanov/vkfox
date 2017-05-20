@@ -2,7 +2,7 @@
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
 import Settings from "../notifications/settings"
-import {NotificationQueue, notificationsSettings, VKNotification} from "./Notification";
+import {NotificationQueue, notificationsSettings, VKNotificationI} from "./Notification";
 
 let audioInProgress = false;
 
@@ -49,7 +49,7 @@ const Notifications = {
      * @param {Boolean} [data.noBadge]
      * @param {Boolean} [data.noPopup]
      */
-    notify: (data: VKNotification) => notificationQueue.push(data),
+    notify: (data: VKNotificationI) => notificationQueue.add(data),
 
     createPopup: (function () {
         function createPopup(options, message) {

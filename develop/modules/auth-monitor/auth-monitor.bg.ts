@@ -1,3 +1,4 @@
+/*
 "use strict";
 import * as _ from "underscore"
 import * as Config from "../config/config"
@@ -10,10 +11,10 @@ const CHECK_AUTH_PERIOD = 3000; //ms
 let userId;
 
 export default function init() {
-    /**
+    /!**
      * Monitor whether the user is logged/relogged on vk.com.
      * Logout if user signed out. Relogin when user id changed
-     */
+     *!/
     const monitorAuthChanges = _.debounce(function () {
         Request
             .get(Config.VK_BASE + 'feed2.php', null, 'json')
@@ -38,3 +39,4 @@ export default function init() {
     });
 }
 
+*/

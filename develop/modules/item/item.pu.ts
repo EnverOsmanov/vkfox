@@ -104,7 +104,6 @@ function docViewPath() {
             match        = filename.match(/\.([^.]+)$/);
 
         if (match) {
-            console.log(match);
             return ~IMAGE_EXTS.indexOf(match[1].toLowerCase());
         }
     }

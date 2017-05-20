@@ -12,7 +12,7 @@ import PersistentModel from "../persistent-model/persistent-model"
 import Msg from "../mediator/messages"
 import {ProfilesColl} from "./collections/ProfilesColl";
 import {Dialog, DialogColl, Message} from "./collections/DialogColl";
-import {NotifType, VKNotification} from "../notifications/Notification";
+import {NotifType} from "../notifications/Notification";
 import {LPMessage} from "../longpoll/models";
 
 const MAX_HISTORY_COUNT = 10;
@@ -154,14 +154,14 @@ function initialize(data, readyPromise: Promise<void>) {
                                 GENDER: gender
                             });
 
-                            Notifications.notify(new VKNotification({
+                            Notifications.notify({
                                 title,
                                 type   : NotifType.CHAT,
                                 message: lastMessage.body,
                                 image  : profile.photo,
                                 noBadge: chatActive,
                                 noPopup: chatActive
-                            }));
+                            });
                         });
                     }
                 });

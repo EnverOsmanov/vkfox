@@ -110,7 +110,7 @@ class Request {
 
             Auth.getAccessToken().then(function (accessToken) {
                 function handleSuccess(data) {
-                    if (data.execute_errors) console.warn("APIquery", data);
+                    if (data.execute_errors) console.warn("APIquery", executeCode, data);
 
                     const response = data.response;
                     if (Array.isArray(response)) {

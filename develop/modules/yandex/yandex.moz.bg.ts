@@ -15,7 +15,7 @@ export default function init() {
     if (storageModel.get('dialog')) {
         storageModel.set('dialog', false);
         Browser.createTab("/pages/install.html");
-        //Browser.createTab("/pages/popup.html");
     }
     else Auth.login();
+    //Browser.createTab("/pages/popup.html");
 }
