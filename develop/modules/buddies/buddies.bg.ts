@@ -9,7 +9,7 @@ import Notifications from "../notifications/notifications.bg"
 import PersistentSet from "../persistent-set/persistent-set.bg"
 import Msg from "../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
-import {NotifType, VKNotification} from "../notifications/Notification"
+import {NotifType} from "../notifications/Notification"
 
 
 const watchedBuddiesSet = new PersistentSet('watchedBuddies');
@@ -67,12 +67,12 @@ export default function initialize() {
                     })
                 ].join(' ');
 
-                Notifications.notify(new VKNotification({
+                Notifications.notify({
                     title,
                     image  : model.photo,
                     type   : NotifType.BUDDIES,
                     noBadge: true
-                }));
+                });
 
                 buddiesColl.sort();
             }

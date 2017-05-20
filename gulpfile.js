@@ -81,9 +81,6 @@ gulp.task("copy:firefox", () => {
     return gulp.src([
         "./develop/pages/background.html",
         "./develop/_locales/**",
-        //best font for window and osx in firefox and chrome
-
-        "./develop/modules/notifications/*.ogg",
         "./develop/modules/auth/oauth.vk.com.js"
     ], {base: "./develop/"})
       .pipe(gulp.dest("./build/firefox"))

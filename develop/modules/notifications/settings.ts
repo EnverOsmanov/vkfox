@@ -1,5 +1,6 @@
 "use strict";
 export default {
-    standart: 'modules/notifications/standart.ogg',
-    original: 'modules/notifications/original.ogg'
+    standart: "assets/sounds/standart.ogg",
+    original: "assets/sounds/original.ogg",
+    from_vk : "assets/sounds/from_vk.ogg"
 };

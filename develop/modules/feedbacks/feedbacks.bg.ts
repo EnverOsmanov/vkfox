@@ -10,7 +10,7 @@ import PersistentModel from "../persistent-model/persistent-model"
 import Notifications from "../notifications/notifications.bg"
 import {ProfileObj, Profiles} from "./collections/ProfilesColl";
 import {Item, ItemColl} from "./collections/ItemColl";
-import {NotifType, VKNotification} from "../notifications/Notification";
+import {NotifType} from "../notifications/Notification";
 import {
     CommentObj, FeedbackObj, FeedbackRS, FeedbacksCollection,
     NotificationObj, ReplyFeedback, WallPostMentionFeedback
@@ -279,7 +279,10 @@ function addRawNotificationsItem(item: NotificationObj) {
     else parentType = item.type;
 
     if (feedbackType) {
-
+        if (!parent) {
+            console.error("Unknown parent for type ", item.type);
+            return;
+        }
         parent.owner_id = Number(parent.from_id || parent.owner_id);
         const itemID = generateItemID(parentType, parent);
 
@@ -438,7 +441,7 @@ function tryNotification() {
                 // 'mention_commentS' type in notifications
             case 'comments':
             case 'reply':
-                title = makeTitle( I18N.get('left a comment', { NAME: name, GENDER: gender }) );
+                title = I18N.get('left a comment', { NAME: name, GENDER: gender });
                 message = (<ReplyFeedback>notificationItem).text;
                 break;
             default:
@@ -451,14 +454,14 @@ function tryNotification() {
                 const feedbacksActive = Browser.isPopupOpened() && Router.isFeedbackTabActive();
 
                 if (!active) {
-                    Notifications.notify(new VKNotification({
+                    Notifications.notify({
                         type   : NotifType.NEWS,
                         title  : title,
                         message: message,
                         image  : profile.photo,
                         noBadge: feedbacksActive,
                         noPopup: feedbacksActive
-                    }));
+                    });
                 }
             });
         }

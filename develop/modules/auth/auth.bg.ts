@@ -74,8 +74,6 @@ function promisify(resolve) {
 export default class Auth {
 
     static login(resetToken?: boolean, withWindow?: boolean) {
-        console.debug("giveMeLogin", resetToken, withWindow, state, iframe);
-
         state = IN_PROGRESS;
         Browser.setIconOffline();
 
