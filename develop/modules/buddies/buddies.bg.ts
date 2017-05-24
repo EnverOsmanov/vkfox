@@ -17,21 +17,6 @@ const watchedBuddiesSet = new PersistentSet('watchedBuddies');
 
 const publishData = _.debounce( () => Mediator.pub(Msg.BuddiesData, buddiesColl.toJSON()), 0);
 
-
-// entry point
-Mediator.sub(Msg.AuthSuccess, initialize);
-
-Mediator.sub(Msg.BuddiesWatchToggle, function (uid) {
-    if (watchedBuddiesSet.contains(uid)) {
-        watchedBuddiesSet.remove(uid);
-        buddiesColl.get(uid).unset('isWatched');
-    }
-    else {
-        watchedBuddiesSet.add(uid);
-        buddiesColl.get(uid).set('isWatched', true);
-    }
-});
-
 /**
  * Initialize all state
  */
@@ -78,6 +63,18 @@ export default function initialize() {
             }
             publishData();
         });
+    });
+
+
+    Mediator.sub(Msg.BuddiesWatchToggle, function (uid) {
+        if (watchedBuddiesSet.contains(uid)) {
+            watchedBuddiesSet.remove(uid);
+            buddiesColl.get(uid).unset('isWatched');
+        }
+        else {
+            watchedBuddiesSet.add(uid);
+            buddiesColl.get(uid).set('isWatched', true);
+        }
     });
 }
 

@@ -10,3 +10,12 @@ export interface ApiQuery {
     resolve(value: any): void
     reject(value: Error): void
 }
+
+// Custom errors
+
+export class AccessTokenError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, AccessTokenError.prototype)
+    }
+}

@@ -86,7 +86,7 @@ export interface VideoFeedback extends FeedbackObj {
     vid     : number
 }
 
-interface FeedbackObjShort {
+export interface FeedbackObjShort {
     owner_id: number
 }
 

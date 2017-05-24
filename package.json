@@ -1,6 +1,6 @@
 {
   "name": "vkfox",
-  "version": "5.3.9",
+  "version": "5.3.12",
   "license": "WTFPL",
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "gulp-plumber": "^1.1.0",
     "gulp-preprocess": "^2.0.0",
     "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^2.0.0",
+    "gulp-uglify": "^3.0.0",
     "less": "^2.7.1",
     "node-notifier": "^5.0.2",
     "resolve": "^1.1.7",

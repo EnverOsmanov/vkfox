@@ -12,11 +12,12 @@ import {ProfileObj, Profiles} from "./collections/ProfilesColl";
 import {Item, ItemColl} from "./collections/ItemColl";
 import {NotifType} from "../notifications/Notification";
 import {
-    CommentObj, FeedbackObj, FeedbackRS, FeedbacksCollection,
+    CommentObj, FeedbackObj, FeedbackObjShort, FeedbackRS, FeedbacksCollection,
     NotificationObj, ReplyFeedback, WallPostMentionFeedback
 } from "./collections/FeedBacksCollection";
 import Msg from "../mediator/messages";
 import {LikesChanged} from "../newsfeed/models";
+import {AccessTokenError} from "../request/models";
 
 /**
  * Responsible for "News -> My" page
@@ -54,7 +55,8 @@ const publishData = _.debounce(function publishData() {
     function itemsCollJS() {
         return itemsColl.map(item => {
             const itemJS = item.toJSON();
-            itemJS["feedbacks"] = item.feedbacks.toJSON();
+            if (item.feedbacks) itemJS["feedbacks"] = item.feedbacks.toJSON();
+
             return itemJS
         })
     }
@@ -261,8 +263,9 @@ function addRawNotificationsItem(item: NotificationObj) {
     if (!isSupportedType(item.type)) return;
 
     if (item.type === 'friend_accepted') {
+        console.debug(item);
         parentType = item.type;
-        parent     = <FeedbackObj>feedback;
+        //parent     = <FeedbackObjShort[]>feedback;
     }
     else if (item.type.indexOf('_') !== -1) {
         const typeTokens = item.type.split('_');
@@ -279,10 +282,6 @@ function addRawNotificationsItem(item: NotificationObj) {
     else parentType = item.type;
 
     if (feedbackType) {
-        if (!parent) {
-            console.error("Unknown parent for type ", item.type);
-            return;
-        }
         parent.owner_id = Number(parent.from_id || parent.owner_id);
         const itemID = generateItemID(parentType, parent);
 
@@ -363,10 +362,17 @@ function fetchFeedbacks() {
         }
     }
 
+    function handleError(e: Error) {
+        if (e instanceof AccessTokenError) {
+            console.error("Unsuccessful fetchFeedbacks... Retrying", e.message)
+        }
+        else console.error("Unsuccessful fetchFeedbacks... Retrying", e)
+    }
+
     return Request
         .api({ code })
         .then(feedbackHandler)
-        .catch(e => console.error("Unsuccessful fetchFeedbacks", e))
+        .catch(handleError)
         .then(fetchFeedbacksDebounced);
 }
 

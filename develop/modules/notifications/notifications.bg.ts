@@ -3,6 +3,7 @@ import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
 import Settings from "../notifications/settings"
 import {NotificationQueue, notificationsSettings, VKNotificationI} from "./Notification";
+import NotificationOptions = browser.notifications.NotificationOptions;
 
 let audioInProgress = false;
 
@@ -54,15 +55,15 @@ const Notifications = {
     createPopup: (function () {
         function createPopup(options, message) {
             getBase64FromImage(options.image, (base64) => {
-                try {
-                    browser.notifications.create(_.uniqueId(), {
-                        type: 'basic',
-                        title: options.title,
-                        message: message,
-                        iconUrl: base64
-                    }).then(() => {});
-                }
-                catch (e) { console.log(e) }
+                const notificationOptions: NotificationOptions = {
+                    type   : "basic",
+                    title  : options.title,
+                    message: message,
+                    iconUrl: base64
+                };
+
+                browser.notifications.create(_.uniqueId(), notificationOptions)
+                    .catch(e => console.error("Failed to create notification", e));
             });
         }
 
