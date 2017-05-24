@@ -3,6 +3,7 @@ import Request from "../request/request.bg";
 import Mediator from "../mediator/mediator.bg";
 import Msg from "../mediator/messages";
 import {LongPollRS, LongPollServerRS} from "./models";
+import {AccessTokenError} from "../request/models";
 
 const LONG_POLL_WAIT = 25,
     DEBOUNCE_RATE    = 1000;
@@ -44,7 +45,11 @@ function enableLongPollUpdates() {
 }
 
 function handleError(e: Error) {
-    console.error("LongPoll failed... Retrying", e);
+    if (e instanceof AccessTokenError) {
+        console.error("LongPoll failed... Retrying", e.message)
+    }
+    else console.error("LongPoll failed... Retrying", e);
+
     setTimeout(enableLongPollUpdates, DEBOUNCE_RATE);
 }
 

@@ -5,7 +5,7 @@ import ProxyMethods from '../proxy-methods/proxy-methods.bg'
 import * as Vow from 'vow'
 import * as _ from "underscore"
 import Auth from '../auth/auth.bg'
-import {ApiOptions, ApiQuery} from "./models";
+import {AccessTokenError, ApiOptions, ApiQuery} from "./models";
 
 const apiQueriesQueue: ApiQuery[] = [];
 
@@ -51,14 +51,6 @@ function querystring(params: object): string {
  * @param {Object|String} data to send
  */
 function xhrMy(type: string, url: string, data: string|object): Promise<any> {
-    // Custom errors
-
-    class AccessTokenError extends Error {
-        constructor(message?: string) {
-            super(message);
-            Object.setPrototypeOf(this, AccessTokenError.prototype)
-        }
-    }
 
     function handleResponse(response: Response): Promise<any> {
         if (response.status === 401) {
@@ -110,6 +102,10 @@ class Request {
 
             Auth.getAccessToken().then(function (accessToken) {
                 function handleSuccess(data) {
+                    function rejectAll() {
+                        queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
+                    }
+
                     if (data.execute_errors) console.warn("APIquery", executeCode, data);
 
                     const response = data.response;
@@ -118,6 +114,10 @@ class Request {
                             queriesToProcess[i].resolve(response[i]);
                         }
                         Request._processApiQueries();
+                    }
+                    else if (data.error && data.error.error_msg) {
+                        Auth.login(true)
+                            .then(rejectAll)
                     }
                     else {
                         console.error(`response is not array`, data);

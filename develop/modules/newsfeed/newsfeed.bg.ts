@@ -6,6 +6,7 @@ import Mediator from "../mediator/mediator.bg"
 import Msg from "../mediator/messages"
 import {Profiles} from "../feedbacks/collections/ProfilesColl";
 import {Item, ItemDulpColl, ItemObj, ItemsColl, LikesChanged, NewsfeedResp, Photo, Post, ProfilesColl} from "./models";
+import {AccessTokenError} from "../request/models";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -180,7 +181,11 @@ function fetchNewsfeed() {
     }
 
     function handleError(e: Error) {
-        console.error("Fetch newsfeed failed... Retrying", e);
+        if (e instanceof AccessTokenError) {
+            console.error("Fetch newsfeed failed... Retrying", e.message)
+        }
+        else console.error("Fetch newsfeed failed... Retrying", e);
+
         setTimeout(fetchNewsfeed, UPDATE_PERIOD);
     }
 
