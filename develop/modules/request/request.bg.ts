@@ -5,7 +5,8 @@ import ProxyMethods from '../proxy-methods/proxy-methods.bg'
 import * as Vow from 'vow'
 import * as _ from "underscore"
 import Auth from '../auth/auth.bg'
-import {AccessTokenError, ApiOptions, ApiQuery} from "./models";
+import {AccessTokenError, ApiOptions, ApiQuery, ApiResponse} from "./models";
+import {error} from "util";
 
 const apiQueriesQueue: ApiQuery[] = [];
 
@@ -101,14 +102,22 @@ class Request {
             const executeCode = `return [${executeCodeTokens}];`;
 
             Auth.getAccessToken().then(function (accessToken) {
-                function handleSuccess(data) {
+                function handleSuccess(data: ApiResponse) {
                     function rejectAll() {
                         queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
                     }
 
-                    if (data.execute_errors) console.warn("APIquery", executeCode, data);
+                    if (data.execute_errors) {
+                        const notServerErrors = data.execute_errors.filter( error => error.error_code != 10);
 
-                    const response = data.response;
+                        function haveAllResponses() {
+                            return data.response.length != queriesToProcess.length
+                        }
+
+                        if (notServerErrors.length > 0 && haveAllResponses) console.warn("APIquery", executeCode, data);
+                    }
+
+                    const { response } = data;
                     if (Array.isArray(response)) {
                         for (let i = 0; i < response.length; i++) {
                             queriesToProcess[i].resolve(response[i]);

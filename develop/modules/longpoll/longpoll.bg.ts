@@ -55,5 +55,5 @@ function handleError(e: Error) {
 
 
 export default function init() {
-    Mediator.sub(Msg.AuthSuccess, enableLongPollUpdates);
+    Mediator.sub(Msg.AuthToken, enableLongPollUpdates);
 }

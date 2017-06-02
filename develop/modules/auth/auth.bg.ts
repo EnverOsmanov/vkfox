@@ -66,8 +66,8 @@ function onAuthIframe(url: string) {
 
 function promisify(resolve) {
 
-    Mediator.unsub(Msg.AuthSuccess, data => onSuccess(data, resolve));
-    Mediator.once(Msg.AuthSuccess, data => onSuccess(data, resolve));
+    Mediator.unsub(Msg.AuthToken, data => onSuccess(data, resolve));
+    Mediator.once(Msg.AuthToken, data => onSuccess(data, resolve));
 }
 
 
@@ -103,6 +103,7 @@ export default class Auth {
         Mediator.sub(Msg.AuthStateGet, () => Mediator.pub(Msg.AuthState, state) );
         Mediator.sub(Msg.AuthOauth, () => Auth.login(false, true) );
 
-        model.on("change:userId", () => Mediator.pub(Msg.AuthSuccess, model.toJSON()) );
+        model.on("change:userId", () => Mediator.pub(Msg.AuthUser, model.toJSON()) );
+        model.on("change:accessToken", () => Mediator.pub(Msg.AuthToken, model.toJSON()) );
     }
 }
