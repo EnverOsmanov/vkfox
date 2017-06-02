@@ -12,7 +12,7 @@ import {ProfileObj, Profiles} from "./collections/ProfilesColl";
 import {Item, ItemColl} from "./collections/ItemColl";
 import {NotifType} from "../notifications/Notification";
 import {
-    CommentObj, FeedbackObj, FeedbackObjShort, FeedbackRS, FeedbacksCollection,
+    CommentObj, Comments, FeedbackObj, FeedbackRS, FeedbacksCollection,
     NotificationObj, ReplyFeedback, WallPostMentionFeedback
 } from "./collections/FeedBacksCollection";
 import Msg from "../mediator/messages";
@@ -79,9 +79,12 @@ export default function init() {
 
     const readyPromise = fetchFeedbacks();
     // entry point
-    Mediator.sub(Msg.AuthSuccess, data => {
+    Mediator.sub(Msg.AuthToken, () => initialize(readyPromise));
+
+    Mediator.sub(Msg.AuthUser, data => {
         userId = data.userId;
-        initialize(readyPromise);
+        itemsColl.reset();
+        profilesColl.reset();
     });
 
     Mediator.sub(Msg.LikesChanged, onLikesChanged);
@@ -342,8 +345,13 @@ function fetchFeedbacks() {
     ].join('');
 
     function feedbackHandler(response: FeedbackRS) {
-        const { notifications, comments } = response;
+        const { notifications } = response;
+        let comments: Comments;
 
+        if (response.comments === false) console.debug("Comments", response.comments);
+        else {
+            comments = <Comments>response.comments
+        }
         autoUpdateNotificationsParams.start_time = autoUpdateCommentsParams.start_time = response.time;
 
         // first item in notifications contains quantity
@@ -478,9 +486,6 @@ function tryNotification() {
  * Initialize all variables
  */
 function initialize(readyPromise: Promise<void>) {
-
-    itemsColl.reset();
-    profilesColl.reset();
 
     readyPromise.then( () => {
         persistentModel = new PersistentModel({}, {

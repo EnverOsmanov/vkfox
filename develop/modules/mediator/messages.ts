@@ -2,7 +2,8 @@
 
 const Msg = {
 
-    AuthSuccess : "auth:success",
+    AuthUser    : "auth:user",
+    AuthToken   : "auth:token",
     AuthIframe  : "auth:iframe",
     AuthStateGet: "auth:state:get",
     AuthState   : "auth:state",

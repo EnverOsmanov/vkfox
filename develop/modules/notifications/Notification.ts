@@ -86,7 +86,7 @@ export class NotificationQueue extends Collection<VKNotification> {
                 }
             });
 
-        Mediator.sub(Msg.AuthSuccess, () => self.reset() );
+        Mediator.sub(Msg.AuthUser, () => self.reset() );
 
         // Remove seen updates
         Mediator.sub(Msg.RouterChange, function (params) {

@@ -35,14 +35,17 @@ const publishData = _.debounce( () => {
 
 
 export default function init() {
-    dialogColl.reset();
-    profilesColl.reset();
 
     const readyPromise = getDialogs()
         .then(getUnreadMessages)
         .then(fetchProfiles);
 
-    Mediator.sub(Msg.AuthSuccess, data => initialize(data, readyPromise) );
+    Mediator.sub(Msg.AuthToken, () => initialize(readyPromise) );
+    Mediator.sub(Msg.AuthUser, data => {
+        userId = data.userId;
+        dialogColl.reset();
+        profilesColl.reset();
+    });
 }
 
 
@@ -100,7 +103,7 @@ function fetchProfiles(): Promise<void> {
 /**
  * Initialize all internal state
  */
-function initialize(data, readyPromise: Promise<void>) {
+function initialize(readyPromise: Promise<void>) {
     readyPromise.then( () => {
 
         function notifyAboutChange() {
@@ -120,8 +123,6 @@ function initialize(data, readyPromise: Promise<void>) {
         readyPromise.then(() => (<any>window).cdg = 3);
         readyPromise.then(publishData)
     } );
-
-    userId = data.userId;
 
     readyPromise.then(function () {
         persistentModel = new PersistentModel({}, {

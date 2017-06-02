@@ -125,7 +125,7 @@ interface Notifications {
     groups  : GroupObj[]
 }
 
-interface Comments {
+export interface Comments {
     items: CommentObj[]
 
     profiles: ProfileObj[]
@@ -134,6 +134,6 @@ interface Comments {
 
 export interface FeedbackRS {
     notifications: Notifications
-    comments     : Comments
+    comments     : Comments | boolean
     time         : number
 }

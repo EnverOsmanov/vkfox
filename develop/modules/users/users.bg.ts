@@ -18,9 +18,7 @@ const usersColl = new ProfilesColl();
 
 const dropOldNonFriendsProfiles = _.debounce(function () {
     if (!inProgress) {
-        usersColl.remove(usersColl.filter(function (model) {
-            return !model.get('isFriend');
-        }));
+        usersColl.remove(usersColl.filter( model => !model.get('isFriend') ));
     }
     dropOldNonFriendsProfiles();
 }, DROP_PROFILES_INTERVAL);
@@ -79,7 +77,7 @@ const processGetUsersQueue = _.debounce(function (processedQueue) {
 
 initialize();
 
-Mediator.sub(Msg.AuthSuccess, () => initialize() );
+Mediator.sub(Msg.AuthToken, () => initialize() );
 
 dropOldNonFriendsProfiles();
 

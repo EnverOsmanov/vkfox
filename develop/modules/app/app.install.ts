@@ -30,7 +30,7 @@ function AppCtrl($scope) {
             onButtonClick: (makeAuth) => {
 
                 if (makeAuth) {
-                    Mediator.once(Msg.AuthSuccess, () => {
+                    Mediator.once(Msg.AuthToken, () => {
                         $scope.$apply( () => $scope.step++ );
                     });
                     Mediator.pub(Msg.AuthOauth);

@@ -19,3 +19,17 @@ export class AccessTokenError extends Error {
         Object.setPrototypeOf(this, AccessTokenError.prototype)
     }
 }
+
+export interface ApiResponse {
+    response: any[];
+
+    execute_errors: ApiError[]
+
+    error ?: ApiError;
+}
+
+interface ApiError {
+    error_code: number;
+    error_msg: string;
+    method: string;
+}
