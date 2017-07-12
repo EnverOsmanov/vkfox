@@ -1,6 +1,7 @@
 "use strict";
 import * as _ from "underscore"
 import ProxyMethods from '../proxy-methods/proxy-methods.bg';
+import Tab = browser.tabs.Tab;
 
 const BADGE_COLOR: [number, number, number, number] = [231, 76, 60, 255],
     ICON_ONLINE = {
@@ -14,63 +15,98 @@ const BADGE_COLOR: [number, number, number, number] = [231, 76, 60, 255],
 
 
 
-const Browser = {
-    init: () => {
+class Browser {
+    static init() {
 
         // Set up popup and popup comminication
         browser.browserAction.setBadgeBackgroundColor({color: BADGE_COLOR});
 
         // overcome circular dependency through mediator
         _.defer( () => ProxyMethods.connect('../browser/browser.bg', Browser) );
-    },
+    }
 
-    getVkfoxVersion: () => browser.management.getSelf().then( info => info.version),
+    static getVkfoxVersion() {
+        return browser.management.getSelf().then( info => info.version)
+    }
+
     /**
      * Sets icon to online status
      */
-    setIconOnline: () => browser.browserAction.setIcon({ path: ICON_ONLINE }),
+    static setIconOnline() {
+        return browser.browserAction.setIcon({ path: ICON_ONLINE })
+    }
+
     /**
      * Sets icon to offline status
      */
-    setIconOffline: () => browser.browserAction.setIcon({ path: ICON_OFFLINE }),
+    static setIconOffline() {
+        return browser.browserAction.setIcon({ path: ICON_OFFLINE })
+    }
+
     /**
      * @param {String|Number} text
      */
-    setBadgeText: text => browser.browserAction.setBadgeText({ text: String(text) }),
+    static setBadgeText(text: string | number) {
+        return browser.browserAction.setBadgeText({ text: String(text) })
+    }
+
     /**
      * Says whether popup is visible
      *
      * @returns {Boolean}
      */
-    isPopupOpened(): boolean {
+    static isPopupOpened(): boolean {
         return Boolean(browser.extension.getViews({type: "popup"}).length)
-    },
+    }
+
     /**
      * Says whether vk.com is currently active tab
      *
      * @returns {Promise<Boolean>} Returns promise that resolves to Boolean
      */
-    isVKSiteActive: () => {
+    static isVKSiteActive(): Promise<boolean> {
         return browser.tabs
             .query({active: true})
-            .then(tabs => {
-                if (tabs.length) return ~tabs[0].url.indexOf('vk.com');
+            .then( tabs => {
+                if (tabs.length) return tabs[0].url.includes("vk.com");
                 else return false;
             });
 
-    },
-    createTab: url => browser.tabs.create({ url }),
+    }
+
+    static createTab(url: string): Promise<Tab> {
+        return browser.tabs.create({url})
+    }
+
+
+    static getOrCreate(url: string): Promise<Tab> {
+        function findOrCreate(tabs: Tab[]) {
+            const found = tabs.find( tab => tab.url.includes(url));
+            if (found && !found.selected) browser.tabs.update(found.id, {active: true});
+
+            return found ? found : Browser.createTab(url)
+        }
+
+        return browser.tabs.query({})
+            .then(findOrCreate)
+    }
+
     /**
      * Closes all tabs that contain urlFragment in its url
      */
-    closeTabs: urlFragment => {
-        function closeTab(tab) {
-            if (~tab.url.indexOf(urlFragment)) browser.tabs.remove(tab.id);
+    static closeTabs(urlFragment: string): Promise<void> {
+        function closeTabs(tabs: Tab[]) {
+            const tabIds =
+                tabs.filter( tab => tab.url.includes(urlFragment))
+                    .map( tab => tab.id );
+
+            return browser.tabs.remove(tabIds);
         }
 
-        browser.tabs.query({}).then( tabs => tabs.forEach(closeTab) );
+        return browser.tabs.query({})
+            .then(closeTabs)
     }
-};
+}
 
 
 export default Browser

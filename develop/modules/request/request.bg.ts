@@ -5,8 +5,7 @@ import ProxyMethods from '../proxy-methods/proxy-methods.bg'
 import * as Vow from 'vow'
 import * as _ from "underscore"
 import Auth from '../auth/auth.bg'
-import {AccessTokenError, ApiOptions, ApiQuery, ApiResponse} from "./models";
-import {error} from "util";
+import {AccessTokenError, ApiOptions, ApiQuery, ApiResponse, WithApiError} from "./models";
 
 const apiQueriesQueue: ApiQuery[] = [];
 
@@ -15,7 +14,7 @@ const API_QUERIES_PER_REQUEST = 15;
 const API_REQUESTS_DEBOUNCE   = 400;
 const API_VERSION             = 4.99;
 const REAUTH_DEBOUNCE         = 2000;
-const XHR_TIMEOUT             = 30000;
+const networkErrorMessage = "NetworkError when attempting to fetch resource.";
 
 
 /**
@@ -44,6 +43,11 @@ function querystring(params: object): string {
     }
     return query.join('&');
 }
+
+function wait() {
+    return new Promise( (resolve) => setTimeout(resolve, REAUTH_DEBOUNCE))
+}
+
 /**
  * Make HTTP Request
  *
@@ -55,7 +59,7 @@ function xhrMy(type: string, url: string, data: string|object): Promise<any> {
 
     function handleResponse(response: Response): Promise<any> {
         if (response.status === 401) {
-            console.debug("Some error", response)
+            console.debug("Some error", response);
             return Auth
                 .login(true)
                 .then(() => xhrMy(type, url, data))
@@ -87,71 +91,89 @@ function xhrMy(type: string, url: string, data: string|object): Promise<any> {
         else return fetch(url + '?' + encodedData, {credentials: "include"});
     }
 
+    function handleError(e: Error) {
+        if (e instanceof TypeError && e.message == networkErrorMessage) {
+            console.debug("[F]: Network, retrying", url, data);
+            return wait().then(() => xhrMy(type, url, data))
+        }
+        else return Promise.reject(e);
+    }
+
     return myFetch()
-        .then(handleResponse);
+        .then(handleResponse, handleError);
 }
+
+function processingSmallPart(queriesToProcess: ApiQuery[]) {
+    const executeCodeTokens = queriesToProcess.map( query => query.params.code.replace(/^return\s*|;$/g, ''));
+
+    const executeCode = `return [${executeCodeTokens}];`;
+
+    Auth.getAccessToken().then(function (accessToken) {
+        function handleSuccess(data: ApiResponse) {
+            function rejectAll() {
+                queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
+            }
+
+            if (data.execute_errors) {
+                const notServerErrors = data.execute_errors.filter( error => error.error_code != 10);
+
+                function haveAllResponses() {
+                    return data.response.length != queriesToProcess.length
+                }
+
+                if (notServerErrors.length > 0 && haveAllResponses) console.warn("APIquery", executeCode, data);
+            }
+
+            const { response } = data;
+            if (Array.isArray(response)) {
+                for (let i = 0; i < response.length; i++) {
+                    queriesToProcess[i].resolve(response[i]);
+                }
+                Request._processApiQueries();
+            }
+            else if (data.error && data.error.error_msg) {
+                if (data.error.error_code == 5) {
+                    console.debug("[R]... Retrying", data.error.error_msg);
+                    Auth.login(true)
+                        .then(() => processingSmallPart(queriesToProcess));
+                }
+                else {
+                    console.debug("[R]", data.error);
+                    Auth.login(true)
+                        .then(rejectAll)
+                }
+            }
+            else {
+                console.error(`response is not array`, data);
+            }
+        }
+
+        function handleFailure(e) {
+            queriesToProcess.forEach( query => query.reject(e))
+        }
+
+        const params = {
+            method      : 'execute',
+            code        : executeCode,
+            access_token: accessToken,
+            v           : API_VERSION
+        };
+        const method = "execute";
+
+        return Request
+            .post(`${API_DOMAIN}method/${method}`, params)
+            .then(handleSuccess)
+            .catch(handleFailure);
+    });
+}
+
 
 class Request {
 
     static _processApiQueries = _.debounce(function () {
         if (apiQueriesQueue.length) {
             const queriesToProcess = apiQueriesQueue.splice(0, API_QUERIES_PER_REQUEST);
-
-            const executeCodeTokens = queriesToProcess.map( query => query.params.code.replace(/^return\s*|;$/g, ''));
-
-            const executeCode = `return [${executeCodeTokens}];`;
-
-            Auth.getAccessToken().then(function (accessToken) {
-                function handleSuccess(data: ApiResponse) {
-                    function rejectAll() {
-                        queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
-                    }
-
-                    if (data.execute_errors) {
-                        const notServerErrors = data.execute_errors.filter( error => error.error_code != 10);
-
-                        function haveAllResponses() {
-                            return data.response.length != queriesToProcess.length
-                        }
-
-                        if (notServerErrors.length > 0 && haveAllResponses) console.warn("APIquery", executeCode, data);
-                    }
-
-                    const { response } = data;
-                    if (Array.isArray(response)) {
-                        for (let i = 0; i < response.length; i++) {
-                            queriesToProcess[i].resolve(response[i]);
-                        }
-                        Request._processApiQueries();
-                    }
-                    else if (data.error && data.error.error_msg) {
-                        Auth.login(true)
-                            .then(rejectAll)
-                    }
-                    else {
-                        console.error(`response is not array`, data);
-                        // force relogin on API error
-                        //forceReauth();
-                    }
-                }
-
-                function handleFailure(e) {
-                    queriesToProcess.forEach( query => query.reject(e))
-                }
-
-                const params = {
-                    method      : 'execute',
-                    code        : executeCode,
-                    access_token: accessToken,
-                    v           : API_VERSION
-                };
-                const method = "execute";
-
-                return Request
-                    .post(`${API_DOMAIN}method/${method}`, params)
-                    .then(handleSuccess)
-                    .catch(handleFailure);
-            });
+            processingSmallPart(queriesToProcess)
         }
     }, API_REQUESTS_DEBOUNCE);
 

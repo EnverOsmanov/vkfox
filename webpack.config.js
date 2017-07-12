@@ -28,7 +28,6 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js"],
     alias: {
       angularKeypress  : 'angular-ui-utils/modules/keypress/keypress.js',
-      bootstrapTooltip : 'bootstrap/js/tooltip.js',
       bootstrapDropdown: 'bootstrap/js/dropdown.js'
     }
   },

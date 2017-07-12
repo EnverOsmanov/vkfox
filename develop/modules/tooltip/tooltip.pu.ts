@@ -1,7 +1,7 @@
 "use strict";
 import * as $ from "jquery"
 (<any>window).jQuery = $;
-import 'bootstrapTooltip';
+import "bootstrap/js/tooltip.js";
 
 export default function init() {
     $(document).ready(() =>

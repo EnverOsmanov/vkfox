@@ -40,7 +40,7 @@ export default function init() {
         .then(getUnreadMessages)
         .then(fetchProfiles);
 
-    Mediator.sub(Msg.AuthToken, () => initialize(readyPromise) );
+    initialize(readyPromise);
     Mediator.sub(Msg.AuthUser, data => {
         userId = data.userId;
         dialogColl.reset();
@@ -54,15 +54,13 @@ export default function init() {
  * Updates "latestMessageId" with current last message
  * Should be called on every incoming message
  */
-function updateLatestMessageId() {
+function updateLatestMessageId(): void {
 
     if (dialogColl.size()) {
-        const messages = dialogColl.first().get('messages');
+        const messages = dialogColl.first().messages;
+        const latestMessageId = messages[messages.length - 1].mid;
 
-        persistentModel.set(
-            'latestMessageId',
-            messages[messages.length - 1].mid
-        );
+        persistentModel.set("latestMessageId", latestMessageId);
     }
 }
 
@@ -104,70 +102,24 @@ function fetchProfiles(): Promise<void> {
  * Initialize all internal state
  */
 function initialize(readyPromise: Promise<void>) {
-    readyPromise.then( () => {
 
-        function notifyAboutChange() {
-            dialogColl.sort();
-            updateLatestMessageId();
-            publishData();
-        }
+    Mediator.sub(Msg.ChatDataGet, () => readyPromise.then(publishData) );
 
-        Mediator.sub(Msg.LongpollUpdates, onUpdates);
+    Mediator.sub(Msg.LongpollUpdates, onUpdates);
 
-        // Notify about changes
-        dialogColl.on("change", notifyAboutChange);
-        profilesColl.on('change', publishData);
+    // Notify about changes
+    dialogColl.on("change", notifyAboutChange);
+    profilesColl.on('change', publishData);
+
+
+    persistentModel = new PersistentModel({}, {
+        name: ['chat', 'background', userId].join(':')
     });
 
-    Mediator.sub(Msg.ChatDataGet, () => {
-        readyPromise.then(() => (<any>window).cdg = 3);
-        readyPromise.then(publishData)
-    } );
+    persistentModel.on('change:latestMessageId', onLatestMessageIdChange);
 
-    readyPromise.then(function () {
-        persistentModel = new PersistentModel({}, {
-            name: ['chat', 'background', userId].join(':')
-        });
 
-        persistentModel.on('change:latestMessageId', function () {
-            const messages = dialogColl.first().messages;
-            const lastMessage = messages[messages.length - 1];
-
-            // don't notify on first run,
-            // when there is no previous value
-            if (!this._previousAttributes.hasOwnProperty('latestMessageId')) {
-                return;
-            }
-
-            if (!lastMessage.out) {
-                // Don't notify, when active tab is vk.com
-                Browser.isVKSiteActive().then(function (active) {
-                    if (!active) {
-                        fetchProfiles().then(function () {
-                            const profile = profilesColl.get(lastMessage.uid).toJSON();
-                            const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
-
-                            const gender = profile.sex === 1 ? 'female' : 'male';
-                            const name = Users.getName(profile);
-
-                            const title = I18N.get('sent a message', {
-                                NAME: name,
-                                GENDER: gender
-                            });
-
-                            Notifications.notify({
-                                title,
-                                type   : NotifType.CHAT,
-                                message: lastMessage.body,
-                                image  : profile.photo,
-                                noBadge: chatActive,
-                                noPopup: chatActive
-                            });
-                        });
-                    }
-                });
-            }
-        });
+    readyPromise.then( () => {
         updateLatestMessageId();
         publishData();
     });
@@ -350,4 +302,53 @@ function addNewMessage(update: LPMessage) {
             return message;
         });
     }).catch(e => console.error(`Error during AddNewMessage`, e));
+}
+
+
+function notifyAboutChange() {
+    dialogColl.sort();
+    updateLatestMessageId();
+    publishData();
+}
+
+
+function onLatestMessageIdChange() {
+    function notifyAboutMessage() {
+
+        const profile = profilesColl.get(lastMessage.uid).toJSON();
+        const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
+
+        const gender = profile.sex === 1 ? 'female' : 'male';
+        const name = Users.getName(profile);
+
+        const title = I18N.get('sent a message', {
+            NAME: name,
+            GENDER: gender
+        });
+
+        Notifications.notify({
+            title,
+            type   : NotifType.CHAT,
+            message: lastMessage.body,
+            image  : profile.photo,
+            noBadge: chatActive,
+            noPopup: chatActive
+        });
+    }
+
+    const messages = dialogColl.first().messages;
+    const lastMessage = messages[messages.length - 1];
+
+    // don't notify on first run,
+    // when there is no previous value
+    if (!this._previousAttributes.hasOwnProperty('latestMessageId')) {
+        return;
+    }
+
+    if (!lastMessage.out) {
+        // Don't notify, when active tab is vk.com
+        Browser.isVKSiteActive().then( (active: boolean) => {
+            if (!active) fetchProfiles().then(notifyAboutMessage);
+        });
+    }
 }

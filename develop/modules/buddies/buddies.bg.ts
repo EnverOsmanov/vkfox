@@ -10,6 +10,7 @@ import PersistentSet from "../persistent-set/persistent-set.bg"
 import Msg from "../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
 import {NotifType} from "../notifications/Notification"
+import {ProfileI} from "../chat/collections/ProfilesColl";
 
 
 const watchedBuddiesSet = new PersistentSet('watchedBuddies');
@@ -101,7 +102,7 @@ function saveOriginalBuddiesOrder() {
  *
  * @returns [jQuery.Deferred]
  */
-function getFavouriteUsers() {
+function getFavouriteUsers(): Promise<ProfileI[]> {
     return Request
         .api({ code: 'return API.fave.getUsers()' })
         .then( response => {

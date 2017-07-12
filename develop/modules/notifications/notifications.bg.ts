@@ -9,7 +9,7 @@ let audioInProgress = false;
 
 const notificationQueue = new NotificationQueue();
 
-function getBase64FromImage(url, onSuccess, onError?: any) {
+function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: any) {
     const xhr = new XMLHttpRequest();
 
     xhr.responseType = "arraybuffer";
@@ -37,7 +37,7 @@ function getBase64FromImage(url, onSuccess, onError?: any) {
     xhr.send();
 }
 
-const Notifications = {
+export default class Notifications {
 
     /**
      * Create notifications. Usually you will need only this method
@@ -50,33 +50,35 @@ const Notifications = {
      * @param {Boolean} [data.noBadge]
      * @param {Boolean} [data.noPopup]
      */
-    notify: (data: VKNotificationI) => notificationQueue.add(data),
+    static notify(data: VKNotificationI) {
+        return notificationQueue.add(data)
+    }
 
-    createPopup: (function () {
-        function createPopup(options, message) {
-            getBase64FromImage(options.image, (base64) => {
-                const notificationOptions: NotificationOptions = {
-                    type   : "basic",
-                    title  : options.title,
-                    message: message,
-                    iconUrl: base64
-                };
+    static createPopup(options: VKNotificationI) {
+        function createP(base64: string) {
+            const message = (popups.showText && options.message) || '';
 
-                browser.notifications.create(_.uniqueId(), notificationOptions)
-                    .catch(e => console.error("Failed to create notification", e));
-            });
+            const notificationOptions: NotificationOptions = {
+                type   : "basic",
+                title  : options.title,
+                message: message,
+                iconUrl: base64
+            };
+
+            return browser.notifications.create(_.uniqueId(), notificationOptions)
+                .catch(e => console.error("Failed to create notification", e));
         }
 
-        return (options) => {
-            const popups = notificationsSettings.get('popups');
+        const popups = notificationsSettings.popups;
 
-            if (notificationsSettings.get('enabled') && popups.enabled) {
-                createPopup(options, (popups.showText && options.message) || '');
-            }
-        };
-    })(),
-    playSound: (function () {
-        function play(source, volume) {
+        if (notificationsSettings.enabled && popups.enabled) {
+            getBase64FromImage(options.image, createP);
+        }
+
+    }
+
+    static playSound(): void {
+        function play(source: string, volume: number): void {
 
             if (!audioInProgress) {
                 audioInProgress = true;
@@ -84,23 +86,21 @@ const Notifications = {
                 const audio = new Audio(source);
                 audio.volume = volume;
                 audio.play();
-                audio.addEventListener('ended', () => { audioInProgress = false });
+                audio.addEventListener("ended", () => { audioInProgress = false });
             }
         }
 
-        return () => {
-            const sound = notificationsSettings.get('sound');
 
-            if (notificationsSettings.get('enabled') && sound.enabled) {
-                play(Settings[sound.signal], sound.volume);
-            }
-        };
-    })(),
-    setBadge: function (count, force?: boolean) {
-        if (notificationsSettings.get('enabled') || force) {
+        const sound = notificationsSettings.sound;
+
+        if (notificationsSettings.enabled && sound.enabled) {
+            play(Settings[sound.signal], sound.volume);
+        }
+    }
+
+    static setBadge(count, force?: boolean) {
+        if (notificationsSettings.enabled || force) {
             Browser.setBadgeText(count || '');
         }
     }
 };
-
-export default Notifications
