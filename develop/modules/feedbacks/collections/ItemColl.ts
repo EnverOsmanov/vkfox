@@ -3,7 +3,9 @@ import {AddOptions, Collection, Model} from "backbone";
 import {FeedbackObj, FeedbacksCollection} from "./FeedBacksCollection";
 
 class ItemAddOptions implements AddOptions {
-    sort = false
+    sort: boolean = false;
+
+    merge?: boolean;
 }
 
 export interface ItemObj {
@@ -47,7 +49,7 @@ export class ItemColl extends Collection<Item> {
     constructor(models?: Item[] | Object[], options?: any) {
         super(models, options);
 
-        this.comparator = (model: Item) => -model.get('date')
+        this.comparator = (model: Item) => -model.date
     }
 
     static addOptions = new ItemAddOptions()

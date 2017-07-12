@@ -209,15 +209,19 @@ function onLikesChanged(params: LikesChanged): void {
     if (model) model.likes = params.likes;
 }
 
+function onChangeUser(): void {
+    profilesColl.reset();
+    groupItemsColl.reset();
+    friendItemsColl.reset();
+}
+
+
 /**
 * Initialize all variables
 */
 
 export default function initialize() {
-
-    profilesColl.reset();
-    groupItemsColl.reset();
-    friendItemsColl.reset();
+    Mediator.sub(Msg.AuthUser, onChangeUser);
 
     const readyPromise = fetchNewsfeed();
 

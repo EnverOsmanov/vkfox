@@ -13,6 +13,7 @@ import itemListPu from "../item-list/item-list.pu"
 import itemPu from "../item/item.pu"
 import checkBoxPu from "../checkbox/checkbox.pu"
 import Msg from "../mediator/messages";
+import {AuthState} from "../auth/models";
 
 const model = new PersistentModel(
     {lastPath: '/chat'},
@@ -53,8 +54,6 @@ function configFoo($routeProvider, $locationProvider, $compileProvider, $provide
 }
 
 function runFoo($location, $rootScope) {
-    // default tab is chat
-    const READY = 3; //ready status from auth module
 
     $rootScope.$on('$routeChangeSuccess', function (scope, current) {
         let path;
@@ -80,7 +79,7 @@ function runFoo($location, $rootScope) {
     Vow.all([notificationsPromise, authPromise])
         .then(([queue, state]) => {
             $rootScope.$apply(function () {
-                if (state === READY) {
+                if (state === AuthState.READY) {
                     if (queue.length) {
                         // queue contains updates from tabs.
                         // Property 'type' holds value
@@ -91,8 +90,8 @@ function runFoo($location, $rootScope) {
             });
         });
 
-    authPromise.then(function (state) {
-        if (state !== READY) {
+    authPromise.then( (state) => {
+        if (state !== AuthState.READY) {
             Mediator.pub(Msg.AuthOauth);
             Browser.closePopup();
         }

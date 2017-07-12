@@ -5,14 +5,15 @@ import * as Vow from "vow"
 import Mediator from "../mediator/mediator.bg"
 import * as _ from "underscore"
 import Msg from "../mediator/messages"
-import {ProfilesColl} from "../chat/collections/ProfilesColl";
+import {ProfileI, ProfilesColl} from "../chat/collections/ProfilesColl";
+import {UsersGetElem} from "./models";
 
 const DROP_PROFILES_INTERVAL = 60000,
     USERS_GET_DEBOUNCE       = 400;
 
-let inProgress,
-    usersGetQueue,
-    friendsProfilesDefer;
+let inProgress: boolean,
+    usersGetQueue: UsersGetElem[],
+    friendsProfilesDefer: Promise<ProfileI[]>;
 
 const usersColl = new ProfilesColl();
 
@@ -75,15 +76,26 @@ const processGetUsersQueue = _.debounce(function (processedQueue) {
     else publishUids(processedQueue);
 }, USERS_GET_DEBOUNCE);
 
-initialize();
-
-Mediator.sub(Msg.AuthToken, () => initialize() );
-
-dropOldNonFriendsProfiles();
+function onUserChange(): void {
+    inProgress = false;
+    usersColl.reset();
+    usersGetQueue = [];
+    friendsProfilesDefer = null;
+    dropOldNonFriendsProfiles()
+}
 
 class Users {
 
-    static getFriendsProfiles(): Promise<any> {
+    /**
+     * Initialize all variables
+     */
+    static init() {
+        Mediator.sub(Msg.AuthUser, onUserChange);
+
+        ProxyMethods.connect('../users/users.bg.ts', Users);
+    }
+
+    static getFriendsProfiles(): Promise<ProfileI[]> {
         if (!friendsProfilesDefer) {
             friendsProfilesDefer = Request.api({
                 code: 'return API.friends.get({ fields : "photo,sex,nickname,lists", order: "hints" })'
@@ -105,21 +117,20 @@ class Users {
      *
      * @returns {Vow.promise} Returns promise that will be fulfilled with profiles
      */
-    static getProfilesById(uids: number[]): Promise<any[]> {
+    static getProfilesById(uids: number[]): Promise<ProfileI[]> {
+        function promisify(resolve: (ProfileI) => void) {
+            usersGetQueue.push({
+                uids: positiveUids,
+                promise: resolve
+            });
+            processGetUsersQueue(usersGetQueue);
+        }
+
         //communities have negative uids but they also can write a message
         const positiveUids = uids.filter(x => x > 0);
 
-        return Users.getFriendsProfiles().then(function () {
-            function promisify(resolve) {
-                usersGetQueue.push({
-                    uids: positiveUids,
-                    promise: resolve
-                });
-                processGetUsersQueue(usersGetQueue);
-            }
-
-            return new Vow.Promise(promisify);
-        });
+        return Users.getFriendsProfiles()
+            .then( () => new Vow.Promise(promisify) );
     }
 
     static getName(input): string {
@@ -130,18 +141,6 @@ class Users {
             else return owner.first_name + ' ' + owner.last_name;
         }).join(', ');
     }
-}
-
-ProxyMethods.connect('../users/users.bg.ts', Users);
-
-    /**
- * Initialize all variables
- */
-function initialize() {
-    inProgress = false;
-    usersColl.reset();
-    usersGetQueue = [];
-    friendsProfilesDefer = null;
 }
 
 export default Users;

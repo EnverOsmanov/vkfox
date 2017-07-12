@@ -4,19 +4,16 @@ import Mediator from "../mediator/mediator.bg";
 import Browser from "../browser/browser.bg";
 import * as Vow from "vow";
 import Msg from "../mediator/messages";
-import {AuthModel} from "./models";
+import {AuthModel, AuthModelI, AuthState} from "./models";
 
-const RETRY_INTERVAL = 10000, //ms
-    CREATED          = 1,
-    IN_PROGRESS      = 2,
-    READY            = 3;
+const RETRY_INTERVAL = 10000; //ms
 
-const model = new AuthModel();
+const authModel = new AuthModel();
 
-let state = CREATED;
+let state = AuthState.NULL;
 
 let iframe: HTMLIFrameElement,
-    authPromise: Promise<object>;
+    authPromise: Promise<AuthModelI>;
 
 
 function tryLogin() {
@@ -27,7 +24,11 @@ function tryLogin() {
 
         iframe.setAttribute("src", Config.AUTH_URI + "&time=" + Date.now());
         setTimeout(() => {
-            if (state == IN_PROGRESS) Browser.createTab(Config.AUTH_URI)
+            //console.debug("With tab", state)
+            if (state == AuthState.LOCKED_IFRAME) {
+                state = AuthState.LOCKED_WINDOW;
+                loginWithWindow();
+            }
         }, RETRY_INTERVAL)
     }
 }
@@ -37,8 +38,9 @@ function freeLogin() {
     iframe = null;
 }
 
-function onSuccess(data, resolve) {
-    state = READY;
+function onSuccess(data: AuthModelI, resolve) {
+    state = AuthState.READY;
+    //console.debug("Success", state);
     Browser.setIconOnline();
     resolve(data);
 }
@@ -50,17 +52,39 @@ function onSuccess(data, resolve) {
 
 
 function onAuthIframe(url: string) {
+    if ((state === AuthState.LOCKED_IFRAME) || (state == AuthState.LOCKED_WINDOW)) {
+        try {
+            //console.log("new Token?", state)
+            const userId = parseInt(url.match(/user_id=(\w+)(?:&|$)/i)[1], 10);
+            const accessToken = url.match(/access_token=(\w+)(?:&|$)/i)[1];
+            state = AuthState.LOCKED_TOKEN_PROCESSING;
 
-    try {
-        model.userId = parseInt(url.match(/user_id=(\w+)(?:&|$)/i)[1], 10);
-        model.accessToken = url.match(/access_token=(\w+)(?:&|$)/i)[1];
-
-        // After successful login we should close all auth tabs
-        Browser.closeTabs(Config.AUTH_DOMAIN);
-        freeLogin();
-    } catch (e) {
-        console.error(`AuthIframe: ${e}`);
+            authModel.userId = userId;
+            authModel.accessToken = accessToken;
+        } catch (e) {
+            console.error(`AuthIframe: ${e}`);
+        }
     }
+    else {
+        console.debug("Token received but not locked anymore", state)
+    }
+    // After successful login we should close all auth tabs
+    Browser.closeTabs(Config.AUTH_DOMAIN);
+    freeLogin();
+}
+
+function loginWithWindow() {
+    if (iframe) freeLogin();
+    Browser.getOrCreate(Config.AUTH_URI);
+}
+
+function onAuthStateGet(): void {
+    Mediator.pub(Msg.AuthState, state)
+}
+
+function onAuthOAuth(): void {
+    if (state === AuthState.READY) Mediator.pub(Msg.AuthReady);
+    else Auth.login(false, true);
 }
 
 
@@ -73,37 +97,46 @@ function promisify(resolve) {
 
 export default class Auth {
 
-    static login(resetToken?: boolean, withWindow?: boolean) {
-        state = IN_PROGRESS;
-        Browser.setIconOffline();
+    static login(resetToken?: boolean, withWindow?: boolean): Promise<AuthModelI> {
+        //console.debug("Login", state, resetToken, withWindow);
+        //console.trace();
 
-        if (withWindow) Browser.createTab(Config.AUTH_URI);
-        else tryLogin();
+        if (state == AuthState.LOCKED_WINDOW) {
+            if (withWindow) loginWithWindow();
+        }
+        else if (state !== AuthState.LOCKED_TOKEN_PROCESSING) {
+            if (withWindow) {
+                state = AuthState.LOCKED_WINDOW;
+                loginWithWindow();
+            }
+            else {
+                state = AuthState.LOCKED_IFRAME;
+                tryLogin()
+            }
+        }
+
+        Browser.setIconOffline();
 
         if (resetToken) return authPromise = new Vow.Promise(promisify);
         else return Auth.tokenReady();
     }
 
-    static tokenReady() {
+    static tokenReady(): Promise<AuthModelI> {
         if (authPromise) return authPromise;
         else return authPromise = new Vow.Promise(promisify);
     }
 
-    static getAccessToken() {
-        return Auth.tokenReady().then( () => model.accessToken )
+    static getAccessToken(): Promise<string> {
+        return Auth.tokenReady().then( () => authModel.accessToken )
     }
 
-    static getUserId() {
-        return Auth.tokenReady().then( () => model.userId )
-    }
-
-    static init() {
+    static init(): void {
+        (<any>window).enverS = () => state;
         Mediator.sub(Msg.AuthIframe, onAuthIframe);
-        //Mediator.sub(Msg.AuthLogin, Auth.login);
-        Mediator.sub(Msg.AuthStateGet, () => Mediator.pub(Msg.AuthState, state) );
-        Mediator.sub(Msg.AuthOauth, () => Auth.login(false, true) );
+        Mediator.sub(Msg.AuthStateGet, onAuthStateGet);
+        Mediator.sub(Msg.AuthOauth, onAuthOAuth);
 
-        model.on("change:userId", () => Mediator.pub(Msg.AuthUser, model.toJSON()) );
-        model.on("change:accessToken", () => Mediator.pub(Msg.AuthToken, model.toJSON()) );
+        authModel.on("change:userId", () => Mediator.pub(Msg.AuthUser, authModel.toJSON()) );
+        authModel.on("change:accessToken", () => Mediator.pub(Msg.AuthToken, authModel.toJSON()) );
     }
 }

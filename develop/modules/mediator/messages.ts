@@ -8,7 +8,7 @@ const Msg = {
     AuthStateGet: "auth:state:get",
     AuthState   : "auth:state",
     AuthOauth   : "auth:oauth",
-    AuthLogin   : "auth:login",
+    AuthReady   : "auth:login",
 
     BuddiesData       : "buddies:data",
     BuddiesDataGet    : "buddies:data:get",

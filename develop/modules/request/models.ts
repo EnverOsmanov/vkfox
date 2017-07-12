@@ -20,12 +20,21 @@ export class AccessTokenError extends Error {
     }
 }
 
-export interface ApiResponse {
+export class LongPollKeyError extends Error {
+    constructor(message?: string) {
+        super(message);
+        Object.setPrototypeOf(this, LongPollKeyError.prototype)
+    }
+}
+
+export interface WithApiError {
+    error ?: ApiError;
+}
+
+export interface ApiResponse extends WithApiError {
     response: any[];
 
     execute_errors: ApiError[]
-
-    error ?: ApiError;
 }
 
 interface ApiError {

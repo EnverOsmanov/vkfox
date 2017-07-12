@@ -1,6 +1,4 @@
 "use strict";
-import * as _ from "underscore";
-import * as Backbone from 'backbone';
 import {Events} from "backbone";
 
 interface IEventEmitter extends Events {

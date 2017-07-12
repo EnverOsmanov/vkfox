@@ -23,13 +23,16 @@ if (!i18n[language]) {
 
 messages = i18n[language].i18n[language];
 
-export default {
+export default class I18N {
     /**
      * Returns current browser language
      *
      * @returns {String}
      */
-    getLang: () => language,
+    static getLang() {
+        return language
+    }
+
     /**
      * Returns localized text
      *
@@ -38,7 +41,7 @@ export default {
      *
      * @returns {String}
      */
-    get: function (key, ...args) {
+    static get(key: string, ...args): string {
         return messages[key].apply(messages, args);
     }
 };

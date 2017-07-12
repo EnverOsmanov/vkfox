@@ -28,42 +28,20 @@ function AppCtrl($scope) {
                 yes: 'login'
             },
             onButtonClick: (makeAuth) => {
+                function onLogIn() {
+                    $scope.$apply( () => $scope.step++ );
+                }
 
                 if (makeAuth) {
-                    Mediator.once(Msg.AuthToken, () => {
-                        $scope.$apply( () => $scope.step++ );
-                    });
+                    Mediator.once(Msg.AuthReady, onLogIn);
+                    Mediator.once(Msg.AuthToken, onLogIn);
                     Mediator.pub(Msg.AuthOauth);
                 }
                 else $scope.step++;
             }
         },
-        // licence agreement
-        '1': {
-            mainText: 'Accept license agreement',
-            buttonLabels: {
-                no : null,
-                yes: 'accept'
-            },
-            onButtonClick: () => $scope.step++
-        },
-        // yandex installation
-        '2': {
-            mainText: 'Install Yandex search',
-            buttonLabels: {
-                no : 'no',
-                yes: 'install_verb'
-            },
-            onButtonClick: (install) => {
-                $scope.step++;
-
-                Mediator.pub(Msg.YandexSettingsPut, {
-                    enabled: install
-                });
-            }
-        },
         // thanks and close
-        '3': {
+        '1': {
             mainText: 'Thank you!',
             buttonLabels: {
                 no : null,
@@ -78,7 +56,7 @@ function AppCtrl($scope) {
     };
     $scope.$watch('step', function () {
         $scope.progress = Math.min(
-            100 * (1 / 6 + $scope.step / 3),
+            100 * (1 / 4 + $scope.step / 2),
             100
         );
         Angular.extend($scope, data[$scope.step]);

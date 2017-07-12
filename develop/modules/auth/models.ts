@@ -1,5 +1,10 @@
 import {Model} from "backbone";
 
+export interface AuthModelI {
+    userId     : string;
+    accessToken: string
+}
+
 
 export class AuthModel extends Model {
     get accessToken(): string {
@@ -20,3 +25,10 @@ export class AuthModel extends Model {
     }
 }
 
+export enum AuthState {
+    NULL,
+    LOCKED_IFRAME,
+    LOCKED_WINDOW,
+    LOCKED_TOKEN_PROCESSING,
+    READY
+}

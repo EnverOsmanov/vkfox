@@ -75,17 +75,24 @@ const fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
 //
 // Functions:
 
+function onChangeUser(data) {
+    userId = data.userId;
+    itemsColl.reset();
+    profilesColl.reset();
+
+    persistentModel = new PersistentModel({}, {
+        name: ['feedbacks', 'background', userId].join(':')
+    });
+    persistentModel.on("change:latestFeedbackId", tryNotification);
+}
+
 export default function init() {
 
     const readyPromise = fetchFeedbacks();
     // entry point
-    Mediator.sub(Msg.AuthToken, () => initialize(readyPromise));
+    initialize(readyPromise);
 
-    Mediator.sub(Msg.AuthUser, data => {
-        userId = data.userId;
-        itemsColl.reset();
-        profilesColl.reset();
-    });
+    Mediator.sub(Msg.AuthUser, onChangeUser);
 
     Mediator.sub(Msg.LikesChanged, onLikesChanged);
 
@@ -266,7 +273,6 @@ function addRawNotificationsItem(item: NotificationObj) {
     if (!isSupportedType(item.type)) return;
 
     if (item.type === 'friend_accepted') {
-        console.debug(item);
         parentType = item.type;
         //parent     = <FeedbackObjShort[]>feedback;
     }
@@ -411,24 +417,16 @@ function tryNotification() {
     }
 
     const ownerId = notificationItem.owner_id;
-    let profile: ProfileObj,
-        gender: string,
-        title: string,
-        message: string,
-        name: string;
+    let title: string,
+        message: string;
 
-    function makeTitle(i18nText) { return `${name} ${i18nText}` }
 
     // Don't show self messages
     if (ownerId !== userId) {
-        try {
-            profile = profilesColl.get(ownerId).toJSON();
-            name = User.getName(profile);
-            gender = profile.sex === 1 ? 'female':'male';
-        } catch (e) {
-            console.log(ownerId, profile, name);
-            throw e;
-        }
+        const profile: ProfileObj = profilesColl.get(ownerId).toJSON();
+        const name = User.getName(profile);
+        const gender = profile.sex === 1 ? "female" : "male";
+
 
         switch (type) {
             case 'friend_accepted':
@@ -480,6 +478,8 @@ function tryNotification() {
             });
         }
     }
+
+    function makeTitle(i18nText) { return `${name} ${i18nText}` }
 }
 
 /**
@@ -488,22 +488,15 @@ function tryNotification() {
 function initialize(readyPromise: Promise<void>) {
 
     readyPromise.then( () => {
-        persistentModel = new PersistentModel({}, {
-            name: ['feedbacks', 'background', userId].join(':')
-        });
-        persistentModel.on("change:latestFeedbackId", tryNotification);
-
-        updateLatestFeedbackId();
-        publishData();
-    });
-
-    readyPromise.then( () => {
         itemsColl.on('add change remove', _.debounce( () => {
             itemsColl.sort();
             updateLatestFeedbackId();
             publishData();
         }, 1));
         profilesColl.on('change', publishData);
+
+        updateLatestFeedbackId();
+        publishData();
     });
 
     Mediator.sub(Msg.FeedbacksDataGet, () => readyPromise.then(publishData) );

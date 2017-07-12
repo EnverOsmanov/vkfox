@@ -20,7 +20,9 @@ class Profile extends Model {
 }
 
 class ProfilesAddOptions implements AddOptions {
-    parse = true
+    parse = true;
+
+    merge?: boolean;
 }
 
 export class Profiles extends ProfilesCollection<Profile> {
