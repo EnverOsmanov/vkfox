@@ -1,8 +1,8 @@
 .DS_Store
-develop/modules/**/*.js
-develop/modules/**/*.js.map
-!develop/modules/env/env.raw.js
-!develop/modules/auth/oauth.vk.com.js
+src/main/javascript/vkfox/**/*.js
+src/main/javascript/vkfox/**/*.js.map
+!src/main/javascript/vkfox/env/env.raw.js
+!src/main/javascript/vkfox/auth/oauth.vk.com.js
 web-ext-artifacts
 
 node_modules

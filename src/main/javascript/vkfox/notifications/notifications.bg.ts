@@ -1,7 +1,7 @@
 "use strict";
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
-import Settings from "../notifications/settings"
+import Settings from "./settings"
 import {NotificationQueue, notificationsSettings, VKNotificationI} from "./Notification";
 import NotificationOptions = browser.notifications.NotificationOptions;
 

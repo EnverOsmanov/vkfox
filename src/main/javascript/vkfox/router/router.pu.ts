@@ -38,7 +38,7 @@ function configFoo($routeProvider, $locationProvider, $compileProvider, $provide
         .when('/:tab', {
             templateUrl: function (params) {
                 return [
-                    'modules/', params.tab,
+                    'vkfox/', params.tab,
                     '/', params.tab, '.tmpl.html'
                 ].join('');
             }
@@ -46,7 +46,7 @@ function configFoo($routeProvider, $locationProvider, $compileProvider, $provide
         .when('/:tab/:subtab', {
             templateUrl: function (params) {
                 return [
-                    'modules/', params.tab,
+                    'vkfox/', params.tab,
                     '/', params.tab, '.tmpl.html'
                 ].join('');
             }

@@ -10,7 +10,7 @@ import Msg from "../mediator/messages";
 
 function itemDirective() {
     return {
-        templateUrl: 'modules/item/item.tmpl.html',
+        templateUrl: "vkfox/item/item.tmpl.html",
         replace    : true,
         transclude : true,
         restrict   : 'E',
@@ -84,7 +84,7 @@ function itemAttachment() {
     });
 
     return {
-        templateUrl: 'modules/item/attachment.tmpl.html',
+        templateUrl: "vkfox/item/attachment.tmpl.html",
         replace    : true,
         restrict   : 'E',
         scope: {
@@ -301,7 +301,7 @@ function itemActionLike() {
     const title =  I18N.get('Like');
 
     return {
-        templateUrl: 'modules/item/action-like.tmpl.html',
+        templateUrl: "vkfox/item/action-like.tmpl.html",
         restrict: 'E',
         replace: true,
         scope: {

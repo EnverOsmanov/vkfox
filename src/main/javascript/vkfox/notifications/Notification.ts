@@ -2,7 +2,7 @@ import {Collection, Model} from "backbone";
 import Notifications from "./notifications.bg";
 import Mediator from "../mediator/mediator.bg";
 import Msg from "../mediator/messages"
-import Settings from "../notifications/settings"
+import Settings from "./settings"
 import PersistentModel from "../persistent-model/persistent-model";
 import {Message} from "../chat/collections/DialogColl";
 

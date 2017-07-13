@@ -1,11 +1,11 @@
 const webpack = require('webpack');
 
 module.exports = {
-  context: __dirname + '/develop',
+  context: __dirname + '/src/main/javascript',
   entry: {
-    "app.install"     : './modules/app/app.install.ts',
-    "app.pu"          : './modules/app/app.pu.ts',
-    "app.bg"          : './modules/app/app.bg.ts',
+    "app.install"     : './vkfox/app/app.install.ts',
+    "app.pu"          : './vkfox/app/app.pu.ts',
+    "app.bg"          : './vkfox/app/app.bg.ts',
     "ng"              : ["angular", "angular-animate", "angular-route", "angular-sanitize"],
     "vendor"          : ["vow", "underscore", "backbone", "linkifyjs", "moment"]
   },

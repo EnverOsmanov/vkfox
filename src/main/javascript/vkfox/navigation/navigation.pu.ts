@@ -5,7 +5,7 @@ import * as Angular from "angular"
 export default function init() {
     Angular.module('app').directive('navigation', ["$routeParams", function ($routeParams) {
         return {
-            templateUrl: 'modules/navigation/navigation.tmpl.html',
+            templateUrl: "vkfox/navigation/navigation.tmpl.html",
             replace: true,
             restrict: 'E',
             controller: function ($scope) {

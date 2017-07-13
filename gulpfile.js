@@ -18,6 +18,8 @@ const webpackConfig = require("./webpack.config.js");
 
 const FIREFOX_DIR = "/usr/lib/firefox/firefox.sh";
 const Locales     = ["en", "ru", "uk"];
+const __srcDir = "./src/main/javascript";
+const __resources = "./src/main/resources";
 
 
 gulp.task("env:firefox", function () {
@@ -36,54 +38,60 @@ gulp.task("env:development", function () {
 });
 
 gulp.task("less", () => {
-    return gulp.src("./pages/*.less", {cwd: "./develop"})
+    return gulp.src("./pages/*.less", {cwd: __resources})
         .pipe(less())
         .pipe(gulp.dest("./build/firefox/assets"))
 });
 
 gulp.task("preprocess:popup", () => {
-    return gulp.src("./develop/pages/popup.raw.html")
+    return gulp.src(__resources + "/pages/popup.raw.html")
         .pipe(preprocess())
         .pipe(rename("popup.html"))
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
 gulp.task("preprocess:env", () => {
-    return gulp.src("./develop/modules/env/env.raw.js")
+    return gulp.src(__srcDir + "/vkfox/env/env.raw.js")
         .pipe(preprocess())
         .pipe(rename("env.js"))
-        .pipe(gulp.dest("./develop/modules/env"));
+        .pipe(gulp.dest(__srcDir + "/vkfox/env"));
 });
 
 gulp.task("preprocess:install", () => {
-    return gulp.src("./develop/pages/install.raw.html")
+    return gulp.src(__resources + "/pages/install.raw.html")
         .pipe(preprocess())
         .pipe(rename("install.html"))
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
 gulp.task("preprocess:manifest", () => {
-    return gulp.src("./develop/manifest.raw.json")
+    return gulp.src(__resources + "/manifest.raw.json")
         .pipe(preprocess())
         .pipe(rename("manifest.json"))
         .pipe(gulp.dest("./build/firefox"));
 });
 
 gulp.task("inline_angular_templates", () => {
-    return gulp.src("./develop/modules/**/*.tmpl.html")
-        .pipe(inlineAngularTemplates("./build/firefox/pages/popup.html", {base: "./develop"}))
+    return gulp.src(__srcDir + "/vkfox/**/*.tmpl.html")
+        .pipe(inlineAngularTemplates("./build/firefox/pages/popup.html", {base: __srcDir}))
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
 gulp.task("clean:firefox", () => del("./build/firefox/**"));
 
-gulp.task("copy:firefox", () => {
+gulp.task("copy:firefoxResources", () => {
     return gulp.src([
-        "./develop/pages/background.html",
-        "./develop/_locales/**",
-        "./develop/modules/auth/oauth.vk.com.js"
-    ], {base: "./develop/"})
+        __resources + "/pages/background.html",
+        __resources + "/_locales/**"
+    ], {base: __resources })
       .pipe(gulp.dest("./build/firefox"))
+});
+
+gulp.task("copy:firefoxSrc", () => {
+    return gulp.src([
+        __srcDir + "/vkfox/auth/oauth.vk.com.js"
+    ], {base: __srcDir })
+        .pipe(gulp.dest("./build/firefox"))
 });
 
 gulp.task("fonts", () => {
@@ -97,7 +105,7 @@ gulp.task("fonts", () => {
 
 gulp.task("assets", () => {
     return gulp.src([
-        "./develop/assets/**",
+        __resources + "/assets/**",
         "./node_modules/emoji/lib/emoji.png",
     ])
       .pipe(gulp.dest("./build/firefox/assets"))
@@ -134,7 +142,7 @@ gulp.task("webpack", callback => {
 });
 
 gulp.task("lint", () => {
-    return  gulp.src(["./develop/modules/**/*.js"])
+    return  gulp.src([__srcDir + "/vkfox/**/*.js"])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
@@ -142,9 +150,9 @@ gulp.task("lint", () => {
 
 function i18n(locale) {
   gulp.task(`i18n-${locale}`, () => {
-    return gulp.src(`./develop/modules/i18n/${locale}/*.json`)
+    return gulp.src(`${__srcDir}/vkfox/i18n/${locale}/*.json`)
       .pipe(messageFormat({locale: locale}))
-      .pipe(gulp.dest(`./develop/modules/i18n`))
+      .pipe(gulp.dest(`${__srcDir}/vkfox/i18n`))
   });
 }
 
@@ -156,7 +164,7 @@ gulp.task("default", function (cb) {
             ["less", "assets", "fonts",
                 "preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"]
                 .concat(Locales.map( locale => `i18n-${locale}`)),
-            ["inline_angular_templates", "webpack", "copy:firefox"],
+            ["inline_angular_templates", "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
              () => cb()
         )
     }

@@ -256,7 +256,7 @@ export default function init() {
         .directive('itemListFixedHeader', itemListFixedHeader)
         .directive('itemList', function () {
             return {
-                templateUrl: 'modules/item-list/item-list.tmpl.html',
+                templateUrl: "vkfox/item-list/item-list.tmpl.html",
                 replace    : true,
                 transclude : true,
                 restrict   : 'E',
