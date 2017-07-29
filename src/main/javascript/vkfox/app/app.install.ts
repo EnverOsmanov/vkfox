@@ -51,10 +51,9 @@ function AppCtrl($scope) {
         }
     };
 
-    $scope.next = function () {
-        $scope.step++;
-    };
-    $scope.$watch('step', function () {
+    $scope.next = () => $scope.step++;
+
+    $scope.$watch('step', () => {
         $scope.progress = Math.min(
             100 * (1 / 4 + $scope.step / 2),
             100
