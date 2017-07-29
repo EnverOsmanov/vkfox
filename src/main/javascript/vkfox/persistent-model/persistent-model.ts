@@ -1,6 +1,7 @@
 "use strict";
 import {Model} from "backbone";
 import storage from "../storage/storage";
+import {Profiles} from "../feedbacks/collections/ProfilesColl";
 
 export default class PersistentModel extends Model {
     _name: string;
@@ -18,9 +19,7 @@ export default class PersistentModel extends Model {
         const item = storage.getItem(this._name);
 
         if (item) {
-            this.set(JSON.parse(item), {
-                silent: true
-            });
+            this.set(JSON.parse(item), Profiles.beSilentOptions);
         }
 
         this.on('change', this._save.bind(this));

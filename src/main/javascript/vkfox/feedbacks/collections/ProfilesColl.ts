@@ -1,14 +1,21 @@
 "use strict";
-import {AddOptions, Model} from "backbone";
+import {AddOptions, Model, Silenceable} from "backbone";
 
 import ProfilesCollection from "../../profiles-collection/profiles-collection.bg"
+import {NameSurname, OnlyName} from "../../chat/collections/ProfilesColl";
 
-export interface ProfileObj {
-    sex: number
-    photo: string
+export interface ProfileObj extends NameSurname {
+    id        : number
+    first_name: string
+    last_name : string
+    photo     : string
 }
 
-export interface GroupObj {}
+export interface GroupObj extends OnlyName {
+    id      : number
+    name    : string
+    photo   : string
+}
 
 class Profile extends Model {
     parse(profile) {
@@ -25,8 +32,14 @@ class ProfilesAddOptions implements AddOptions {
     merge?: boolean;
 }
 
+class SilentAddOptions implements Silenceable {
+    silent: boolean = true
+}
+
+
 export class Profiles extends ProfilesCollection<Profile> {
     model = Profile;
 
+    static beSilentOptions = new SilentAddOptions();
     static addOptions = new ProfilesAddOptions()
 }

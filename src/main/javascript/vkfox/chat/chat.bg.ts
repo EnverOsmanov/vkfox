@@ -10,10 +10,11 @@ import I18N from "../i18n/i18n"
 import Notifications from "../notifications/notifications.bg"
 import PersistentModel from "../persistent-model/persistent-model"
 import Msg from "../mediator/messages"
-import {ProfilesColl} from "./collections/ProfilesColl";
+import {Profile, ProfileI, ProfilesColl} from "./collections/ProfilesColl";
 import {Dialog, DialogColl, Message} from "./collections/DialogColl";
 import {NotifType} from "../notifications/Notification";
 import {LPMessage} from "../longpoll/models";
+import {Profiles} from "../feedbacks/collections/ProfilesColl";
 
 const MAX_HISTORY_COUNT = 10;
 
@@ -77,7 +78,7 @@ function fetchProfiles(): Promise<void> {
         else return uids;
     }
 
-    function addProfile(data) {
+    function addProfile(data: ProfileI[]) {
         profilesColl.add(data);
         profilesColl.get(userId).set('isSelf', true);
     }
@@ -153,11 +154,11 @@ function getDialogs(): Promise<void> {
 
        function toDialog(message: Message): Dialog {
            return new Dialog({
-            id: message.chat_id ? 'chat_id_' + message.chat_id:'uid_' + message.uid,
-            chat_id: message.chat_id,
-            chat_active: message.chat_active,
-            uid: message.uid,
-            messages: [message]
+            id          : message.chat_id ? 'chat_id_' + message.chat_id:'uid_' + message.uid,
+            chat_id     : message.chat_id,
+            chat_active : message.chat_active,
+            uid         : message.uid,
+            messages    : [message]
         });
        }
 
@@ -293,9 +294,9 @@ function addNewMessage(update: LPMessage) {
             chat_id     : message.chat_id,
             chat_active : message.chat_active,
             messages    : [message]
-        }, {silent: true});
+        }, Profiles.beSilentOptions);
 
-        return fetchProfiles().then(function () {
+        return fetchProfiles().then( () => {
             // important to trigger change, when profiles are available
             // because will cause an error, when creating notifications
             dialogColl.trigger('change');
@@ -313,9 +314,9 @@ function notifyAboutChange() {
 
 
 function onLatestMessageIdChange() {
-    function notifyAboutMessage() {
+    function notifyAboutMessage(): void {
 
-        const profile = profilesColl.get(lastMessage.uid).toJSON();
+        const profile: ProfileI = profilesColl.get(lastMessage.uid).toJSON();
         const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
 
         const gender = profile.sex === 1 ? 'female' : 'male';
@@ -346,9 +347,15 @@ function onLatestMessageIdChange() {
     }
 
     if (!lastMessage.out) {
+        function notifyIfVkIsNotActive(active: boolean): Promise<void> {
+            return active
+                ? Promise.resolve()
+                : fetchProfiles().then(notifyAboutMessage)
+        }
+
         // Don't notify, when active tab is vk.com
-        Browser.isVKSiteActive().then( (active: boolean) => {
-            if (!active) fetchProfiles().then(notifyAboutMessage);
-        });
+        Browser.isVKSiteActive()
+            .then(notifyIfVkIsNotActive)
+            .catch(console.log);
     }
 }

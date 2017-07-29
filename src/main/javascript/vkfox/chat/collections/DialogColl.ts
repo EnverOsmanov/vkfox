@@ -1,8 +1,6 @@
-import {Collection, Model, ModelSetOptions} from "backbone";
+import {Collection, Model} from "backbone";
+import {Profiles} from "../../feedbacks/collections/ProfilesColl";
 
-class DialogSetOptions implements ModelSetOptions {
-    silent = true
-}
 
 export interface Message {
     mid         : number;
@@ -34,10 +32,9 @@ export class Dialog extends Model {
     }
 
     set messages(value: Message[]) {
-        super.set("messages", value, Dialog.setOptions)
+        super.set("messages", value, Profiles.beSilentOptions)
     }
 
-    static setOptions = new DialogSetOptions()
 }
 
 export class DialogColl extends Collection<Dialog> {

@@ -38,12 +38,6 @@ function freeLogin() {
     iframe = null;
 }
 
-function onSuccess(data: AuthModelI, resolve) {
-    state = AuthState.READY;
-    //console.debug("Success", state);
-    Browser.setIconOnline();
-    resolve(data);
-}
 
 // We need to authorize in own window, after user was logined in a tab
 // In google chrome we use content-script for this purpose (declared in manifest.js)
@@ -88,10 +82,15 @@ function onAuthOAuth(): void {
 }
 
 
-function promisify(resolve) {
+function promisify(resolve: (AuthModelI) => void) {
+    function onSuccess(data: AuthModelI) {
+        state = AuthState.READY;
+        Browser.setIconOnline();
+        resolve(data);
+    }
 
-    Mediator.unsub(Msg.AuthToken, data => onSuccess(data, resolve));
-    Mediator.once(Msg.AuthToken, data => onSuccess(data, resolve));
+    Mediator.unsub(Msg.AuthToken, onSuccess);
+    Mediator.once(Msg.AuthToken, onSuccess);
 }
 
 
@@ -131,7 +130,6 @@ export default class Auth {
     }
 
     static init(): void {
-        (<any>window).enverS = () => state;
         Mediator.sub(Msg.AuthIframe, onAuthIframe);
         Mediator.sub(Msg.AuthStateGet, onAuthStateGet);
         Mediator.sub(Msg.AuthOauth, onAuthOAuth);

@@ -11,6 +11,7 @@ import Msg from "../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
 import {NotifType} from "../notifications/Notification"
 import {ProfileI} from "../chat/collections/ProfilesColl";
+import {Profiles} from "../feedbacks/collections/ProfilesColl";
 
 
 const watchedBuddiesSet = new PersistentSet('watchedBuddies');
@@ -36,21 +37,17 @@ export default function initialize() {
 
     Mediator.sub(Msg.BuddiesDataGet, () => readyPromise.then(publishData) );
 
-    readyPromise.then(function () {
+    readyPromise.then( () => {
         buddiesColl.on('change', (model: Buddy) => {
-            const profile = model.toJSON();
+            const profile: ProfileI = model.toJSON();
 
             if (profile.isWatched && model.changed.hasOwnProperty('online')) {
-                model.set({
-                    'lastActivityTime': Date.now()
-                }, {silent: true});
+                model.set({ "lastActivityTime": Date.now() }, Profiles.beSilentOptions);
                 const gender = profile.sex === 1 ? 'female':'male';
 
                 const title = [
                     Users.getName(profile),
-                    I18N.get(profile.online ? 'is online':'went offline', {
-                        GENDER: gender
-                    })
+                    I18N.get(profile.online ? 'is online':'went offline', { GENDER: gender })
                 ].join(' ');
 
                 Notifications.notify({
@@ -67,7 +64,7 @@ export default function initialize() {
     });
 
 
-    Mediator.sub(Msg.BuddiesWatchToggle, function (uid) {
+    Mediator.sub(Msg.BuddiesWatchToggle, (uid) => {
         if (watchedBuddiesSet.contains(uid)) {
             watchedBuddiesSet.remove(uid);
             buddiesColl.get(uid).unset('isWatched');
@@ -111,8 +108,11 @@ function getFavouriteUsers(): Promise<ProfileI[]> {
             return Users
                 .getProfilesById(uids)
                 .then( profiles => {
-                    profiles.forEach( profile => profile.isFave = true );
-                    return profiles;
+                    return profiles.map( profile => {
+                        profile.isFave = true;
+
+                        return profile
+                    } );
                 });
         });
 }

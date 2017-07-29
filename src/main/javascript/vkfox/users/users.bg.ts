@@ -5,8 +5,9 @@ import * as Vow from "vow"
 import Mediator from "../mediator/mediator.bg"
 import * as _ from "underscore"
 import Msg from "../mediator/messages"
-import {ProfileI, ProfilesColl} from "../chat/collections/ProfilesColl";
+import {NameSurname, OnlyName, ProfileI, ProfilesColl} from "../chat/collections/ProfilesColl";
 import {UsersGetElem} from "./models";
+import {GroupObj, ProfileObj} from "../feedbacks/collections/ProfilesColl";
 
 const DROP_PROFILES_INTERVAL = 60000,
     USERS_GET_DEBOUNCE       = 400;
@@ -133,8 +134,9 @@ class Users {
             .then( () => new Vow.Promise(promisify) );
     }
 
-    static getName(input): string {
-        return [].concat(input).map(function (owner) {
+    static getName(input: OnlyName | NameSurname): string {
+
+        return [].concat(input).map( (owner) => {
             //group profile
             if (owner.name) return owner.name;
             //user profile

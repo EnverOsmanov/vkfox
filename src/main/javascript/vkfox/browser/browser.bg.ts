@@ -25,14 +25,16 @@ class Browser {
         _.defer( () => ProxyMethods.connect('../browser/browser.bg', Browser) );
     }
 
-    static getVkfoxVersion() {
-        return browser.management.getSelf().then( info => info.version)
+    static async getVkfoxVersion(): Promise<string> {
+        const info = await browser.management.getSelf();
+
+        return info.version
     }
 
     /**
      * Sets icon to online status
      */
-    static setIconOnline() {
+    static setIconOnline(): Promise<void> {
         return browser.browserAction.setIcon({ path: ICON_ONLINE })
     }
 
@@ -64,14 +66,11 @@ class Browser {
      *
      * @returns {Promise<Boolean>} Returns promise that resolves to Boolean
      */
-    static isVKSiteActive(): Promise<boolean> {
-        return browser.tabs
-            .query({active: true})
-            .then( tabs => {
-                if (tabs.length) return tabs[0].url.includes("vk.com");
-                else return false;
-            });
+    static async isVKSiteActive(): Promise<boolean> {
+        const tabs = await browser.tabs.query({active: true});
 
+        if (tabs.length) return tabs[0].url.includes("vk.com");
+        else return false;
     }
 
     static createTab(url: string): Promise<Tab> {

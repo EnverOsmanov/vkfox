@@ -36,7 +36,7 @@ export interface LikesObj {
     user_likes: number
 }
 
-interface CommentsLikesObj extends LikesObj {
+interface NewsLikesObj extends LikesObj {
     can_like   : number
     can_publish: number
 }
@@ -49,7 +49,7 @@ export interface FeedbackObj {
 }
 
 export interface WallPostMentionFeedback extends FeedbackObj {
-    comments  : CommentCommentObj
+    comments  : CNewsCommentObj
     source_id?: number
     id       ?: number
     post_id   : number
@@ -65,7 +65,7 @@ interface TopicObj {
 }
 
 export interface PostFeedback extends FeedbackObj {
-    post?: CommentObj
+    post?: CommentsNewsItem
     id   : number
     topic?: TopicObj
 }
@@ -97,24 +97,24 @@ export interface NotificationObj {
     date    : number
 }
 
-interface CommentCommentObj {
+interface CNewsCommentObj {
     count: number
     can_post: number
 
     list: FeedbackObj[]
 }
 
-export interface CommentObj {
-    id: number;
-    type: string
-    from_id: number
-    source_id: number
-    likes: CommentsLikesObj
+export interface CommentsNewsItem {
+    id          : number;
+    type        : string
+    from_id    ?: number
+    source_id   : number
+    likes       : NewsLikesObj
 
 
-    comments: CommentCommentObj
-    owner_id?: number
-    date: number
+    comments    : CNewsCommentObj
+    owner_id   ?: number
+    date        : number
 
 }
 
@@ -125,8 +125,8 @@ interface Notifications {
     groups  : GroupObj[]
 }
 
-export interface Comments {
-    items: CommentObj[]
+export interface CommentsNews {
+    items: CommentsNewsItem[]
 
     profiles: ProfileObj[]
     groups: GroupObj[]
@@ -134,6 +134,6 @@ export interface Comments {
 
 export interface FeedbackRS {
     notifications: Notifications
-    comments     : Comments | boolean
+    comments     : CommentsNews | boolean
     time         : number
 }

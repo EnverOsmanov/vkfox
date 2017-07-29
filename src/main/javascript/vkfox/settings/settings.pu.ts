@@ -1,6 +1,6 @@
 "use strict";
 import * as _ from "underscore"
-import Env = require('../env/env.js');
+import Env from "../env/env"
 import NotificationsSettings from '../notifications/settings'
 import Mediator from '../mediator/mediator.pu'
 import * as Angular from "angular"

@@ -8,11 +8,11 @@ import Browser from "../browser/browser.bg"
 import I18N from "../i18n/i18n"
 import PersistentModel from "../persistent-model/persistent-model"
 import Notifications from "../notifications/notifications.bg"
-import {ProfileObj, Profiles} from "./collections/ProfilesColl";
+import {Profiles} from "./collections/ProfilesColl";
 import {Item, ItemColl} from "./collections/ItemColl";
 import {NotifType} from "../notifications/Notification";
 import {
-    CommentObj, Comments, FeedbackObj, FeedbackRS, FeedbacksCollection,
+    CommentsNewsItem, CommentsNews, FeedbackObj, FeedbackRS, FeedbacksCollection,
     NotificationObj, ReplyFeedback, WallPostMentionFeedback
 } from "./collections/FeedBacksCollection";
 import Msg from "../mediator/messages";
@@ -166,6 +166,19 @@ function generateItemID(type: string, parent): string {
     else return _.uniqueId(type);
 }
 
+
+function getOrCreateFeedbackItem(parentType: string, parent: FeedbackObj): Item {
+    const itemID = generateItemID(parentType, parent);
+    const itemModel = itemsColl.get(itemID);
+
+    if (itemModel) return itemModel;
+    else {
+        const newItemModel = createItemModel(parentType, parent);
+        itemsColl.add(itemModel, ItemColl.addOptions);
+        return newItemModel
+    }
+}
+
 /**
  * Creates feedbacks item
  *
@@ -176,25 +189,22 @@ function generateItemID(type: string, parent): string {
  * @return {Object}
  */
 function createItemModel(type: string, parent: FeedbackObj, itemID?: string): Item {
-  return new Item({
-      parent,
-      type,
-      id    : itemID ? itemID : generateItemID(type, parent)
-    });
+    const id = itemID ? itemID : generateItemID(type, parent);
+
+    return new Item({parent, type, id});
 }
 
 /**
- * Processes raw comments item and adds it to itemsColl,
+ * Processes raw comments from newsItem and adds it to itemsColl,
  * doesn't sort itemsColl
  *
- * @param {Object} item
+ * @param {Object} newsItem
  */
-function addRawCommentsItem(item: CommentObj) {
-    const parent = item,
-      parentType = item.type;
+function addRawCommentsItem(newsItem: CommentsNewsItem) {
+    const parent = newsItem,
+      parentType = newsItem.type;
 
-    let itemModel: Item,
-        lastCommentDate: number;
+    let lastCommentDate: number;
 
     function comment2Feedback(feedback: FeedbackObj) {
         feedback.owner_id = Number(feedback.from_id);
@@ -207,34 +217,29 @@ function addRawCommentsItem(item: CommentObj) {
     }
 
     // do nothing if no comments
-    if (item.comments.list && item.comments.list.length) {
+    if (newsItem.comments.list && newsItem.comments.list.length) {
 
         parent.owner_id = Number(parent.from_id || parent.source_id);
 
-        const itemID = generateItemID(parentType, parent);
+        const fbItemModel = getOrCreateFeedbackItem(parentType, parent);
 
-        if (!(itemModel = itemsColl.get(itemID))) {
-            itemModel = createItemModel(parentType, parent);
-            itemsColl.add(itemModel, ItemColl.addOptions);
+        if (!fbItemModel.has('feedbacks')) {
+            fbItemModel.feedbacks = new FeedbacksCollection();
         }
 
-        if (!itemModel.has('feedbacks')) {
-            itemModel.feedbacks = new FeedbacksCollection();
-        }
-
-        itemModel.feedbacks
+        fbItemModel.feedbacks
             .add(
-                item.comments
-                    .list.slice(-MAX_COMMENTS_COUNT)
+                newsItem.comments.list
+                    .slice(-MAX_COMMENTS_COUNT)
                     .map(comment2Feedback)
             );
 
-        lastCommentDate = itemModel.feedbacks.last().date;
-        if (!itemModel.has('date') || itemModel.date < lastCommentDate) {
-            itemModel.date = lastCommentDate;
+        lastCommentDate = fbItemModel.feedbacks.last().date;
+        if (!fbItemModel.has('date') || fbItemModel.date < lastCommentDate) {
+            fbItemModel.date = lastCommentDate;
         }
 
-        itemModel.trigger('change');
+        fbItemModel.trigger('change');
     }
 }
 
@@ -352,26 +357,27 @@ function fetchFeedbacks() {
 
     function feedbackHandler(response: FeedbackRS) {
         const { notifications } = response;
-        let comments: Comments;
+        let newsAboutComments: CommentsNews;
 
-        if (response.comments === false) console.debug("Comments", response.comments);
+        if (response.comments === false) console.debug("CommentsNews", response.comments);
         else {
-            comments = <Comments>response.comments
+            newsAboutComments = <CommentsNews>response.comments
         }
+        if (newsAboutComments.items.length) debugger;
         autoUpdateNotificationsParams.start_time = autoUpdateCommentsParams.start_time = response.time;
 
         // first item in notifications contains quantity
         if (
             (notifications.items && notifications.items.length > 1) ||
-            (comments.items && comments.items.length)
+            (newsAboutComments.items && newsAboutComments.items.length)
         ) {
-            profilesColl.add(comments.profiles, Profiles.addOptions);
-            profilesColl.add(comments.groups, Profiles.addOptions);
+            profilesColl.add(newsAboutComments.profiles, Profiles.addOptions);
+            profilesColl.add(newsAboutComments.groups, Profiles.addOptions);
             profilesColl.add(notifications.profiles, Profiles.addOptions);
             profilesColl.add(notifications.groups, Profiles.addOptions);
 
             notifications.items.slice(1).forEach(addRawNotificationsItem);
-            comments.items.forEach(addRawCommentsItem);
+            newsAboutComments.items.forEach(addRawCommentsItem);
             itemsColl.sort();
         }
     }
@@ -423,7 +429,7 @@ function tryNotification() {
 
     // Don't show self messages
     if (ownerId !== userId) {
-        const profile: ProfileObj = profilesColl.get(ownerId).toJSON();
+        const profile = profilesColl.get(ownerId).toJSON();
         const name = User.getName(profile);
         const gender = profile.sex === 1 ? "female" : "male";
 

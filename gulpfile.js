@@ -50,12 +50,6 @@ gulp.task("preprocess:popup", () => {
         .pipe(gulp.dest("./build/firefox/pages"));
 });
 
-gulp.task("preprocess:env", () => {
-    return gulp.src(__srcDir + "/vkfox/env/env.raw.js")
-        .pipe(preprocess())
-        .pipe(rename("env.js"))
-        .pipe(gulp.dest(__srcDir + "/vkfox/env"));
-});
 
 gulp.task("preprocess:install", () => {
     return gulp.src(__resources + "/pages/install.raw.html")
@@ -162,7 +156,7 @@ gulp.task("default", function (cb) {
         runSequence(
             ["env:firefox", "env:development", "clean:firefox"],
             ["less", "assets", "fonts",
-                "preprocess:env", "preprocess:install", "preprocess:popup", "preprocess:manifest"]
+                "preprocess:install", "preprocess:popup", "preprocess:manifest"]
                 .concat(Locales.map( locale => `i18n-${locale}`)),
             ["inline_angular_templates", "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
              () => cb()

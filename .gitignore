@@ -1,7 +1,6 @@
 .DS_Store
 src/main/javascript/vkfox/**/*.js
 src/main/javascript/vkfox/**/*.js.map
-!src/main/javascript/vkfox/env/env.raw.js
 !src/main/javascript/vkfox/auth/oauth.vk.com.js
 web-ext-artifacts
 
