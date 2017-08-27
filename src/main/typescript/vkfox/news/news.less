@@ -1,0 +1,22 @@
+.news {
+    height: calc(~"100% - 2rem - @{baseLineHeight} - 1px");
+
+    .item-list {
+        height: calc(~"100% - 2rem - @{baseLineHeight} - 2px");
+    }
+}
+.news__navigation a {
+    outline: none;
+}
+.news__navigation a:first-letter {
+    text-transform: uppercase;
+}
+.news_type_my {
+
+    .icon-remove {
+        font-size: 1.2em;
+    }
+    .news__show-all {
+        margin-left: @itemIconSize + @itemPadding;
+    }
+}

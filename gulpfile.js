@@ -6,86 +6,65 @@ const gulp                 = require("gulp"),
     less                   = require("gulp-less"),
     preprocess             = require("gulp-preprocess"),
     rename                 = require("gulp-rename"),
-    inlineAngularTemplates = require("gulp-inline-angular-templates"),
     del                    = require("del"),
     runSequence            = require("run-sequence"),
     notifier               = require("node-notifier"),
     messageFormat          = require("gulp-messageformat"),
-    webpack                = require("webpack"),
-    eslint                 = require("gulp-eslint");
+    webpack                = require("webpack");
 
-const webpackConfig = require("./webpack.config.js");
-
-const FIREFOX_DIR = "/usr/lib/firefox/firefox.sh";
 const Locales     = ["en", "ru", "uk"];
-const __srcDir = "./src/main/javascript";
+const __srcDir = "./src/main/typescript";
 const __resources = "./src/main/resources";
 
+const APP_VERSION = process.env.npm_package_version;
 
-gulp.task("env:firefox", function () {
+gulp.task("env:firefox",  () => {
     env({
         vars: {
-        TARGET: "FIREFOX",
-        FIREFOX_BIN: FIREFOX_DIR
+        TARGET: "FIREFOX"
     }})
 });
 
-gulp.task("env:development", function () {
+gulp.task("env:development", () => {
     env({
         vars: {
-        ENV: "DEVELOPMENT"
+        NODE_ENV: "development"
     }})
+});
+
+gulp.task("env:version",  () => {
+    env({ vars: { APP_VERSION }})
 });
 
 gulp.task("less", () => {
     return gulp.src("./pages/*.less", {cwd: __resources})
         .pipe(less())
-        .pipe(gulp.dest("./build/firefox/assets"))
+        .pipe(gulp.dest("./target/firefox/assets"))
 });
 
-gulp.task("preprocess:popup", () => {
-    return gulp.src(__resources + "/pages/popup.raw.html")
-        .pipe(preprocess())
-        .pipe(rename("popup.html"))
-        .pipe(gulp.dest("./build/firefox/pages"));
-});
-
-
-gulp.task("preprocess:install", () => {
-    return gulp.src(__resources + "/pages/install.raw.html")
-        .pipe(preprocess())
-        .pipe(rename("install.html"))
-        .pipe(gulp.dest("./build/firefox/pages"));
-});
 
 gulp.task("preprocess:manifest", () => {
     return gulp.src(__resources + "/manifest.raw.json")
         .pipe(preprocess())
         .pipe(rename("manifest.json"))
-        .pipe(gulp.dest("./build/firefox"));
+        .pipe(gulp.dest("./target/firefox"));
 });
 
-gulp.task("inline_angular_templates", () => {
-    return gulp.src(__srcDir + "/vkfox/**/*.tmpl.html")
-        .pipe(inlineAngularTemplates("./build/firefox/pages/popup.html", {base: __srcDir}))
-        .pipe(gulp.dest("./build/firefox/pages"));
-});
-
-gulp.task("clean:firefox", () => del("./build/firefox/**"));
+gulp.task("clean:firefox", () => del("./target/firefox/**"));
 
 gulp.task("copy:firefoxResources", () => {
     return gulp.src([
-        __resources + "/pages/background.html",
-        __resources + "/_locales/**"
+        __resources + "/_locales/**",
+        __resources + "/pages/*.html"
     ], {base: __resources })
-      .pipe(gulp.dest("./build/firefox"))
+      .pipe(gulp.dest("./target/firefox"))
 });
 
 gulp.task("copy:firefoxSrc", () => {
     return gulp.src([
         __srcDir + "/vkfox/auth/oauth.vk.com.js"
     ], {base: __srcDir })
-        .pipe(gulp.dest("./build/firefox"))
+        .pipe(gulp.dest("./target/firefox"))
 });
 
 gulp.task("fonts", () => {
@@ -94,7 +73,7 @@ gulp.task("fonts", () => {
         "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
         "./node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
     ], {base: "./node_modules/font-awesome/"})
-      .pipe(gulp.dest("./build/firefox/assets"))
+      .pipe(gulp.dest("./target/firefox/assets"))
 });
 
 gulp.task("assets", () => {
@@ -102,10 +81,12 @@ gulp.task("assets", () => {
         __resources + "/assets/**",
         "./node_modules/emoji/lib/emoji.png",
     ])
-      .pipe(gulp.dest("./build/firefox/assets"))
+      .pipe(gulp.dest("./target/firefox/assets"))
 });
 
 gulp.task("webpack", callback => {
+    const webpackConfig = require("./webpack.config.js");
+
     const myConfig = Object.create(webpackConfig);
     let firstCallback = true;
 
@@ -135,13 +116,6 @@ gulp.task("webpack", callback => {
     });
 });
 
-gulp.task("lint", () => {
-    return  gulp.src([__srcDir + "/vkfox/**/*.js"])
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
-});
-
 function i18n(locale) {
   gulp.task(`i18n-${locale}`, () => {
     return gulp.src(`${__srcDir}/vkfox/i18n/${locale}/*.json`)
@@ -152,13 +126,26 @@ function i18n(locale) {
 
 Locales.forEach(i18n);
 
-gulp.task("default", function (cb) {
+////
+// Tasks for public use
+
+gulp.task("production", (cb) => {
         runSequence(
-            ["env:firefox", "env:development", "clean:firefox"],
-            ["less", "assets", "fonts",
-                "preprocess:install", "preprocess:popup", "preprocess:manifest"]
+            ["env:version", "env:firefox", "clean:firefox"],
+            ["less", "assets", "fonts", "preprocess:manifest"]
                 .concat(Locales.map( locale => `i18n-${locale}`)),
-            ["inline_angular_templates", "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
+            [ "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
+            () => cb()
+        )
+    }
+);
+
+gulp.task("default", (cb) => {
+        runSequence(
+            ["env:version", "env:firefox", "env:development", "clean:firefox"],
+            ["less", "assets", "fonts", "preprocess:manifest"]
+                .concat(Locales.map( locale => `i18n-${locale}`)),
+            [ "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
              () => cb()
         )
     }
