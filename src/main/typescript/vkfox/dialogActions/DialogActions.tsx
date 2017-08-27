@@ -59,7 +59,7 @@ class DialogActions extends React.Component<DialogActionsProps, undefined> {
         return unread
             ? (
                 <ItemAction
-                    className="chat__item-action_mark-read"
+                    className="chat__item-action_mark-read fa fa-bookmark"
                     title={ChatPage.markAsReadTitle(this.props.out)}
                     hidden={unread}
                     onClick={this.unreadHandler}
