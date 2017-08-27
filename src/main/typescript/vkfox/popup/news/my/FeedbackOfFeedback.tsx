@@ -73,7 +73,19 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
                         {I18N.get("Reposted")}
                         <i className="fa fa-retweet"/>
                     </span>
-                )
+                );
+
+            case "wall_publish":
+                return (
+                    <span>
+                        {I18N.get("wall_publish")}
+                        <i className="fa fa-plane"/>
+                    </span>
+                );
+
+            default:
+                console.debug("Unknown FeedbackOfFeedback", feedback.type);
+                break;
         }
     };
 

@@ -143,7 +143,6 @@ export class NotificationQueue extends Collection<VKNotification> {
         });
 
         Mediator.sub(Msg.NotificationsQueueGet, () => {
-            console.debug("NotificationQueGet", self.toJSON());
             Mediator.pub(Msg.NotificationsQueue, self.toJSON())
         });
 

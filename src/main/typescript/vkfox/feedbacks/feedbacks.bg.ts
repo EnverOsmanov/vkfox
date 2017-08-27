@@ -288,7 +288,7 @@ function addRawNotificationsItem(item: NotificationObj) {
         parentType   = typeTokens[1];
     }
 
-    if (item.type === "mention") {
+    if (item.type === "mention" || item.type == "wall_publish") {
         feedbackType = item.type;
         parentType   = item.type;
         parent       = <FeedbackObj>feedback;

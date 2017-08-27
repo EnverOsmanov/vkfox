@@ -8,14 +8,27 @@ Our group in VK - [vkfoxy](https://vk.com/vkfoxy).
 
 
 ## For developers
-To build:
+1) First of all you need bundle source code to unpacked extension.
+
+* If you want just bundle extension - run:
 
 ```
 npm install
-gulp
+npm run bundle
+````
+Now look to `target/firefox` directory.
+
+<hr>
+
+* If you want to bundle in developer mode (with *hot-reload* etc...) use:
+```
+npm install
+npm run gulp
 ````
 
-To start built addon in Firefox Developer Edition:
+---
+
+After that if you want to start unpacked extension in Firefox Developer Edition:
 ````
-npm run startMac
+npm run ffoxMac
 ````
