@@ -11,7 +11,7 @@ interface PopupSetting {
     showText: boolean
 }
 
-interface SoundSetting {
+export interface SoundSetting {
     enabled: boolean;
     volume : number;
     signal : string

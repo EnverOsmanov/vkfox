@@ -34,9 +34,10 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
 
     commentFeedback = (commentFeedback: ReplyFeedback) => {
         const attachments = commentFeedback.attachments
-            ? commentFeedback.attachments.map(attachment => {
+            ? commentFeedback.attachments.map((attachment, i) => {
                 return (
                     <AttachmentC
+                        key={i}
                         type={attachment.type}
                         data={attachment[attachment.type]}
                     />

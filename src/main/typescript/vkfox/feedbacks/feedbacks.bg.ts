@@ -277,9 +277,8 @@ function addRawNotificationsItem(item: NotificationObj) {
 
     if (!isSupportedType(item.type)) return;
 
-    if (item.type === 'friend_accepted') {
+    if (item.type === "friend_accepted") {
         parentType = item.type;
-        //parent     = <FeedbackObjShort[]>feedback;
     }
     else if (item.type.indexOf('_') !== -1) {
         const typeTokens = item.type.split('_');

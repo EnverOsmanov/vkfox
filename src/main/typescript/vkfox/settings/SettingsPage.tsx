@@ -3,8 +3,9 @@ import Mediator from "../mediator/mediator.pu"
 import Msg from "../mediator/messages"
 import I18N from "../i18n/i18n";
 import Settings from "../notifications/settings"
-import {ForceOnlineSettingsI, NotificationsSettingsI} from "../notifications/Notification";
+import {ForceOnlineSettingsI, NotificationsSettingsI, SoundSetting} from "../notifications/Notification";
 import Checkbox from "../checkbox/Checkbox";
+import VKfoxAudio from "../notifications/VKfoxAudio";
 
 
 
@@ -173,16 +174,17 @@ class SettingsPage extends React.Component<undefined, SettingsState> {
         const signal = event.target.value;
         this.setState(prevState => {
 
-            const sound = {
+            const sound: SoundSetting = {
                 ...prevState.notifications.sound,
                 signal
             };
 
-            const notifications = {
+            const notifications: NotificationsSettingsI = {
                 ...prevState.notifications,
                 sound
             };
 
+            VKfoxAudio.play(sound);
 
             Mediator.pub(Msg.NotificationsSettingsPut, notifications);
 
@@ -198,17 +200,18 @@ class SettingsPage extends React.Component<undefined, SettingsState> {
         const volume = event.target.value;
         this.setState(prevState => {
 
-            const sound = {
+            const sound: SoundSetting = {
                 ...prevState.notifications.sound,
                 volume
             };
 
-            const notifications = {
+            const notifications: NotificationsSettingsI = {
                 ...prevState.notifications,
                 sound
             };
 
 
+            VKfoxAudio.play(sound);
             Mediator.pub(Msg.NotificationsSettingsPut, notifications);
 
             return {

@@ -98,7 +98,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
     showAll = (item: ItemObj) => {
         const text = this.state.showAllFeedbacks ? "hide" : "show all";
 
-        if (item.feedbacks.length > 3) return (
+        if (item.feedbacks && item.feedbacks.length > 3) return (
             <span
                 className="btn news__show-all"
                 onClick={() => this.changeShowAllFeedback()}>
@@ -122,7 +122,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
             )
         };
 
-        return item.feedbacks.slice(sliceI).map(singleFeedback)
+        return item.feedbacks && item.feedbacks.slice(sliceI).map(singleFeedback)
     };
 
 

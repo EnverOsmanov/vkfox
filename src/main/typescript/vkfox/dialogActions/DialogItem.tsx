@@ -5,7 +5,7 @@ import DialogActions from "./DialogActions";
 import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../chat/chat.pu";
 import Request from "../request/request.pu"
-import {timeAgo} from "../filters/filters.pu";
+import {object2Name, timeAgo} from "../filters/filters.pu";
 import AttachmentC from "../attachment/AttachmentC";
 import {Profile, ProfileI} from "../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
@@ -129,7 +129,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     messages = (messageItems: Message[]) => messageItems.map(this.singleMessage);
 
 
-    blockquotes = (dialog: DialogI, foldedMessages: MessageMemo[]) => {
+    blockquotes = (dialog: DialogI, foldedMessages: MessageMemo[], owners: ProfileI | ProfileI[]) => {
 
 
         return foldedMessages.map((foldedMessage, i) => {
@@ -138,6 +138,13 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                     ? "chat__messages_out"
                     : "";
 
+                const messageAuthor = foldedMessage.author.uid !== (owners as ProfileI).uid
+                    ?
+                    <small className="chat__author">
+                        {object2Name()(foldedMessage.author)}
+                    </small>
+                    : null;
+
                 return (
                     <blockquote
                         key={i}
@@ -145,6 +152,8 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
                         <div className={isOutClassName}>
                             {this.messages(foldedMessage.items)}
+
+                            {messageAuthor}
                         </div>
 
                     </blockquote>
@@ -161,18 +170,20 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         const out = _(foldedMessages).last().author.isSelf;
         const description = timeAgo()(dialog.messages.slice(-1)[0].date * 1000);
 
+        const owners = this.getOwners(dialog);
+
 
         return (
             <Item
                 description={description}
-                owners={this.getOwners(dialog)}
+                owners={owners}
                 itemClass="chat"
                 reply={this.state.reply}
                 message={this.state.message}
                 sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
                 handleMessageChange={this.handleMessageChange}>
 
-                {this.blockquotes(dialog, foldedMessages)}
+                {this.blockquotes(dialog, foldedMessages, owners)}
 
                 <DialogActions
                     dialog={dialog}

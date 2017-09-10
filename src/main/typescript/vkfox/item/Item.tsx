@@ -27,11 +27,11 @@ class Item extends React.Component<ItemProps> {
             </div>
         );
 
-        const cssProps: CSSProperties = {
-            backgroundImage: `url(${(owners as ProfileI).photo})`
-        };
-
         const divForNotArray = () => {
+            const cssProps: CSSProperties = {
+                backgroundImage: `url(${(owners as ProfileI).photo})`
+            };
+
             const owner = owners as ProfileI;
             const anchor = owner.uid && owner.uid > 0
                 ? `/id${owner.uid}`

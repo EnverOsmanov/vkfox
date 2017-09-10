@@ -4,8 +4,8 @@ import Browser from "../browser/browser.bg"
 import Settings from "./settings"
 import {NotificationQueue, notificationsSettings, VKNotificationI} from "./Notification";
 import NotificationOptions = browser.notifications.NotificationOptions;
+import VKfoxAudio from "./VKfoxAudio";
 
-let audioInProgress = false;
 
 const notificationQueue = new NotificationQueue();
 
@@ -78,23 +78,11 @@ export default class Notifications {
     }
 
     static playSound(): void {
-        function play(source: string, volume: number): void {
-
-            if (!audioInProgress) {
-                audioInProgress = true;
-
-                const audio = new Audio(source);
-                audio.volume = volume;
-                audio.play();
-                audio.addEventListener("ended", () => { audioInProgress = false });
-            }
-        }
-
 
         const sound = notificationsSettings.sound;
 
         if (notificationsSettings.enabled && sound.enabled) {
-            play(Settings[sound.signal], sound.volume);
+            VKfoxAudio.play(sound);
         }
     }
 

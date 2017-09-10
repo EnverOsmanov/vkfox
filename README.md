@@ -14,21 +14,21 @@ Our group in VK - [vkfoxy](https://vk.com/vkfoxy).
 
 ```
 npm install
-npm run bundle
+npm run bundleProd
 ````
 Now look to `target/firefox` directory.
 
 <hr>
 
-* If you want to bundle in developer mode (with *hot-reload* etc...) use:
+* If you want to bundle in **developer** mode (with *hot-reload* etc...) use:
 ```
 npm install
-npm run gulp
+npm run bundle
 ````
 
 ---
 
-After that if you want to start unpacked extension in Firefox Developer Edition:
+2) After that if you want to start unpacked extension in Firefox Developer Edition:
 ````
 npm run ffoxMac
 ````
