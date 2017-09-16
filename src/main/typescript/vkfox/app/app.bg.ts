@@ -1,5 +1,4 @@
 "use strict";
-import Tracker from "../tracker/tracker";
 import Browser from "../browser/browser.bg";
 import Buddies from "../buddies/buddies.bg";
 import ChatBg from "../chat/chat.bg";
@@ -13,21 +12,18 @@ import InstallPageOrLogin from "../yandex/yandex.bg";
 import Auth from "../auth/auth.bg";
 import Users from "../users/users.bg";
 
-try {
-    Browser.init();
-    Auth.init();
-    Buddies();
-    ChatBg();
-    NewsfeedBg();
-    FeedbacksBg();
-    RouterBg.init();
-    LikesBg();
-    ForceOnlineBg();
-    LongpollBg();
-    Users.init();
 
-    InstallPageOrLogin();
-} catch (e)  {
-    Tracker.error(e);
-    throw e;
-}
+Browser.init();
+Auth.init();
+Buddies();
+Users.init();
+ChatBg();
+NewsfeedBg();
+FeedbacksBg();
+RouterBg.init();
+LikesBg();
+ForceOnlineBg();
+LongpollBg();
+
+InstallPageOrLogin();
+

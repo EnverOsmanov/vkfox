@@ -4,7 +4,7 @@ import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/collections/FeedBac
 import {ReplyI} from "../../../chat/Chat";
 import AttachmentC from "../../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
-import {rectifyPu} from "../../../rectify/rectify.pu";
+import RectifyPu from "../../../rectify/rectify.pu";
 
 
 interface FeedbackItemProps {
@@ -47,7 +47,9 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
         return (
             <div>
 
-                <span dangerouslySetInnerHTML={{__html: rectifyPu()(commentFeedback.text, false)}}/>
+                <span>
+                    <RectifyPu text={commentFeedback.text} hasEmoji={false}/>
+                </span>
                 {attachments}
             </div>
         );

@@ -10,7 +10,7 @@ import AttachmentC from "../attachment/AttachmentC";
 import {Profile, ProfileI} from "../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
 import {ReplyI} from "../chat/Chat";
-import {rectifyPu} from "../rectify/rectify.pu";
+import RectifyPu from "../rectify/rectify.pu";
 
 interface DialogItemProps {
     dialog      : DialogI
@@ -119,7 +119,13 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
         return (
             <div key={messageItem.mid}>
-                <span dangerouslySetInnerHTML={{__html: rectifyPu()(messageItem.body, false)}}/>
+                <span>
+                    <RectifyPu
+                        text={messageItem.body}
+                        hasEmoji={false}
+                    />
+                </span>
+
                 <br hidden={!(messageItem.attachments && messageItem.body)}/>
                 {attachments}
             </div>

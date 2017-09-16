@@ -119,7 +119,7 @@ gulp.task("webpack", callback => {
 function i18n(locale) {
   gulp.task(`i18n-${locale}`, () => {
     return gulp.src(`${__srcDir}/vkfox/i18n/${locale}/*.json`)
-      .pipe(messageFormat({locale: locale}))
+      .pipe(messageFormat({ locale }))
       .pipe(gulp.dest(`${__srcDir}/vkfox/i18n`))
   });
 }

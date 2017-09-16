@@ -1,14 +1,13 @@
 "use strict";
 import Request from '../request/request.bg';
 import * as _ from "underscore"
-import Tracker from "../tracker/tracker"
 import Mediator from "../mediator/mediator.bg"
 import Msg from "../mediator/messages"
 import {Profiles} from "../feedbacks/collections/ProfilesColl";
 import {
     AttachmentPhoto,
     AttachmentPhotoContainer, Item, ItemDulpColl, ItemObj, ItemsColl, LikesChanged, NewsfeedResp, Photo, PostItem,
-    ProfilesColl
+    ProfilesColl, WallPhotoItem
 } from "./models";
 import {AccessTokenError} from "../request/models";
 
@@ -71,14 +70,10 @@ function processRawItem(item: ItemObj) {
         if (propertyName) {
             // type "photo" item has "photos" property; note - notes etc
 
+            collection.add(item[propertyName].slice(1), Profiles.addOptions);
+            collection.add(collisionItem[propertyName].slice(1), Profiles.addOptions);
 
-            try {
-                collection.add(item[propertyName].slice(1), Profiles.addOptions);
-                collection.add(collisionItem[propertyName].slice(1), Profiles.addOptions);
-
-                item[propertyName] = [collection.size()].concat(collection.toJSON());
-            }
-            catch (event) { Tracker.debug(collisionItem, item, event); }
+            item[propertyName] = [collection.size()].concat(collection.toJSON());
         }
     }
 
@@ -97,7 +92,8 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
         let wallPhotos: Photo[];
 
         if (item.type === 'wall_photo') {
-            wallPhotos = <Photo[]>item.photos.slice(1);
+            const wallPhotoItem = item as WallPhotoItem;
+            wallPhotos = (wallPhotoItem.photos as Photo[]).slice(1);
 
             // collect all attachments from source_id's posts
             const postProperties = {
@@ -124,7 +120,7 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
             //exclude attachedPhotos from wallPhotos
             wallPhotos = wallPhotos.filter( ({pid}) => !(_.findWhere(attachedPhotos, { pid })) );
 
-            item.photos = (<(number | Photo)[]>[wallPhotos.length]).concat(wallPhotos);
+            wallPhotoItem.photos = (<(number | Photo)[]>[wallPhotos.length]).concat(wallPhotos);
             return  wallPhotos.length;
         }
         return true;

@@ -3,7 +3,7 @@ import {ItemObj} from "../../../feedbacks/collections/ItemColl";
 import AttachmentC from "../../../attachment/AttachmentC";
 import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
 import I18N from "../../../i18n/i18n";
-import {rectifyPu} from "../../../rectify/rectify.pu";
+import RectifyPu from "../../../rectify/rectify.pu";
 
 
 interface MyFeedbackPostProps {
@@ -27,7 +27,9 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
             ) : null;
 
         const text = postParent.text &&
-            <span dangerouslySetInnerHTML={{__html: rectifyPu()(postParent.text, false)}}/>;
+            <span>
+                <RectifyPu text={postParent.text} hasEmoji={false}/>
+            </span>;
 
         return (
             <div>

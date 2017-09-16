@@ -61,8 +61,6 @@ export interface ItemObj {
     date     : number
     source_id: number;
     post_id  : number;
-    photos   : (number | Photo)[];
-    friends  : (number | Friend)[]
 }
 
 
@@ -219,4 +217,39 @@ export interface PhotoItem extends ItemObj {}
 
 export interface PhotoTagItem extends ItemObj {
     photo_tags: Photo[]
+}
+
+export interface WallPhotoItem extends ItemObj {
+    // type = "wall_photo"
+
+    photos: (number | Photo)[]
+}
+
+export interface FriendItem extends ItemObj {
+
+    friends: (number | Friend)[]
+}
+
+export interface AudioItem extends ItemObj {
+    // type = "audio";
+
+    audio: (number | AudioAudio)[]
+}
+
+export interface VideoItem extends ItemObj {
+    // type = "video";
+
+    video: (number | VideoVideo)[]
+}
+
+export interface VideoVideo {
+    vid: number
+    title: string
+}
+
+export interface AudioAudio {
+    aid     : number
+    artist  : string
+    title   : string
+    duration: number
 }

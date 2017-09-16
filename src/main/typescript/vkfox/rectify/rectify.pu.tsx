@@ -1,17 +1,31 @@
-"use strict";
+import * as React from "react"
 import I18N from '../i18n/i18n.pu';
 import * as linkifyHtml from 'linkifyjs/html';
 import * as sanitizeHtml from "sanitize-html";
 import * as jEmoji from 'emoji';
-import * as $ from "jquery";
 
+interface RectifyPuProps {
+    text    : string
+    hasEmoji: boolean;
+}
 
-export function rectifyPu() {
-    const MAX_TEXT_LENGTH = 300,
-        TRUNCATE_LENGTH = 200,
+interface RectifyPuState {
+    hideButton: boolean
+}
 
-        showMoreButtonLabel = I18N.get('more...');
+const MAX_TEXT_LENGTH = 300,
+    TRUNCATE_LENGTH = 200;
 
+class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
+
+    constructor() {
+        super(...arguments);
+
+        this.state = {hideButton: false}
+    }
+
+    static showMoreButtonLabel = I18N.get('more...');
+/*
     $('body').on('click', '.show-more', function (e) {
         const jTarget = $(e.currentTarget);
 
@@ -19,7 +33,11 @@ export function rectifyPu() {
             jTarget.data('text'),
             jTarget.data('emoji') === 'yes'
         ));
-    });
+    });*/
+
+    showMore() {
+        this.setState({ hideButton: true })
+    }
 
     /**
      * Sanitize html with Angular's $sanitize.
@@ -34,7 +52,7 @@ export function rectifyPu() {
      * @param {Boolean} hasEmoji
      * @returns {String} html
      */
-    function linkifySanitizeEmoji(text, hasEmoji) {
+    static linkifySanitizeEmoji(text, hasEmoji) {
         const jEmojedText = hasEmoji
             ? jEmoji.unifiedToHTML(text)
             : text;
@@ -56,7 +74,7 @@ export function rectifyPu() {
         );
     }
 
-    function escapeQuotes(string) {
+    static escapeQuotes(string) {
         const entityMap = {
             '"': '&quot;',
             "'": '&#39;'
@@ -64,6 +82,25 @@ export function rectifyPu() {
 
         return String(string).replace(/["']/g, s => entityMap[s] );
     }
+
+    buttonOrFullText = (text: string, spaceIndex: number, hasEmoji: boolean) => {
+
+        if (this.state.hideButton) {
+            const restOfText =  RectifyPu.escapeQuotes(text.slice(spaceIndex));
+            const resultText = RectifyPu.linkifySanitizeEmoji(restOfText, hasEmoji);
+
+            return <div dangerouslySetInnerHTML={{__html: resultText}} />
+        }
+        else
+        return (
+            <span
+                className="show-more btn rectify__button"
+                onClick={() => this.showMore()}>
+                {RectifyPu.showMoreButtonLabel}
+            </span>
+        )
+    };
+
     /**
      * Truncates long text, and add pseudo-link "show-more"
      * Replaces text links and next wiki format: [id12345|Dmitrii]
@@ -75,27 +112,30 @@ export function rectifyPu() {
      *
      * @returns {String} html-string
      */
-    return function (text: string, hasEmoji: boolean) {
+    render() {
+        let text = this.props.text;
+        const hasEmoji = this.props.hasEmoji;
 
-        if (text) {
-            text = String(text);
-            if (text.length > MAX_TEXT_LENGTH) {
-                const spaceIndex = text.indexOf(' ', TRUNCATE_LENGTH);
+        if (text.length > MAX_TEXT_LENGTH) {
+            const spaceIndex = text.indexOf(" ", TRUNCATE_LENGTH);
 
-                if (spaceIndex !== -1) {
-                    const resultText = linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji);
-                    const resultButton = [
-                        ' <span class="show-more btn rectify__button" data-text="',
-                        escapeQuotes(text.slice(spaceIndex)), '" ',
-                        hasEmoji ? 'data-emoji="yes" ':'',
-                        'type="button">', showMoreButtonLabel, '</span>'
-                    ].join('');
+            if (spaceIndex !== -1) {
+                const firstPartOfText = RectifyPu.linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji);
 
-                    return resultText + resultButton;
-                }
-                else return linkifySanitizeEmoji(text, hasEmoji);
+                return (
+                    <div>
+                        <div dangerouslySetInnerHTML={{__html: firstPartOfText}}/>
+                        {this.buttonOrFullText(text, spaceIndex, hasEmoji)}
+                    </div>
+                );
             }
-            else return linkifySanitizeEmoji(text, hasEmoji);
+            else return <div dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}/>;
         }
+        else {
+            return <div dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}/>;
+        }
+
     };
 }
+
+export default RectifyPu;

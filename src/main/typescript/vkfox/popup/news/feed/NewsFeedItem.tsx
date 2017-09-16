@@ -1,18 +1,21 @@
 import * as React from "react"
 import Item from "../../../item/Item";
 import {ReplyI} from "../../../chat/Chat";
-import {AttachmentContainer, Friend, ItemObj, Photo, PhotoTagItem, PostItem} from "../../../newsfeed/models";
+import {
+    AttachmentContainer, AudioAudio, AudioItem, Friend, FriendItem, ItemObj, Photo, PhotoTagItem, PostItem,
+    WallPhotoItem
+} from "../../../newsfeed/models";
 import I18N from "../../../i18n/i18n";
 import ItemActionLike from "../../../itemActions/ItemActionLike";
 import ItemActionComment from "../../../itemActions/ItemActionComment";
 import ItemAction from "../../../itemActions/ItemAction";
 import ItemActions from "../../../itemActions/ItemActions";
 import {addVKBase, object2Name} from "../../../filters/filters.pu";
-import {rectifyPu} from "../../../rectify/rectify.pu";
 import AttachmentC from "../../../attachment/AttachmentC";
 import {ProfileI} from "../../../chat/collections/ProfilesColl";
 import Request from "../../../request/request.pu";
 import {SendMessageI} from "../../../itemActions/types";
+import RectifyPu from "../../../rectify/rectify.pu";
 
 
 interface NewsFeedItemProps {
@@ -181,10 +184,10 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     postElm = (itemPost: PostItem) => {
         return (
             <div>
-                <p
-                    className="news__item-text"
-                    dangerouslySetInnerHTML={{__html: rectifyPu()(itemPost.text, false)}}
-                />
+                <div
+                    className="news__item-text">
+                    <RectifyPu text={itemPost.text} hasEmoji={false}/>
+                </div>
 
                 {this.postAttachmentElms(itemPost)}
 
@@ -227,7 +230,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
             case "photo":
             case "wall_photo":
-                return this.photoAttachmentElms(item.photos as Photo[]);
+                return this.photoAttachmentElms((item as WallPhotoItem).photos as Photo[]);
 
             case "photo_tag":
                 const photoTagItem = item as PhotoTagItem;
@@ -237,10 +240,31 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 return JSON.stringify(item);
 
             case "friend":
-                return this.friendsElms(item.friends as Friend[]);
+                return (
+                    <div>
+                        {I18N.get("New friends:")}
+                        {this.friendsElms((item as FriendItem).friends as Friend[])}
+                    </div>
+                );
 
             case "audio":
-                return <div>{I18N.get("New music:")}</div>;
+                const audioItem = item as AudioItem;
+
+                const audios = audioItem.audio.slice(1).map( (audio: AudioAudio, i: number) => {
+                    return (
+                        <div key={i}>
+                            <i className="fa fa-music"/>
+                            {audio.artist} - {audio.title}
+                        </div>
+                    )
+                });
+
+                return (
+                    <div>
+                        {I18N.get("New music:")}
+                        {audios}
+                    </div>
+                );
 
             case "video":
                 return <div>{I18N.get("New video:")}</div>;

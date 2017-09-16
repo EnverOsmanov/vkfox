@@ -3,14 +3,11 @@ import Mediator from "../mediator/mediator.pu"
 import Msg from "../mediator/messages"
 import {ProfileI} from "../chat/collections/ProfilesColl"
 import {buddiesFilter, initBuddiesFilter} from "./buddies.pu"
-import * as $ from "jquery"
 import BuddyItem from "../buddy/BuddyItem";
 import BuddiesSearch from "./BuddiesSearch";
 import {BuddiesFilters} from "./types";
 import ItemList from "../item-list/ItemList";
 
-(window as any).jQuery = $;
-require('bootstrapDropdown');
 
 
 interface BuddiesState {
@@ -23,15 +20,15 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
 
     filtersModel = initBuddiesFilter();
 
-    constructor(props) {
-        super(props);
+    constructor() {
+        super(...arguments);
 
-        $('.dropdown-menu').click( event => event.stopPropagation() );
+        const filters = this.filtersModel.toJSON();
 
         this.state = {
             data        : [],
-            filters     : this.filtersModel.toJSON(),
-            searchInput : ""
+            searchInput : "",
+            filters
         };
     }
 

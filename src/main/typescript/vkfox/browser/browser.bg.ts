@@ -1,5 +1,4 @@
 "use strict";
-import * as _ from "underscore"
 import ProxyMethods from '../proxy-methods/proxy-methods.bg';
 import Tab = browser.tabs.Tab;
 
@@ -22,13 +21,12 @@ class Browser {
         browser.browserAction.setBadgeBackgroundColor({color: BADGE_COLOR});
 
         // overcome circular dependency through mediator
-        _.defer( () => ProxyMethods.connect('../browser/browser.bg', Browser) );
+        ProxyMethods.connect('../browser/browser.bg', Browser);
     }
 
-    static async getVkfoxVersion(): Promise<string> {
-        const info = await browser.management.getSelf();
-
-        return info.version
+    static getVkfoxVersion(): Promise<string> {
+        return browser.management.getSelf()
+            .then( info => info.version);
     }
 
     /**
@@ -69,8 +67,9 @@ class Browser {
     static async isVKSiteActive(): Promise<boolean> {
         const tabs = await browser.tabs.query({active: true});
 
-        if (tabs.length) return tabs[0].url.includes("vk.com");
-        else return false;
+        return tabs.length
+            ? tabs[0].url.includes("vk.com")
+            : false;
     }
 
     static createTab(url: string): Promise<Tab> {

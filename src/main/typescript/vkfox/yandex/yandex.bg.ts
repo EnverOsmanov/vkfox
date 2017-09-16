@@ -18,10 +18,10 @@ export default function init() {
     // Show install dialog only once, don't bother
     if (storageModel.get('dialog')) {
         storageModel.set('dialog', false);
-        Browser.createTab("/pages/install.html");
+        return Browser.createTab("/pages/install.html");
     }
     else {
-        Auth.login();
+        return Auth.login();
     }
     // Browser.createTab("/pages/popup.html");
 }

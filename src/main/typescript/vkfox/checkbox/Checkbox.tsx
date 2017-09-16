@@ -14,6 +14,7 @@ interface CheckboxProps {
 class Checkbox extends React.Component<CheckboxProps> {
 
     onChange = () => {
+        debugger;
         this.props.onToggle(this.props.filterName, !this.props.isChecked)
     };
 
