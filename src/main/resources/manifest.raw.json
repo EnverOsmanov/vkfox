@@ -17,6 +17,8 @@
             "https://*.vk.me/*"
             , "https://imv4.vk.com/*"
             , "https://api.vk.com/*"
+            , "https://login.vk.com/*"
+            , "https://oauth.vk.com/*"
             , "https://pp.userapi.com/*"
             , "https://sun1-1.userapi.com/*"
             , "https://*.vk.com/*"
