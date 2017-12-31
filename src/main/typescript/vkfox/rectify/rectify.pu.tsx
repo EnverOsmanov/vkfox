@@ -18,8 +18,8 @@ const MAX_TEXT_LENGTH = 300,
 
 class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
 
-    constructor() {
-        super(...arguments);
+    constructor(props) {
+        super(props);
 
         this.state = {hideButton: false}
     }

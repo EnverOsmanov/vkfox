@@ -20,8 +20,8 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
 
     filtersModel = initBuddiesFilter();
 
-    constructor() {
-        super(...arguments);
+    constructor(props) {
+        super(props);
 
         const filters = this.filtersModel.toJSON();
 

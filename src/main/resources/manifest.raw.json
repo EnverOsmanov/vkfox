@@ -14,9 +14,11 @@
             "128": "assets/logo128.png"
         },
         "permissions": [
-            "http://*.vk.me/*"
-            , "http://*.vk.com/*"
-            , "https://*.vk.me/*"
+            "https://*.vk.me/*"
+            , "https://imv4.vk.com/*"
+            , "https://api.vk.com/*"
+            , "https://pp.userapi.com/*"
+            , "https://sun1-1.userapi.com/*"
             , "https://*.vk.com/*"
             , "webRequest"
             , "webRequestBlocking"

@@ -10,8 +10,8 @@ import {InstallButtons, stepsInfo} from "../install/StepInfo";
 
 class App extends React.Component<undefined, InstallState> {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {step: 0}
     }
