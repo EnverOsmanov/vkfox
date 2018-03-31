@@ -18,12 +18,7 @@ module.exports = {
   watch  : isDev,
   devtool: isDev ? "cheap-inline-module-source-map" : false,
   plugins: [
-      new webpack.NoEmitOnErrorsPlugin(),
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
-      new webpack.optimize.CommonsChunkPlugin({
-          name: ["vendor", "ng"],
-          minChunks: 2
-      }),
       new webpack.DefinePlugin({
           'process.env': {
               'NODE_ENV': JSON.stringify(process.env.NODE_ENV)

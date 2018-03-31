@@ -87,10 +87,9 @@ gulp.task("assets", () => {
 gulp.task("webpack", callback => {
     const webpackConfig = require("./webpack.config.js");
 
-    const myConfig = Object.create(webpackConfig);
     let firstCallback = true;
 
-    webpack(myConfig, (err, stats) => {
+    webpack(webpackConfig, (err, stats) => {
         if (firstCallback) {
             firstCallback = false;
 
@@ -102,7 +101,7 @@ gulp.task("webpack", callback => {
                     message: err
                 });
 
-                gulplog.error(err)
+                gulplog.error("[webpack in gulp]", err)
             }
             else {
                 gulplog.info("[webpack:build]", stats.toString({
@@ -110,7 +109,7 @@ gulp.task("webpack", callback => {
                 }));
             }
 
-            if (!myConfig.watch && err) callback(err);
+            if (!webpackConfig.watch && err) callback(err);
             else callback();
         }
     });
