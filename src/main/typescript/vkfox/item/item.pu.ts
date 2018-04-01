@@ -1,9 +1,11 @@
 "use strict";
 
+import {AttachmentGraffiti, AttachmentSticker} from "../newsfeed/types";
+
+const DOC_VIEW_URL = 'http://vkfox.io/doc/',
+    IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
 
 export function docViewPath() {
-    const DOC_VIEW_URL = 'http://vkfox.io/doc/',
-        IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
 
     function isImage(filename) {
         const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tiff'],
@@ -21,26 +23,41 @@ export function docViewPath() {
     };
 }
 
-export function imageViewPath() {
-    const IMAGE_VIEW_URL = 'http://vkfox.io/photo/';
+export function imageViewPath(photo: AttachmentGraffiti): string | void {
+    const sizes = [
+        'src_xxxbig',
+        'src_xxbig',
+        'src_xbig',
+        'src_big',
+        'src_small',
+        'src'
+    ];
 
-    return function (photo) {
-        const sizes = [
-            'src_xxxbig',
-            'src_xxbig',
-            'src_xbig',
-            'src_big',
-            'src_small',
-            'src'
-        ];
-
-        let i;
-        if (photo) {
-            for (i in sizes) {
-                if (sizes[i] in photo) {
-                    return IMAGE_VIEW_URL + '#' + btoa(photo[sizes[i]]);
-                }
+    let i;
+    if (photo) {
+        for (i in sizes) {
+            if (sizes[i] in photo) {
+                return IMAGE_VIEW_URL + '#' + btoa(photo[sizes[i]]);
             }
         }
-    };
+    }
+}
+
+export function stickerViewPath(photo: AttachmentSticker) {
+    const sizes = [
+        "photo_512",
+        "photo_352",
+        "photo_256",
+        "photo_128",
+        "photo_64"
+    ];
+
+    let i;
+    if (photo) {
+        for (i in sizes) {
+            if (sizes[i] in photo) {
+                return IMAGE_VIEW_URL + '#' + btoa(photo[sizes[i]]);
+            }
+        }
+    }
 }

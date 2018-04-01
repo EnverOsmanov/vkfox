@@ -9,10 +9,10 @@ import {
     AttachmentGraffiti,
     AttachmentLink,
     AttachmentNote,
-    AttachmentPoll,
-    AttachmentVideo, AttachmentWall, AttachmentWallContainer
+    AttachmentPoll, AttachmentSticker,
+    AttachmentVideo, AttachmentWall
 } from "../newsfeed/types";
-import {docViewPath, imageViewPath} from "../item/item.pu";
+import {docViewPath, imageViewPath, stickerViewPath} from "../item/item.pu";
 import {duration} from "../filters/filters.pu";
 
 
@@ -97,7 +97,7 @@ export function attachmentDiv(type: string, data: Attachment) {
                 <div
                     className="item__picture"
                     style={imageProperties(dataGraffiti.src_big)}
-                    data-anchor={imageViewPath()(dataGraffiti)}>
+                    data-anchor={imageViewPath(dataGraffiti)}>
                 </div>
             );
 
@@ -116,8 +116,17 @@ export function attachmentDiv(type: string, data: Attachment) {
 
                 </div>
             );
+        case "sticker":
+            const sticker = data as AttachmentSticker;
+            return (
+                <div
+                    className="item__sticker"
+                    style={imageProperties(sticker.photo_256)}
+                    data-anchor={stickerViewPath(sticker)}>
+
+                </div>
+            );
         case "wall":
-            debugger;
             const wall = data as AttachmentWall;
             return (
                 <div className="item__attachment">

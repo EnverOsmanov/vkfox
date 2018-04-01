@@ -201,6 +201,18 @@ export interface AttachmentWall extends Attachment {
     attachments : AttachmentContainer[]
 }
 
+export interface AttachmentSticker extends Attachment {
+    id          : number
+    width       : number
+    height      : number
+    product_id  : number
+    photo_64    : string
+    photo_128   : string
+    photo_256   : string
+    photo_352   : string
+    photo_512   : string
+}
+
 
 
 class Profile extends Model {

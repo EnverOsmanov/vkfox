@@ -5,9 +5,9 @@ const isDev = process.env.NODE_ENV === "development";
 module.exports = {
   context: __dirname + '/src/main/typescript',
   entry: {
-    "app.install"     : './vkfox/app/app.install.tsx',
+    "app.install"     : './vkfox/install/app/app.install.tsx',
     "app.pu"          : './vkfox/popup/app/app.pu.tsx',
-    "app.bg"          : './vkfox/app/app.bg.ts',
+    "app.bg"          : './vkfox/back/app/app.bg.ts',
     "ng"              : ["react", "react-dom", "react-router-dom"],
     "vendor"          : ["underscore", "backbone", "linkifyjs", "moment"]
   },

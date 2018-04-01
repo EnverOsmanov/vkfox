@@ -1,11 +1,11 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom"
-import InstallTitle from "../install/InstallTitle"
-import InstallSteps from "../install/InstallSteps"
-import InstallStepText from "../install/InstallStepText"
-import InstallControls from "../install/InstallControls"
-import InstallState from "../install/InstallState";
-import {InstallButtons, stepsInfo} from "../install/StepInfo";
+import InstallTitle from "../InstallTitle"
+import InstallSteps from "../InstallSteps"
+import InstallStepText from "../InstallStepText"
+import InstallControls from "../InstallControls"
+import InstallState from "../InstallState";
+import {InstallButtons, stepsInfo} from "../StepInfo";
 
 
 class App extends React.Component<undefined, InstallState> {
