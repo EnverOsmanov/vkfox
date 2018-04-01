@@ -1,5 +1,5 @@
 import * as React from "react"
-import {ItemObj, NewsfeedData} from "../../../newsfeed/models";
+import {ItemObj, NewsfeedData} from "../../../newsfeed/types";
 import NewsFeedItem from "./NewsFeedItem";
 
 interface FeedsProps {

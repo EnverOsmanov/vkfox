@@ -10,8 +10,8 @@ import {
     AttachmentLink,
     AttachmentNote,
     AttachmentPoll,
-    AttachmentVideo
-} from "../newsfeed/models";
+    AttachmentVideo, AttachmentWall, AttachmentWallContainer
+} from "../newsfeed/types";
 import {docViewPath, imageViewPath} from "../item/item.pu";
 import {duration} from "../filters/filters.pu";
 
@@ -111,9 +111,19 @@ export function attachmentDiv(type: string, data: Attachment) {
 
                     <div className="item__video-desc">
                         <div className="item__video-title">{dataVideo.title}</div>
-                        <div className="item__video-duration">{duration()(dataVideo.duration)}</div>
+                        <div className="item__video-duration">{duration(dataVideo.duration)}</div>
                     </div>
 
+                </div>
+            );
+        case "wall":
+            debugger;
+            const wall = data as AttachmentWall;
+            return (
+                <div className="item__attachment">
+                    <i className="fa fa-bullhorn"/>
+
+                    { wall.text}
                 </div>
             );
         default:

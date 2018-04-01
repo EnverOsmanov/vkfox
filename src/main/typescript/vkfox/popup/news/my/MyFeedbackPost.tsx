@@ -1,9 +1,12 @@
+"use strict";
+
 import * as React from "react"
 import {ItemObj} from "../../../feedbacks/collections/ItemColl";
 import AttachmentC from "../../../attachment/AttachmentC";
 import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
+import {html2text} from "../../../rectify/helpers";
 
 
 interface MyFeedbackPostProps {
@@ -48,11 +51,11 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
 
             case "topic":
                 const topicParent = item.parent as TopicFeedback;
-                return <div>{topicParent.text}</div>;
+                return <RectifyPu text={topicParent.text} hasEmoji={false}/>;
 
             case "mention":
                 const mentionParent = item.parent as WallPostMentionFeedback;
-                return <div>{mentionParent.text}</div>;
+                return <RectifyPu text={mentionParent.text} hasEmoji={false}/>;
 
             case "follow":
                 return (
@@ -88,7 +91,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
 
 
     render() {
-        const item = this.props.item;
+        const {item} = this.props;
 
         return this.myFeedbackPost(item)
     }

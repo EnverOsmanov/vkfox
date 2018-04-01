@@ -57,7 +57,7 @@ class MainNavigation extends React.Component {
                         {this.tabLinks}
 
                         <div className="navigation__actions">
-                            <div data-anchor={addVKBase()("/vkfoxy")}
+                            <div data-anchor={addVKBase("/vkfoxy")}
                                   className="navigation__action navigation__help">
                                 <i className="fa fa-bug"/>
                             </div>

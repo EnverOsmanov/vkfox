@@ -14,6 +14,7 @@ import {Dialog, DialogColl, Message} from "./collections/DialogColl";
 import {NotifType} from "../notifications/Notification";
 import {LPMessage} from "../longpoll/models";
 import {Profiles} from "../feedbacks/collections/ProfilesColl";
+import {AuthModelI} from "../auth/models";
 
 const MAX_HISTORY_COUNT = 10;
 
@@ -42,7 +43,7 @@ export default function init() {
         .then(fetchProfiles);
 
     initialize(readyPromise);
-    Mediator.sub(Msg.AuthUser, data => {
+    Mediator.sub(Msg.AuthUser, (data: AuthModelI) => {
         userId = data.userId;
         dialogColl.reset();
         profilesColl.reset();
@@ -68,7 +69,7 @@ function updateLatestMessageId(): void {
 function fetchProfiles(): Promise<void> {
 
     function dialog2Uuids(uids: number[], dialog: Dialog): number[] {
-        const allDialogUids = dialog.messages.map( (message: Message) => message.uid);
+        const allDialogUids = dialog.messages.map( message => message.uid);
 
         uids = uids
             .concat(allDialogUids, dialog.uid)
@@ -84,7 +85,7 @@ function fetchProfiles(): Promise<void> {
     }
 
     const requiredUids = dialogColl.reduce(dialog2Uuids, [userId]);
-    const cachesUids = profilesColl.pluck('uid');
+    const cachesUids = profilesColl.map(p => p.uid);
     const missingUids = _
         .chain(requiredUids)
         .uniq()

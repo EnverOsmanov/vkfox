@@ -6,7 +6,7 @@ import {ChatDataI, DialogI, Message} from "./collections/DialogColl"
 import {Collection} from "backbone"
 import Msg from "../mediator/messages";
 import I18N from "../i18n/i18n";
-import DialogItem from "../dialogActions/DialogItem";
+import DialogItem from "../popup/chat/dialogActions/DialogItem";
 
 
 export interface ReplyI {
@@ -28,7 +28,7 @@ class ChatPage extends React.Component<undefined, ChatState> {
 
         this.state = {
             dialogs: [],
-            profilesColl: profilesColl
+            profilesColl
         };
     }
 

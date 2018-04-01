@@ -6,9 +6,19 @@ import Msg from "../mediator/messages"
 import {Profiles} from "../feedbacks/collections/ProfilesColl";
 import {
     AttachmentPhoto,
-    AttachmentPhotoContainer, Item, ItemDulpColl, ItemObj, ItemsColl, LikesChanged, NewsfeedResp, Photo, PostItem,
-    ProfilesColl, WallPhotoItem
-} from "./models";
+    AttachmentPhotoContainer,
+    Item,
+    ItemDulpColl,
+    ItemObj,
+    ItemsColl,
+    LikesChanged,
+    NewsfeedRequestParams,
+    NewsfeedResp,
+    Photo,
+    PostItem,
+    ProfilesColl,
+    WallPhotoItem
+} from "./types";
 import {AccessTokenError} from "../request/models";
 
 /**
@@ -25,7 +35,7 @@ const profilesColl = new ProfilesColl();
 const groupItemsColl = new ItemsColl();
 const friendItemsColl = new ItemsColl();
 
-const autoUpdateParams: { count: number, start_time?: number } = {
+const autoUpdateParams: NewsfeedRequestParams = {
     count: MAX_ITEMS_COUNT
 };
 
@@ -165,9 +175,9 @@ function fetchNewsfeed() {
         "time: API.utils.getServerTime() };";
 
     function responseHandler(response: NewsfeedResp) {
-        const newsfeed = response.newsfeed;
+        const {newsfeed, time} = response;
 
-        autoUpdateParams.start_time = response.time;
+        autoUpdateParams.start_time = time;
 
         profilesColl.add(newsfeed.profiles, Profiles.addOptions);
         profilesColl.add(newsfeed.groups, Profiles.addOptions);
@@ -196,15 +206,16 @@ function fetchNewsfeed() {
 }
 
 function onLikesChanged(params: LikesChanged): void {
-    let model: Item;
+
     const whereClause = {
         type     : params.type,
         source_id: params.owner_id,
         post_id  : params.item_id
     };
 
-    if (params.owner_id > 0) model = friendItemsColl.findWhere(whereClause);
-    else model = groupItemsColl.findWhere(whereClause);
+    const model = params.owner_id > 0
+        ? friendItemsColl.findWhere(whereClause)
+        : groupItemsColl.findWhere(whereClause);
 
     if (model) model.likes = params.likes;
 }

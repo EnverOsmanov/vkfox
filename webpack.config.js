@@ -15,6 +15,7 @@ module.exports = {
     path: __dirname + '/target/firefox/pages',
     filename: "[name].js"
   },
+    mode: process.env.NODE_ENV,
   watch  : isDev,
   devtool: isDev ? "cheap-inline-module-source-map" : false,
   plugins: [

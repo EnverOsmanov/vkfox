@@ -4,13 +4,13 @@ import {ReplyI} from "../../../chat/Chat";
 import {
     AttachmentContainer, AudioAudio, AudioItem, Friend, FriendItem, ItemObj, Photo, PhotoTagItem, PostItem,
     WallPhotoItem
-} from "../../../newsfeed/models";
+} from "../../../newsfeed/types";
 import I18N from "../../../i18n/i18n";
 import ItemActionLike from "../../../itemActions/ItemActionLike";
 import ItemActionComment from "../../../itemActions/ItemActionComment";
 import ItemAction from "../../../itemActions/ItemAction";
 import ItemActions from "../../../itemActions/ItemActions";
-import {addVKBase, object2Name} from "../../../filters/filters.pu";
+import {addVKBase, profile2Name} from "../../../filters/filters.pu";
 import AttachmentC from "../../../attachment/AttachmentC";
 import {ProfileI} from "../../../chat/collections/ProfilesColl";
 import Request from "../../../request/request.pu";
@@ -169,8 +169,8 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
             return (
                 <span key={friend.uid}>
-                    <a data-anchor={addVKBase()(`/id${friend.uid}`)}>
-                        {object2Name()(profile)}
+                    <a data-anchor={addVKBase(`/id${friend.uid}`)}>
+                        {profile2Name(profile)}
 
                         {comma}
                     </a>

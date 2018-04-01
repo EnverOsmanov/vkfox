@@ -3,7 +3,7 @@ import Mediator from "../../../mediator/mediator.pu"
 import {RouteComponentProps} from "react-router"
 import Msg from "../../../mediator/messages"
 import Feeds from "./Feeds";
-import {NewsfeedData} from "../../../newsfeed/models";
+import {NewsfeedData} from "../../../newsfeed/types";
 
 
 interface ChatState {

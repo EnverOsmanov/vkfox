@@ -1,6 +1,6 @@
 "use strict";
 
-export const APP_ID = 3807372;
+export const APP_ID = 4791855;
 
 export const TRACKER_ID = 'UA-9568575-4';
 
@@ -18,6 +18,7 @@ export const AUTH_URI = [
         'scope=friends,photos,audio,video,docs,notes,pages,wall,groups,messages,notifications',
         'response_type=token',
         'redirect_uri=' + encodeURIComponent('https://oauth.vk.com/blank.html'),
-        'display=page'
+        'display=page',
+        `v=${5.73}`
     ].join('&')
 ].join('');

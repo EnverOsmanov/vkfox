@@ -3,7 +3,7 @@ import Mediator from '../mediator/mediator.pu'
 import PersistentModel from '../persistent-model/persistent-model'
 import Msg from "../mediator/messages"
 import {ProfileI} from "../chat/collections/ProfilesColl";
-import {object2Name} from "../filters/filters.pu";
+import {profile2Name} from "../filters/filters.pu";
 
 
 /**
@@ -16,7 +16,7 @@ import {object2Name} from "../filters/filters.pu";
  * @returns [Boolean]
  */
 export function matchProfile(profile: ProfileI, searchClue): boolean {
-    return object2Name()(profile)
+    return profile2Name(profile)
         .toLowerCase()
         .indexOf(searchClue.toLowerCase()) !== -1;
 }

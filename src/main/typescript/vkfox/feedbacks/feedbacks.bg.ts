@@ -16,7 +16,7 @@ import {
     NotificationObj, ReplyFeedback, WallPostMentionFeedback
 } from "./collections/FeedBacksCollection";
 import Msg from "../mediator/messages";
-import {LikesChanged} from "../newsfeed/models";
+import {LikesChanged} from "../newsfeed/types";
 import {AccessTokenError} from "../request/models";
 
 /**

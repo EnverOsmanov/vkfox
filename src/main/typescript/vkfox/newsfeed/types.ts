@@ -2,6 +2,11 @@ import {Collection, Model} from "backbone";
 import {LikesObj} from "../feedbacks/collections/FeedBacksCollection";
 import {ProfileI} from "../chat/collections/ProfilesColl";
 
+export interface NewsfeedRequestParams {
+    count: number,
+    start_time?: number
+}
+
 export interface NewsfeedData {
     profiles: ProfileI[]
     items: ItemObj[]
@@ -15,6 +20,7 @@ interface Newsfeed {
 
 export interface NewsfeedResp {
     newsfeed: Newsfeed
+
     time: number
 }
 
@@ -169,17 +175,30 @@ export interface AttachmentGraffitiContainer extends AttachmentContainer {
 
 
 export interface AttachmentVideo extends Attachment {
-    owner_id    : string
-    vid         : string
+    owner_id    : number
+    vid         : number
     access_key  : string
     image       : string
     title       : string
-    duration    : string
+    duration    : number
 }
 
 export interface AttachmentVideoContainer extends AttachmentContainer {
     type: string
     video: AttachmentVideo
+}
+
+export interface AttachmentWallContainer extends AttachmentContainer {
+    wall: AttachmentWall
+}
+
+export interface AttachmentWall extends Attachment {
+    from_id     : number
+    id          : number
+    likes       : object
+    post_type   : string
+    text        : string
+    attachments : AttachmentContainer[]
 }
 
 

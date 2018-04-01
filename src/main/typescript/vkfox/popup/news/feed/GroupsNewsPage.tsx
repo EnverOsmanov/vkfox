@@ -3,7 +3,7 @@ import Mediator from "../../../mediator/mediator.pu"
 import {RouteComponentProps} from "react-router"
 import Msg from "../../../mediator/messages"
 import Feeds from "./Feeds";
-import {NewsfeedData} from "../../../newsfeed/models";
+import {NewsfeedData} from "../../../newsfeed/types";
 
 
 interface ChatProps extends RouteComponentProps<any> {}
@@ -17,7 +17,7 @@ class GroupNewsPage extends React.Component<ChatProps, ChatState> {
     constructor(props) {
         super(props);
 
-        const data = {
+        const data: NewsfeedData = {
             profiles: [],
             items: []
         };
@@ -34,7 +34,7 @@ class GroupNewsPage extends React.Component<ChatProps, ChatState> {
         Mediator.unsub(Msg.NewsfeedGroups);
     }
 
-    onNewsfeedData = (data) => {
+    onNewsfeedData = (data: NewsfeedData) => {
         this.setState( {data})
     };
 

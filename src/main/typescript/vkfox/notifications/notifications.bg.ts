@@ -1,10 +1,10 @@
 "use strict";
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
-import Settings from "./settings"
 import {NotificationQueue, notificationsSettings, VKNotificationI} from "./Notification";
-import NotificationOptions = browser.notifications.NotificationOptions;
 import VKfoxAudio from "./VKfoxAudio";
+import NotificationOptions = browser.notifications.NotificationOptions;
+import {html2text} from "../rectify/helpers";
 
 
 const notificationQueue = new NotificationQueue();
@@ -16,7 +16,7 @@ function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: a
     xhr.open("GET", url);
 
     xhr.onload = function () {
-
+console.debug("ONLOAD");
         const bytes = new Uint8Array(xhr.response);
         //NOTE String.fromCharCode.apply(String, ...
         //may cause "Maximum call stack size exceeded"
@@ -42,30 +42,24 @@ export default class Notifications {
     /**
      * Create notifications. Usually you will need only this method
      *
-     * @param {Object} data
-     * @param {String} data.type
-     * @param {String} data.title
-     * @param {String} data.message
-     * @param {String} data.image
-     * @param {Boolean} [data.noBadge]
-     * @param {Boolean} [data.noPopup]
      */
-    static notify(data: VKNotificationI) {
-        return notificationQueue.add(data)
+    static notify(notification: VKNotificationI) {
+        return notificationQueue.add(notification)
     }
 
     static createPopup(options: VKNotificationI) {
-        function createP(base64: string) {
+        function createP(base64: string): Promise<string | void> {
             const message = (popups.showText && options.message) || '';
 
             const notificationOptions: NotificationOptions = {
                 type   : "basic",
                 title  : options.title,
-                message: message,
-                iconUrl: base64
+                iconUrl: base64,
+                message: html2text(message)
             };
 
-            return browser.notifications.create(_.uniqueId(), notificationOptions)
+            return browser.notifications
+                .create(_.uniqueId(), notificationOptions)
                 .catch(e => console.error("Failed to create notification", e));
         }
 

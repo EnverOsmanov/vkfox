@@ -25,15 +25,7 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
     }
 
     static showMoreButtonLabel = I18N.get('more...');
-/*
-    $('body').on('click', '.show-more', function (e) {
-        const jTarget = $(e.currentTarget);
 
-        jTarget.replaceWith(linkifySanitizeEmoji(
-            jTarget.data('text'),
-            jTarget.data('emoji') === 'yes'
-        ));
-    });*/
 
     showMore() {
         this.setState({ hideButton: true })

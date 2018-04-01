@@ -2,8 +2,7 @@ import * as React from "react"
 import {CSSProperties} from "react"
 import {ReplyI} from "../chat/Chat";
 import {ProfileI} from "../chat/collections/ProfilesColl";
-import {isArray} from "util";
-import {addVKBase, object2Name} from "../filters/filters.pu";
+import {addVKBase, profile2Name} from "../filters/filters.pu";
 
 interface ItemProps {
     owners      : ProfileI | ProfileI[],
@@ -11,6 +10,7 @@ interface ItemProps {
     itemClass  ?: string
     message    ?: string
     description?: string
+    title      ?: string
 
     sendMessage         ?: () => void
     handleMessageChange ?: (event) => void
@@ -40,16 +40,24 @@ class Item extends React.Component<ItemProps> {
             return (
                 <div
                     style={cssProps}
-                    data-anchor={addVKBase()(anchor)}
+                    data-anchor={addVKBase(anchor)}
                     className="item__img media-object">
                 </div>
             );
         };
 
 
-        return isArray(owners)
+        return Array.isArray(owners)
             ? divForArray
             : divForNotArray()
+    };
+
+    itemName = () => {
+        const {owners, title} = this.props;
+
+        return Array.isArray(owners)
+            ? title
+            : profile2Name(this.props.owners)
     };
 
     handleMessageChange = (event) => {
@@ -58,9 +66,11 @@ class Item extends React.Component<ItemProps> {
     };
 
     isOnlineClassName = () => {
-        const owners = this.props.owners as ProfileI;
+        const {owners} = this.props;
 
-        return owners.online ? "is-online" : ""
+        return ("online" in owners) && owners.online
+            ? "is-online"
+            : "";
     };
 
     handleKeyPress = (event: React.KeyboardEvent<any>) => {
@@ -108,7 +118,7 @@ class Item extends React.Component<ItemProps> {
                     </div>
                     <span className={`item__title ${this.isOnlineClassName()}`}>
                         <span className="item__author">
-                            {object2Name()(this.props.owners)}
+                            {this.itemName()}
                         </span>
 
                         {this.descriptionElm()}

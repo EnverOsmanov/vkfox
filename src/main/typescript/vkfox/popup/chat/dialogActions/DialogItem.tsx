@@ -1,16 +1,16 @@
 import * as React from "react"
-import {DialogI, Message, MessageMemo, SendMessageParams} from "../chat/collections/DialogColl";
-import Item from "../item/Item";
+import {DialogI, Message, MessageMemo, SendMessageParams} from "../../../chat/collections/DialogColl";
+import Item from "../../../item/Item";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
-import {foldMessagesByAuthor} from "../chat/chat.pu";
-import Request from "../request/request.pu"
-import {object2Name, timeAgo} from "../filters/filters.pu";
-import AttachmentC from "../attachment/AttachmentC";
-import {Profile, ProfileI} from "../chat/collections/ProfilesColl";
+import {foldMessagesByAuthor} from "../../../chat/chat.pu";
+import Request from "../../../request/request.pu"
+import {profile2Name, timeAgo} from "../../../filters/filters.pu";
+import AttachmentC from "../../../attachment/AttachmentC";
+import {Profile, ProfileI} from "../../../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
-import {ReplyI} from "../chat/Chat";
-import RectifyPu from "../rectify/rectify.pu";
+import {ReplyI} from "../../../chat/Chat";
+import RectifyPu from "../../../rectify/rectify.pu";
 
 interface DialogItemProps {
     dialog      : DialogI
@@ -93,7 +93,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
 
     getOwners = (dialog: DialogI): ProfileI | ProfileI[] =>{
-        const profilesColl = this.props.profilesColl;
+        const {profilesColl} = this.props;
 
         if (dialog.chat_id) {
             return dialog.chat_active.map(uid => profilesColl.get(uid).toJSON())
@@ -135,7 +135,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     messages = (messageItems: Message[]) => messageItems.map(this.singleMessage);
 
 
-    blockquotes = (dialog: DialogI, foldedMessages: MessageMemo[], owners: ProfileI | ProfileI[]) => {
+    blockquotes = (foldedMessages: MessageMemo[], owners: ProfileI | ProfileI[]) => {
 
 
         return foldedMessages.map((foldedMessage, i) => {
@@ -147,7 +147,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                 const messageAuthor = foldedMessage.author.uid !== (owners as ProfileI).uid
                     ?
                     <small className="chat__author">
-                        {object2Name()(foldedMessage.author)}
+                        {profile2Name(foldedMessage.author)}
                     </small>
                     : null;
 
@@ -169,27 +169,28 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     };
 
 
-    render() {
+    render(): React.ReactNode {
         const dialog = this.props.dialog;
 
         const foldedMessages = foldMessagesByAuthor(dialog.messages, this.props.profilesColl);
         const out = _(foldedMessages).last().author.isSelf;
-        const description = timeAgo()(dialog.messages.slice(-1)[0].date * 1000);
+        const datetime = timeAgo(dialog.messages.slice(-1)[0].date * 1000);
 
         const owners = this.getOwners(dialog);
 
 
         return (
             <Item
-                description={description}
+                description={datetime}
                 owners={owners}
                 itemClass="chat"
                 reply={this.state.reply}
                 message={this.state.message}
+                title={dialog.messages.slice(-1)[0].title}
                 sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
                 handleMessageChange={this.handleMessageChange}>
 
-                {this.blockquotes(dialog, foldedMessages, owners)}
+                {this.blockquotes(foldedMessages, owners)}
 
                 <DialogActions
                     dialog={dialog}

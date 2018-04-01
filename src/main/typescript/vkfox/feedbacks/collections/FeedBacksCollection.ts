@@ -1,6 +1,6 @@
 import {Collection, Model} from "backbone";
 import {GroupObj, ProfileObj} from "./ProfilesColl";
-import {Attachment, AttachmentContainer} from "../../newsfeed/models";
+import {Attachment, AttachmentContainer} from "../../newsfeed/types";
 
 class Feedback extends Model {
 

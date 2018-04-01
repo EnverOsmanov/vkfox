@@ -1,6 +1,6 @@
 import {Collection, Model} from "backbone";
 import {Profiles} from "../../feedbacks/collections/ProfilesColl";
-import {AttachmentContainer} from "../../newsfeed/models";
+import {AttachmentContainer} from "../../newsfeed/types";
 import {Profile, ProfileI} from "./ProfilesColl";
 
 export interface ChatDataI {
@@ -35,6 +35,7 @@ export interface Message {
     date        : number;
     out         : number;
     body        : string
+    title       : string
     attachments?: AttachmentContainer[]
 
     chat_active ?: number[];

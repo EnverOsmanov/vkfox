@@ -1,12 +1,12 @@
 import * as React from "react"
-import ChatPage from "../chat/Chat";
-import ItemAction from "../itemActions/ItemAction";
-import I18N from "../i18n/i18n";
-import ItemActions from "../itemActions/ItemActions";
+import ChatPage from "../../../chat/Chat";
+import ItemAction from "../../../itemActions/ItemAction";
+import I18N from "../../../i18n/i18n";
+import ItemActions from "../../../itemActions/ItemActions";
 
-import {Dialog, DialogI, Message, MessageHistoryI, MessageMemo} from "../chat/collections/DialogColl";
-import {getHistory, markAsRead} from "../chat/chat.pu";
-import {ProfileI} from "../chat/collections/ProfilesColl";
+import {DialogI, Message, MessageHistoryI, MessageMemo} from "../../../chat/collections/DialogColl";
+import {getHistory, markAsRead} from "../../../chat/chat.pu";
+import {ProfileI} from "../../../chat/collections/ProfilesColl";
 import * as _ from "underscore"
 import * as $ from "jquery"
 
@@ -68,8 +68,8 @@ class DialogActions extends React.Component<DialogActionsProps, undefined> {
             : null
     };
 
-    render(): JSX.Element | any | any {
-        const dialog = this.props.dialog;
+    render(): React.ReactNode {
+        const {dialog} = this.props;
         const messageURL = `http://vk.com/im?sel=${(dialog.chat_id ? 'c' + dialog.chat_id:dialog.uid)}`;
 
         const unread = _(dialog.messages).last().read_state === 0;

@@ -1,59 +1,54 @@
 "use strict";
 import * as moment from "moment";
 import * as Config from '../config/config';
+import {NameSurname, OnlyName, ProfileI} from "../chat/collections/ProfilesColl";
 
+/**
+ * Returns time duration in format 'HH:mm'
+ *
+ * @param {Array} seconds
+ *
+ * @returns {String}
+ */
+export function duration(seconds: number) {
 
-export function duration() {
-    /**
-     * Returns time duration in format 'HH:mm'
-     *
-     * @param {Array} seconds
-     *
-     * @returns {String}
-     */
-    return (seconds) => {
-        if (seconds) return moment.unix(seconds).format('HH:mm');
-    };
+    if (seconds) return moment.unix(seconds).format('HH:mm');
 }
 
-export function object2Name() {
-    /**
-     * Returns names from profile's data
-     *
-     * @param {Object|Array} input
-     *
-     * @returns {String} String
-     */
-    return (input) => {
-        function owner2Name(owner) {
-            //group profile
-            //user profile
-            return owner.name
-                ? owner.name
-                : `${owner.first_name} ${owner.last_name}`;
-        }
+/**
+ * Returns names from profile's data
+ *
+ * @param {Object|Array} input
+ *
+ * @returns {String} String
+ */
+export function profile2Name(input: OnlyName | NameSurname | OnlyName[] | NameSurname[]): string {
 
-        if (input) {
-            return [].concat(input).map(owner2Name).join(', ');
-        }
-    };
+    function owner2Name(owner: OnlyName | NameSurname) {
+        //group profile
+        //user profile
+        return "name" in owner
+            ? owner.name
+            : `${owner.first_name} ${owner.last_name}`;
+    }
+
+    if (input) {
+        return [].concat(input).map(owner2Name).join(', ');
+    }
 }
 
-export function timeAgo() {
-    return (timestamp: number) => {
-        if (timestamp) return moment(timestamp).fromNow();
-    };
+export function timeAgo(timestamp: number) {
+    if (timestamp)
+        return moment(timestamp).fromNow();
 }
 
-export function addVKBase() {
-    return (path: string) => {
-        if (path.indexOf(Config.VK_BASE) === -1) {
-            if (path.charAt(0) === '/') path = path.substr(1);
+export function addVKBase(path: string) {
+    if (path.indexOf(Config.VK_BASE) === -1) {
+        if (path.charAt(0) === '/') path = path.substr(1);
 
-            return Config.VK_BASE + path;
-        }
-        else return path;
-    };
+        return Config.VK_BASE + path;
+    }
+    else return path;
 }
 
 export function Capitalize() {

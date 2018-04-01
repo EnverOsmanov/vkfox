@@ -1,5 +1,5 @@
 import * as React from "react"
-import {Attachment} from "../newsfeed/models";
+import {Attachment} from "../newsfeed/types";
 import {attachmentDiv} from "./AttachmentHelper";
 
 interface AttachmentProps<A extends Attachment> {
