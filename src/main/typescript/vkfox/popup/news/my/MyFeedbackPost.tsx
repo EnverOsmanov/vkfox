@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {ItemObj} from "../../../feedbacks/collections/ItemColl";
-import AttachmentC from "../../../attachment/AttachmentC";
+import AttachmentC from "../../attachment/AttachmentC";
 import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";

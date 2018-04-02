@@ -54,7 +54,7 @@ function wait() {
  * @param {String} url
  * @param {Object|String} data to send
  */
-function xhrMy(type: string, url: string, data: string|object): Promise<any> {
+function xhrMy(type: string, url: string, data: string | object): Promise<any> {
 
     function handleResponse(response: Response): Promise<any> {
         if (response.status === 401) {
@@ -63,13 +63,13 @@ function xhrMy(type: string, url: string, data: string|object): Promise<any> {
                 .login(true)
                 .then(() => xhrMy(type, url, data))
         }
-        else return response.text().then((text: string) => {
+        else return response.text().then(text => {
             try {
                 return JSON.parse(text)
             }
             catch (e) {
                 console.error(`Not a JSON: ${text}`, e);
-                return text
+                return {};
             }
         })
     }
@@ -102,12 +102,12 @@ function xhrMy(type: string, url: string, data: string|object): Promise<any> {
         .then(handleResponse, handleError);
 }
 
-function processingSmallPart(queriesToProcess: ApiQuery[]) {
+function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
     const executeCodeTokens = queriesToProcess.map( query => query.params.code.replace(/^return\s*|;$/g, ''));
 
     const executeCode = `return [${executeCodeTokens}];`;
 
-    Auth.getAccessToken().then(function (accessToken) {
+    return Auth.getAccessToken().then( (accessToken) => {
         function handleSuccess(data: ApiResponse) {
             function rejectAll() {
                 queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
@@ -169,7 +169,7 @@ function processingSmallPart(queriesToProcess: ApiQuery[]) {
 
 class Request {
 
-    static _processApiQueries = _.debounce(function () {
+    static _processApiQueries = _.debounce( () => {
         if (apiQueriesQueue.length) {
             const queriesToProcess = apiQueriesQueue.splice(0, API_QUERIES_PER_REQUEST);
             processingSmallPart(queriesToProcess)

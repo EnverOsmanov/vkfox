@@ -1,20 +1,20 @@
 import * as React from "react"
-import Item from "../../../item/Item";
+import Item from "../../item/Item";
 import {ReplyI} from "../../../chat/Chat";
 import {
     AttachmentContainer, AudioAudio, AudioItem, Friend, FriendItem, ItemObj, Photo, PhotoTagItem, PostItem,
     WallPhotoItem
 } from "../../../newsfeed/types";
 import I18N from "../../../i18n/i18n";
-import ItemActionLike from "../../../itemActions/ItemActionLike";
-import ItemActionComment from "../../../itemActions/ItemActionComment";
-import ItemAction from "../../../itemActions/ItemAction";
-import ItemActions from "../../../itemActions/ItemActions";
-import {addVKBase, profile2Name} from "../../../filters/filters.pu";
-import AttachmentC from "../../../attachment/AttachmentC";
+import ItemActionLike from "../../itemActions/ItemActionLike";
+import ItemActionComment from "../../itemActions/ItemActionComment";
+import ItemAction from "../../itemActions/ItemAction";
+import ItemActions from "../../itemActions/ItemActions";
+import {addVKBase, profile2Name} from "../../filters/filters.pu";
+import AttachmentC from "../../attachment/AttachmentC";
 import {ProfileI} from "../../../chat/collections/ProfilesColl";
 import Request from "../../../request/request.pu";
-import {SendMessageI} from "../../../itemActions/types";
+import {SendMessageI} from "../../itemActions/types";
 import RectifyPu from "../../../rectify/rectify.pu";
 
 

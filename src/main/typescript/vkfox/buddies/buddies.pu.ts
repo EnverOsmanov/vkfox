@@ -3,7 +3,7 @@ import Mediator from '../mediator/mediator.pu'
 import PersistentModel from '../persistent-model/persistent-model'
 import Msg from "../mediator/messages"
 import {ProfileI} from "../chat/collections/ProfilesColl";
-import {profile2Name} from "../filters/filters.pu";
+import {profile2Name} from "../popup/filters/filters.pu";
 
 
 /**

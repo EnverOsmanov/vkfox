@@ -1,12 +1,12 @@
 import * as React from "react"
 import {DialogI, Message, MessageMemo, SendMessageParams} from "../../../chat/collections/DialogColl";
-import Item from "../../../item/Item";
+import Item from "../../item/Item";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../../../chat/chat.pu";
 import Request from "../../../request/request.pu"
-import {profile2Name, timeAgo} from "../../../filters/filters.pu";
-import AttachmentC from "../../../attachment/AttachmentC";
+import {profile2Name, timeAgo} from "../../filters/filters.pu";
+import AttachmentC from "../../attachment/AttachmentC";
 import {Profile, ProfileI} from "../../../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
 import {ReplyI} from "../../../chat/Chat";

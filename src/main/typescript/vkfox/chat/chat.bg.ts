@@ -3,7 +3,7 @@ import Request from '../request/request.bg'
 import * as _ from "underscore"
 import Mediator from "../mediator/mediator.bg"
 import Users from "../users/users.bg"
-import Router from "../router/router.bg"
+import Router from "../back/router/router.bg"
 import Browser from "../browser/browser.bg"
 import I18N from "../i18n/i18n"
 import Notifications from "../notifications/notifications.bg"
@@ -12,7 +12,7 @@ import Msg from "../mediator/messages"
 import { ProfileI, ProfilesColl} from "./collections/ProfilesColl";
 import {Dialog, DialogColl, Message} from "./collections/DialogColl";
 import {NotifType} from "../notifications/Notification";
-import {LPMessage} from "../longpoll/models";
+import {LPMessage} from "../back/longpoll/models";
 import {Profiles} from "../feedbacks/collections/ProfilesColl";
 import {AuthModelI} from "../auth/models";
 
@@ -182,7 +182,7 @@ function getDialogs(): Promise<void> {
 
 function onUpdates(updates: LPMessage[]) {
 
-    updates.forEach(function (update: LPMessage) {
+    updates.forEach( (update: LPMessage) => {
 
         // @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
         switch (update[0]) {
@@ -192,8 +192,8 @@ function onUpdates(updates: LPMessage[]) {
                 const mask = update[2];
                 const readState = mask & 1;
                 if (messageId && mask && readState) {
-                    dialogColl.some(function (dialog: Dialog) {
-                        return dialog.messages.some(function (message) {
+                    dialogColl.some( (dialog: Dialog) => {
+                        return dialog.messages.some( (message) => {
                             if (message.mid === messageId) {
                                 message.read_state = readState;
                                 removeReadMessages(dialog);
@@ -231,7 +231,7 @@ function getUnreadMessages(): Promise<void> {
     // FIXME wtf models.filter?
     const unreadDialogs =
         dialogColl.models
-            .filter( (dialog: Dialog) => !dialog.chat_id && !dialog.messages[0].read_state );
+            .filter( dialog => !dialog.chat_id && !dialog.messages[0].read_state );
 
     const unreadHistoryRequests = unreadDialogs.map(getHistory);
 

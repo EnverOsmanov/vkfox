@@ -4,8 +4,8 @@ import {Redirect, withRouter} from "react-router"
 import * as React from "react"
 import ChatPage from "../../chat/Chat";
 import BuddiesPage from "../../buddies/Buddies";
-import {addVKBase} from "../../filters/filters.pu";
-import SettingsPage from "../../settings/SettingsPage";
+import {addVKBase} from "../filters/filters.pu";
+import SettingsPage from "../settings/SettingsPage";
 import I18N from "../../i18n/i18n";
 import PersistentModel from "../../persistent-model/persistent-model";
 import NewsPage from "../news/NewsPage";
@@ -14,7 +14,7 @@ import Msg from "../../mediator/messages";
 import {AuthState} from "../../auth/models";
 import Browser from '../../browser/browser.pu'
 import {VKNotificationI} from "../../notifications/Notification";
-import Resizer from "../../resize/Resizer";
+import Resizer from "../resize/Resizer";
 
 
 

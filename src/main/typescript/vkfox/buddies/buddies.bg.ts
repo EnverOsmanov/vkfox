@@ -5,7 +5,7 @@ import Mediator from "../mediator/mediator.bg"
 import Users from "../users/users.bg"
 import I18N from "../i18n/i18n"
 import Notifications from "../notifications/notifications.bg"
-import PersistentSet from "../persistent-set/persistent-set.bg"
+import PersistentSet from "../back/persistent-set/persistent-set.bg"
 import Msg from "../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
 import {NotifType} from "../notifications/Notification"

@@ -3,7 +3,7 @@ import Request from '../request/request.bg'
 import * as _ from "underscore"
 import User from "../users/users.bg"
 import Mediator from "../mediator/mediator.bg"
-import Router from "../router/router.bg"
+import Router from "../back/router/router.bg"
 import Browser from "../browser/browser.bg"
 import I18N from "../i18n/i18n"
 import PersistentModel from "../persistent-model/persistent-model"

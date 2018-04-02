@@ -1,8 +1,8 @@
 import * as React from "react"
 import ChatPage from "../../../chat/Chat";
-import ItemAction from "../../../itemActions/ItemAction";
+import ItemAction from "../../itemActions/ItemAction";
 import I18N from "../../../i18n/i18n";
-import ItemActions from "../../../itemActions/ItemActions";
+import ItemActions from "../../itemActions/ItemActions";
 
 import {DialogI, Message, MessageHistoryI, MessageMemo} from "../../../chat/collections/DialogColl";
 import {getHistory, markAsRead} from "../../../chat/chat.pu";

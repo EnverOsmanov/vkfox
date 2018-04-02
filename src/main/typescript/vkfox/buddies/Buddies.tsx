@@ -3,10 +3,10 @@ import Mediator from "../mediator/mediator.pu"
 import Msg from "../mediator/messages"
 import {ProfileI} from "../chat/collections/ProfilesColl"
 import {buddiesFilter, initBuddiesFilter} from "./buddies.pu"
-import BuddyItem from "../buddy/BuddyItem";
+import BuddyItem from "../popup/buddy/BuddyItem";
 import BuddiesSearch from "./BuddiesSearch";
 import {BuddiesFilters} from "./types";
-import ItemList from "../item-list/ItemList";
+import ItemList from "../popup/item-list/ItemList";
 
 
 

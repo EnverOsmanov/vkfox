@@ -1,5 +1,5 @@
 import * as React from "react"
-import Item from "../../../item/Item";
+import Item from "../../item/Item";
 import {FeedbackObj, WallPostMentionFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
 import {ReplyI} from "../../../chat/Chat";
 import I18N from "../../../i18n/i18n";
@@ -8,7 +8,7 @@ import {ProfileI} from "../../../chat/collections/ProfilesColl";
 import MyFeedbackPost from "./MyFeedbackPost";
 import MyFeedbackActions from "./MyFeedbackActions";
 import FeedbackOfFeedback from "./FeedbackOfFeedback";
-import {SendMessageI} from "../../../itemActions/types";
+import {SendMessageI} from "../../itemActions/types";
 import NewsFeedItem from "../feed/NewsFeedItem";
 
 

@@ -1,8 +1,8 @@
 import * as React from "react"
-import Item from "../../../item/Item";
+import Item from "../../item/Item";
 import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
 import {ReplyI} from "../../../chat/Chat";
-import AttachmentC from "../../../attachment/AttachmentC";
+import AttachmentC from "../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
 
