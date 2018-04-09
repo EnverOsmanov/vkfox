@@ -3,11 +3,10 @@
 const constructor = function (name) {
     const item = localStorage.getItem(name);
 
-    if (item) {
-        this._set = JSON.parse(item);
-    } else {
-        this._set = [];
-    }
+    this._set = item
+        ? JSON.parse(item)
+        : [];
+
     this._name = name;
 };
 constructor.prototype = {

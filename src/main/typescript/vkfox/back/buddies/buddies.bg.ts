@@ -1,20 +1,20 @@
 "use strict";
-import Request from '../request/request.bg'
+import Request from "../../request/request.bg"
 import * as _ from "underscore"
-import Mediator from "../mediator/mediator.bg"
+import Mediator from "../../mediator/mediator.bg"
 import Users from "../users/users.bg"
-import I18N from "../i18n/i18n"
-import Notifications from "../notifications/notifications.bg"
-import PersistentSet from "../back/persistent-set/persistent-set.bg"
-import Msg from "../mediator/messages"
-import buddiesColl, {Buddy} from "./buddiesColl";
-import {NotifType} from "../notifications/Notification"
-import {ProfileI} from "../chat/collections/ProfilesColl";
-import {Profiles} from "../feedbacks/collections/ProfilesColl";
+import I18N from "../../i18n/i18n"
+import Notifications from "../../notifications/notifications.bg"
+import PersistentSet from "../persistent-set/persistent-set.bg"
+import Msg from "../../mediator/messages"
+import buddiesColl, {Buddy} from "../../buddies/buddiesColl";
+import {NotifType} from "../../notifications/Notification"
+import {ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
+import {ProfileI} from "../../chat/types";
+import {UserI} from "../users/types";
 
 
-const watchedBuddiesSet = new PersistentSet('watchedBuddies');
-
+const watchedBuddiesSet = new PersistentSet("watchedBuddies");
 
 const publishData = _.debounce( () => Mediator.pub(Msg.BuddiesData, buddiesColl.toJSON()), 0);
 
@@ -37,17 +37,18 @@ export default function initialize() {
     Mediator.sub(Msg.BuddiesDataGet, () => readyPromise.then(publishData) );
 
     readyPromise.then( () => {
-        buddiesColl.on('change', (model: Buddy) => {
+        buddiesColl.on("change", (model: Buddy) => {
             const profile: ProfileI = model.toJSON();
 
-            if (profile.isWatched && model.changed.hasOwnProperty('online')) {
-                model.set({ "lastActivityTime": Date.now() }, Profiles.beSilentOptions);
-                const gender = profile.sex === 1 ? 'female':'male';
+            if (profile.isWatched && model.changed.hasOwnProperty("online")) {
+
+                model.set({ "lastActivityTime": Date.now() }, ProfilesCmpn.beSilentOptions);
+                const gender = profile.sex === 1 ? "female":"male";
 
                 const title = [
                     Users.getName(profile),
-                    I18N.get(profile.online ? 'is online':'went offline', { GENDER: gender })
-                ].join(' ');
+                    I18N.get(profile.online ? "is online":"went offline", { GENDER: gender })
+                ].join(" ");
 
                 Notifications.notify({
                     title,
@@ -63,14 +64,18 @@ export default function initialize() {
     });
 
 
-    Mediator.sub(Msg.BuddiesWatchToggle, (uid) => {
+    Mediator.sub(Msg.BuddiesWatchToggle, (uid: number) => {
+
         if (watchedBuddiesSet.contains(uid)) {
             watchedBuddiesSet.remove(uid);
-            buddiesColl.get(uid).unset('isWatched');
+            const buddy = buddiesColl.get(uid);
+            buddy.unset("isWatched");
         }
         else {
             watchedBuddiesSet.add(uid);
-            buddiesColl.get(uid).set('isWatched', true);
+            
+            const buddy = buddiesColl.get(uid);
+            buddy.isWatched = true;
         }
     });
 }
@@ -84,9 +89,9 @@ export default function initialize() {
 function saveOriginalBuddiesOrder() {
     const length = buddiesColl.length;
 
-    if (length && !buddiesColl.at(length - 1).get('originalIndex')) {
+    if (length && !buddiesColl.last().originalIndex) {
         buddiesColl.forEach(
-            (buddie, i) => buddie.set('originalIndex', i)
+            (buddie, i) => buddie.originalIndex = i
         );
     }
 }
@@ -100,9 +105,11 @@ function saveOriginalBuddiesOrder() {
  */
 function getFavouriteUsers(): Promise<ProfileI[]> {
     return Request
-        .api({ code: 'return API.fave.getUsers()' })
-        .then( response => {
-            const uids = _.pluck(response.slice(1), 'uid');
+        .api({ code: "return API.fave.getUsers()" })
+        .then( (response: (number | UserI)[]) => {
+            const uids = response
+                .slice(1)
+                .map((u: UserI) => u.uid);
 
             return Users
                 .getProfilesById(uids)
@@ -125,6 +132,6 @@ function setWatchedBuddies() {
         .toArray()
         .forEach( uid => {
             const model = buddiesColl.get(uid);
-            if (model) model.set('isWatched', true)
+            if (model) model.isWatched = true;
         });
 }

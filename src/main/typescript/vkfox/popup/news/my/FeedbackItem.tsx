@@ -1,21 +1,21 @@
 import * as React from "react"
 import Item from "../../item/Item";
-import {FeedbackObj, WallPostMentionFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
-import {ReplyI} from "../../../chat/Chat";
+import {ReplyI} from "../../chat/Chat";
 import I18N from "../../../i18n/i18n";
-import {ItemObj} from "../../../feedbacks/collections/ItemColl";
-import {ProfileI} from "../../../chat/collections/ProfilesColl";
+import {ProfileI} from "../../../chat/types";
 import MyFeedbackPost from "./MyFeedbackPost";
 import MyFeedbackActions from "./MyFeedbackActions";
 import FeedbackOfFeedback from "./FeedbackOfFeedback";
 import {SendMessageI} from "../../itemActions/types";
 import NewsFeedItem from "../feed/NewsFeedItem";
+import {ItemObj} from "../types";
+import {FeedbackObj, WallPostMentionFeedback} from "../../../feedbacks/types";
 
 
 interface FeedbackItemProps {
-    item: ItemObj
-    itemProfile: ProfileI
-    profiles: ProfileI[]
+    item        : ItemObj
+    itemProfile : ProfileI
+    profiles    : ProfileI[]
 }
 
 interface FeedbackItemState {
@@ -111,12 +111,12 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         const sliceI = this.state.showAllFeedbacks ? 0 : -3;
 
         const singleFeedback = (feedback: FeedbackObj) => {
-            const owners = this.props.profiles.find(profile => profile.id === feedback.feedback.owner_id);
+            const owner = this.props.profiles.find(profile => profile.id === feedback.feedback.owner_id);
 
             return (
                 <FeedbackOfFeedback
                     key={feedback.date}
-                    owners={owners}
+                    owner={owner}
                     feedback={feedback}
                 />
             )

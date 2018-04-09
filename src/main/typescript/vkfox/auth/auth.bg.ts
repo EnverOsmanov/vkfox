@@ -3,7 +3,8 @@ import * as Config from "../config/config";
 import Mediator from "../mediator/mediator.bg";
 import Browser from "../browser/browser.bg";
 import Msg from "../mediator/messages";
-import {AuthModel, AuthModelI, AuthState} from "./models";
+import {AuthModel, AuthState} from "./models";
+import {AuthModelI} from "./types";
 
 const RETRY_INTERVAL = 10000; //ms
 

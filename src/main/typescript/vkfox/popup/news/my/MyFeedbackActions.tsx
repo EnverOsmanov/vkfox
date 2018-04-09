@@ -1,5 +1,4 @@
 import * as React from "react"
-import {ItemObj} from "../../../feedbacks/collections/ItemColl";
 import ItemActions from "../../itemActions/ItemActions";
 import {CommentsDataI, getCommentsData, getSourceLink, unsubscribe} from "../news.pu";
 import {Capitalize} from "../../filters/filters.pu";
@@ -7,7 +6,8 @@ import I18N from "../../../i18n/i18n";
 import ItemAction from "../../itemActions/ItemAction";
 import ItemActionComment from "../../itemActions/ItemActionComment";
 import ItemActionLike from "../../itemActions/ItemActionLike";
-import {FeedbackObj} from "../../../feedbacks/collections/FeedBacksCollection";
+import {ItemObj} from "../types";
+import {FeedbackObj} from "../../../feedbacks/types";
 
 
 interface MyFeedbackActionsProps {

@@ -1,11 +1,12 @@
 "use strict";
-import Request from '../request/request.bg';
-import ProxyMethods from '../proxy-methods/proxy-methods.bg'
-import Mediator from "../mediator/mediator.bg"
+import Request from '../../request/request.bg';
+import ProxyMethods from '../../proxy-methods/proxy-methods.bg'
+import Mediator from "../../mediator/mediator.bg"
 import * as _ from "underscore"
-import Msg from "../mediator/messages"
-import {NameSurname, OnlyName, ProfileI, ProfilesColl} from "../chat/collections/ProfilesColl";
-import {UsersGetElem} from "./models";
+import Msg from "../../mediator/messages"
+import {UserProfileColl} from "../../profiles-collection/profiles-collection.bg";
+import {NameSurname, OnlyName, ProfileI} from "../../chat/types";
+import {UsersGetElem} from "./types";
 
 const DROP_PROFILES_INTERVAL = 60000,
     USERS_GET_DEBOUNCE       = 400;
@@ -14,7 +15,7 @@ let inProgress: boolean,
     usersGetQueue: UsersGetElem[],
     friendsProfilesDefer: Promise<ProfileI[]>;
 
-const usersColl = new ProfilesColl();
+const usersColl = new UserProfileColl();
 
 const dropOldNonFriendsProfiles = _.debounce(function () {
     if (!inProgress) {
@@ -28,8 +29,9 @@ const dropOldNonFriendsProfiles = _.debounce(function () {
  *
  * @param {Array} queue
  */
-function publishUids(queue: object[]) {
-    let data, queueItem;
+function publishUids(queue: UsersGetElem[]) {
+    let data: ProfileI[],
+        queueItem: UsersGetElem;
 
     function getProfileById(uid: number) {
         return _.clone(usersColl.get(Number(uid)));
@@ -43,7 +45,7 @@ function publishUids(queue: object[]) {
     }
 }
 
-const processGetUsersQueue = _.debounce(function (processedQueue) {
+const processGetUsersQueue = _.debounce(function (processedQueue: UsersGetElem[]) {
     const newUids = _
         .chain(processedQueue)
         .pluck('uids')
@@ -64,7 +66,7 @@ const processGetUsersQueue = _.debounce(function (processedQueue) {
             .api({
                 code: 'return API.users.get({uids: "' + newUids.join() + '", fields: "online,photo,sex,nickname,lists"})'
             })
-            .then(function (response) {
+            .then( (response) => {
                 if (response && response.length) {
                     usersColl.add(response);
                     publishUids(processedQueue);
@@ -117,7 +119,7 @@ class Users {
      * @returns {Promise} Returns promise that will be fulfilled with profiles
      */
     static getProfilesById(uids: number[]): Promise<ProfileI[]> {
-        function promisify(resolve: (ProfileI) => void) {
+        function promisify(resolve: (_: ProfileI[]) => void) {
             usersGetQueue.push({
                 uids: positiveUids,
                 promise: resolve

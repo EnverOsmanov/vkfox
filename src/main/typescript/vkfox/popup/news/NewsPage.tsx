@@ -6,7 +6,7 @@ import {NavLink} from "react-router-dom";
 import MyNewsPage from "./my/MyNewsPage";
 import FriendNewsPage from "./feed/FriendNewsPage";
 import GroupNewsPage from "./feed/GroupsNewsPage";
-import {ReplyI} from "../../chat/Chat";
+import {ReplyI} from "../chat/Chat";
 
 interface RouterTab {
     href: string

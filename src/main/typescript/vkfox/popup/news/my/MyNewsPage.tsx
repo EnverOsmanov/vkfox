@@ -2,28 +2,23 @@ import * as React from "react"
 import Mediator from "../../../mediator/mediator.pu"
 import {RouteComponentProps} from "react-router"
 import Msg from "../../../mediator/messages"
-import {FeedbacksData, ItemObj} from "../../../feedbacks/collections/ItemColl";
 import FeedbackItem from "./FeedbackItem";
+import {FeedbacksData} from "./types";
+import {ItemObj} from "../types";
 
 
-interface ChatProps extends RouteComponentProps<any> {}
+interface MyNewsProps extends RouteComponentProps<any> {}
 
-interface ChatState {
-    data: FeedbacksData
-}
+interface MyNewsState extends FeedbacksData {}
 
-class MyNewsPage extends React.Component<ChatProps, ChatState> {
+class MyNewsPage extends React.Component<MyNewsProps, MyNewsState> {
 
     constructor(props) {
         super(props);
 
-        const profilesColl = {
-            profiles: [],
-            items: []
-        };
-
         this.state = {
-            data: profilesColl
+            profiles: [],
+            items   : []
         };
     }
 
@@ -37,11 +32,11 @@ class MyNewsPage extends React.Component<ChatProps, ChatState> {
     }
 
     onFeedbacksData = (data: FeedbacksData) => {
-        this.setState({data})
+        this.setState(data)
     };
 
     newsElms = () => {
-        const profiles = this.state.data.profiles;
+        const {profiles} = this.state;
 
         const singleNewsItem = (item: ItemObj) => {
 
@@ -58,7 +53,7 @@ class MyNewsPage extends React.Component<ChatProps, ChatState> {
         };
 
 
-        return this.state.data.items.map(singleNewsItem)
+        return this.state.items.map(singleNewsItem)
     };
 
     render() {

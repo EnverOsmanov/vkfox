@@ -1,26 +1,23 @@
 "use strict";
-import Request from '../request/request.bg';
+import Request from '../../request/request.bg';
 import * as _ from "underscore"
-import Mediator from "../mediator/mediator.bg"
-import Msg from "../mediator/messages"
-import {Profiles} from "../feedbacks/collections/ProfilesColl";
+import Mediator from "../../mediator/mediator.bg"
+import Msg from "../../mediator/messages"
+import {Profiles, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
 import {
     AttachmentPhoto,
     AttachmentPhotoContainer,
-    Item,
     ItemDulpColl,
     ItemObj,
     ItemsColl,
     LikesChanged,
-    NewsfeedRequestParams,
-    NewsfeedResp,
     Photo,
     PostItem,
-    ProfilesColl,
     WallPhotoItem
-} from "../newsfeed/types";
-import {AccessTokenError} from "../request/models";
-import {markAsOfflineIfModeOn} from "./force-online/force-online.bg";
+} from "../../newsfeed/types";
+import {AccessTokenError} from "../../request/models";
+import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
+import {NewsfeedRequestParams, NewsfeedResp} from "./types";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -32,7 +29,7 @@ const MAX_ITEMS_COUNT = 50,
     UPDATE_PERIOD     = 10000; //ms
 
 
-const profilesColl = new ProfilesColl();
+const profilesColl = new Profiles();
 const groupItemsColl = new ItemsColl();
 const friendItemsColl = new ItemsColl();
 
@@ -81,8 +78,8 @@ function processRawItem(item: ItemObj) {
         if (propertyName) {
             // type "photo" item has "photos" property; note - notes etc
 
-            collection.add(item[propertyName].slice(1), Profiles.addOptions);
-            collection.add(collisionItem[propertyName].slice(1), Profiles.addOptions);
+            collection.add(item[propertyName].slice(1), ProfilesCmpn.addOptions);
+            collection.add(collisionItem[propertyName].slice(1), ProfilesCmpn.addOptions);
 
             item[propertyName] = [collection.size()].concat(collection.toJSON());
         }
@@ -180,8 +177,8 @@ function fetchNewsfeed() {
 
         autoUpdateParams.start_time = time;
 
-        profilesColl.add(newsfeed.profiles, Profiles.addOptions);
-        profilesColl.add(newsfeed.groups, Profiles.addOptions);
+        profilesColl.add(newsfeed.profiles, ProfilesCmpn.addOptions);
+        profilesColl.add(newsfeed.groups, ProfilesCmpn.addOptions);
 
         discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
 

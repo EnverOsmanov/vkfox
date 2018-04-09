@@ -1,19 +1,7 @@
 import {Collection, Model} from "backbone";
-import {Profiles} from "../../feedbacks/collections/ProfilesColl";
-import {AttachmentContainer} from "../../newsfeed/types";
-import {Profile, ProfileI} from "./ProfilesColl";
+import {ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
+import {Message} from "../types";
 
-export interface ChatDataI {
-    dialogs : DialogI[]
-    profiles: Profile[]
-}
-
-export interface GetHistoryParams {
-    offset  : number
-    count   : number
-    chat_id?: number
-    user_id?: number
-}
 
 export interface SendMessageParams {
     message  : string
@@ -21,40 +9,9 @@ export interface SendMessageParams {
     uid     ?: number
 }
 
-export interface MessageHistoryI {
-    messages: Message[]
-    profiles: ProfileI[]
-}
 
 
-export interface Message {
-    mid         : number;
-    uid         : number;
-    chat_id    ?: number;
-    read_state  : number;
-    date        : number;
-    out         : number;
-    body        : string
-    title       : string
-    attachments?: AttachmentContainer[]
 
-    chat_active ?: number[];
-}
-
-export interface MessageMemo {
-    items   : Message[]
-    out     : boolean
-    author  : ProfileI
-}
-
-export interface DialogI {
-    id      : string
-    uid     : number
-    messages: Message[]
-
-    chat_active ?: number[]
-    chat_id     ?: number
-}
 
 export class Dialog extends Model {
 
@@ -75,7 +32,7 @@ export class Dialog extends Model {
     }
 
     set messages(value: Message[]) {
-        super.set("messages", value, Profiles.beSilentOptions)
+        super.set("messages", value, ProfilesCmpn.beSilentOptions)
     }
 
 }

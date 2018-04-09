@@ -1,27 +1,27 @@
 "use strict";
-import Request from '../request/request.bg'
+import Request from '../../request/request.bg'
 import * as _ from "underscore"
-import Mediator from "../mediator/mediator.bg"
+import Mediator from "../../mediator/mediator.bg"
 import Users from "../users/users.bg"
-import Router from "../back/router/router.bg"
-import Browser from "../browser/browser.bg"
-import I18N from "../i18n/i18n"
-import Notifications from "../notifications/notifications.bg"
-import PersistentModel from "../persistent-model/persistent-model"
-import Msg from "../mediator/messages"
-import { ProfileI, ProfilesColl} from "./collections/ProfilesColl";
-import {Dialog, DialogColl, Message} from "./collections/DialogColl";
-import {NotifType} from "../notifications/Notification";
-import {LPMessage} from "../back/longpoll/models";
-import {Profiles} from "../feedbacks/collections/ProfilesColl";
-import {AuthModelI} from "../auth/models";
+import Router from "../router/router.bg"
+import Browser from "../../browser/browser.bg"
+import I18N from "../../i18n/i18n"
+import Notifications from "../../notifications/notifications.bg"
+import PersistentModel from "../../persistent-model/persistent-model"
+import Msg from "../../mediator/messages"
+import {Dialog, DialogColl} from "../../chat/collections/DialogColl";
+import {NotifType} from "../../notifications/Notification";
+import {LPMessage} from "../longpoll/models";
+import {ChatUserProfileColl, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
+import {AuthModelI} from "../../auth/types";
+import {Message, ProfileI} from "../../chat/types";
 
 const MAX_HISTORY_COUNT = 10;
 
 let persistentModel,
     userId: number;
 const dialogColl = new DialogColl();
-const profilesColl = new ProfilesColl();
+const profilesColl = new ChatUserProfileColl();
 
 /**
  * Notifies about current state of module.
@@ -295,7 +295,7 @@ function addNewMessage(update: LPMessage) {
             chat_id     : message.chat_id,
             chat_active : message.chat_active,
             messages    : [message]
-        }, Profiles.beSilentOptions);
+        }, ProfilesCmpn.beSilentOptions);
 
         return fetchProfiles().then( () => {
             // important to trigger change, when profiles are available
@@ -357,6 +357,10 @@ function onLatestMessageIdChange() {
         // Don't notify, when active tab is vk.com
         Browser.isVKSiteActive()
             .then(notifyIfVkIsNotActive)
-            .catch(console.log);
+            .catch(handleError);
     }
+}
+
+function handleError(e: Error): void {
+    console.warn("Failed to notify in chat", e)
 }

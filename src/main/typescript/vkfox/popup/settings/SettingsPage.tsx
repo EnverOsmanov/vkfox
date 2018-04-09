@@ -82,6 +82,8 @@ class SettingsPage extends React.Component<undefined, SettingsState> {
         })
     };
 
+    ///////////////
+
     onForceOnlineToggle = (filterName: string, filterValue: boolean) => {
         this.setState(prevState => {
 
@@ -132,6 +134,7 @@ class SettingsPage extends React.Component<undefined, SettingsState> {
                 ...prevState.notifications,
                 sound
             };
+            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
 
             return {
                 ...prevState,
@@ -153,6 +156,7 @@ class SettingsPage extends React.Component<undefined, SettingsState> {
                 ...prevState.notifications,
                 popups
             };
+            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
 
             return {
                 ...prevState,

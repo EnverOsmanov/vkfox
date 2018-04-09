@@ -1,9 +1,5 @@
 import {Model} from "backbone";
 
-export interface AuthModelI {
-    userId     : number;
-    accessToken: string
-}
 
 
 export class AuthModel extends Model {

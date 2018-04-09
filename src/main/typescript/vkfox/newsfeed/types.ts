@@ -1,30 +1,14 @@
 import {Collection, Model} from "backbone";
-import {LikesObj} from "../feedbacks/collections/FeedBacksCollection";
-import {ProfileI} from "../chat/collections/ProfilesColl";
+import {ProfileI} from "../chat/types";
+import {UserI} from "../back/users/types";
+import {LikesObj} from "../feedbacks/types";
 
-export interface NewsfeedRequestParams {
-    count: number,
-    start_time?: number
-}
+
 
 export interface NewsfeedData {
     profiles: ProfileI[]
     items: ItemObj[]
 }
-
-interface Newsfeed {
-    profiles
-    groups
-    items: ItemObj[]
-}
-
-export interface NewsfeedResp {
-    newsfeed: Newsfeed
-
-    time: number
-}
-
-
 
 class ItemDupl extends Model {
     parse(item) {
@@ -57,10 +41,6 @@ export interface Photo {
     pid: string //or number?
 }
 
-export interface Friend {
-    uid: number
-}
-
 export interface ItemObj {
     id      ?: string;
     type     : string;
@@ -72,7 +52,7 @@ export interface ItemObj {
 
 export class Item extends Model {
 
-    get friends(): (number | Friend)[] {
+    get friends(): (number | UserI)[] {
         return super.get("friends")
     }
 
@@ -215,7 +195,7 @@ export interface AttachmentSticker extends Attachment {
 
 
 
-class Profile extends Model {
+/*class Profile extends Model {
     gid: number;
     uid: number;
 
@@ -230,7 +210,7 @@ class Profile extends Model {
 
 export class ProfilesColl extends Collection<Profile> {
     model = Profile
-}
+}*/
 
 interface CanPostable {
     can_post: boolean
@@ -258,7 +238,7 @@ export interface WallPhotoItem extends ItemObj {
 
 export interface FriendItem extends ItemObj {
 
-    friends: (number | Friend)[]
+    friends: (number | UserI)[]
 }
 
 export interface AudioItem extends ItemObj {

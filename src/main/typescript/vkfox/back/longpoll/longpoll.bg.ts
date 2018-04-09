@@ -22,7 +22,7 @@ function fetchUpdates(serverRS: LongPollServerRS) {
         mode: 2
     };
 
-    function handleSuccess(response: LongPollRS) {
+    function handleSuccess(response: LongPollRS): Promise<any> {
 
         if (response.failed && response.failed == 2){
             //console.debug("Failed", response, serverRS);
@@ -35,10 +35,12 @@ function fetchUpdates(serverRS: LongPollServerRS) {
             Mediator.pub(Msg.LongpollUpdates, response.updates);
 
             serverRS.ts = response.ts;
+            return Promise.resolve();
         }
         else {
             console.debug("LP nothing", response);
-            if (response.ts) serverRS.ts = response.ts
+            if (response.ts) serverRS.ts = response.ts;
+            return Promise.resolve();
         }
     }
 
@@ -59,7 +61,7 @@ export default function enableLongPollUpdates(ts?: number) {
         .catch(handleError)
 }
 
-function handleError(e: Error) {
+function handleError(e: Error): void {
     if (e instanceof AccessTokenError || e instanceof LongPollKeyError) {
         console.error("LongPoll failed... Retrying", e.message)
     }

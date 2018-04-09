@@ -1,20 +1,22 @@
 import * as React from "react"
-import {DialogI, Message, MessageMemo, SendMessageParams} from "../../../chat/collections/DialogColl";
+import {SendMessageParams} from "../../../chat/collections/DialogColl";
 import Item from "../../item/Item";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
-import {foldMessagesByAuthor} from "../../../chat/chat.pu";
+import {foldMessagesByAuthor} from "../chat.pu";
 import Request from "../../../request/request.pu"
 import {profile2Name, timeAgo} from "../../filters/filters.pu";
 import AttachmentC from "../../attachment/AttachmentC";
-import {Profile, ProfileI} from "../../../chat/collections/ProfilesColl";
+import {PuChatUserProfile} from "../../../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
-import {ReplyI} from "../../../chat/Chat";
+import {ReplyI} from "../Chat";
 import RectifyPu from "../../../rectify/rectify.pu";
+import {DialogI, MessageMemo} from "../types";
+import {Message, ProfileI} from "../../../chat/types";
 
 interface DialogItemProps {
     dialog      : DialogI
-    profilesColl: Collection<Profile>
+    profilesColl: Collection<PuChatUserProfile>
 
     addToProfilesColl(profiles: ProfileI[]): void
     addToMessages(dialogId: string, messages: Message[]): void

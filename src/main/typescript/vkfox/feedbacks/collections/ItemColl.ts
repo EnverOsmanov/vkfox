@@ -1,12 +1,7 @@
-
 import {AddOptions, Collection, Model} from "backbone";
-import {FeedbackObj, FeedbacksCollection, WallPostMentionFeedback} from "./FeedBacksCollection";
-import {ProfileI} from "../../chat/collections/ProfilesColl";
+import {FeedbacksCollection} from "./FeedBacksCollection";
+import {FeedbackObj} from "../types";
 
-export interface FeedbacksData {
-    profiles: ProfileI[],
-    items   : ItemObj[]
-}
 
 class ItemAddOptions implements AddOptions {
     sort: boolean = false;
@@ -14,15 +9,6 @@ class ItemAddOptions implements AddOptions {
     merge?: boolean;
 }
 
-export interface ItemObj {
-    parent: FeedbackObj
-    type  : string
-    id    : string
-    date  : number
-
-    // added by VKfox
-    feedbacks       : FeedbackObj[]
-}
 
 export class Item extends Model {
 

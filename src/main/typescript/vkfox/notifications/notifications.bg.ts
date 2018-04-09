@@ -16,7 +16,7 @@ function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: a
     xhr.open("GET", url);
 
     xhr.onload = function () {
-console.debug("ONLOAD");
+
         const bytes = new Uint8Array(xhr.response);
         //NOTE String.fromCharCode.apply(String, ...
         //may cause "Maximum call stack size exceeded"

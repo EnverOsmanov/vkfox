@@ -1,25 +1,54 @@
 "use strict";
-import Users from '../users/users.bg'
+/*import Users from '../back/users/users.bg'*/
 import * as _ from "underscore"
 import Mediator from '../mediator/mediator.bg'
-import {Model, Collection} from "backbone";
+import {AddOptions, Collection, Model, Silenceable} from "backbone";
 import Msg from "../mediator/messages";
+import {ProfileI} from "../chat/types";
 
 
 const UPDATE_NON_FRIENDS_PERIOD = 10000;
 
-export default class ProfileColl<P extends Model> extends Collection<P> {
-    initialize() {
-        Mediator.sub(Msg.LongpollUpdates, this._onFriendUpdates.bind(this));
 
-        this._updateNonFriends = _.debounce(
+export abstract class GProfile extends Model {}
+
+class Profile extends GProfile {
+
+    parse(profile: ProfileI) {
+        if (profile.gid) profile.id = -profile.gid;
+        else profile.id = profile.uid;
+
+        return profile;
+    }
+}
+
+class UserProfile extends GProfile {
+    get idAttribute(): string { return "uid" }
+
+
+    get uid(): number { return super.get("uid")}
+}
+
+class ChatUserProfile extends UserProfile {
+    set isSelf(value: boolean) {
+        super.set("isSelf", value)
+    }
+}
+
+
+
+export default class GProfileColl<P extends GProfile> extends Collection<P> {
+    initialize() {
+        this.subscribeForLpUpdates();
+
+/*        this._updateNonFriends = _.debounce(
             this._updateNonFriends.bind(this),
             UPDATE_NON_FRIENDS_PERIOD
         );
-        this._updateNonFriends();
+        this._updateNonFriends();*/
     }
 
-    _updateNonFriends() {
+/*    _updateNonFriends() {
         const self = this;
 
         const uids = this.where({
@@ -32,21 +61,33 @@ export default class ProfileColl<P extends Model> extends Collection<P> {
             Users.getProfilesById(uids).then( (profiles) => {
                 profiles.forEach( profile => {
                     const model = self.get(profile.uid);
+                    console.debug("NonFrined", model, self.find(p => (p as any).uid === profile.uid));
 
                     if (model) model.set('online', profile.online);
                 });
             }).then(this._updateNonFriends.bind(this));
         }
         else this._updateNonFriends();
+    }*/
+
+    subscribeForLpUpdates(): void {
+        Mediator.sub(
+            Msg.LongpollUpdates,
+            (updates: number[][]) => GProfileCollCmpn._onFriendUpdates(this, updates)
+        );
     }
+
+}
+
+class GProfileCollCmpn {
 
     /**
      * @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
-     *
-     * @param {Array} updates
+
      */
-    _onFriendUpdates(updates) {
-        updates.forEach(function (update) {
+    static _onFriendUpdates<P extends GProfile>(self: Collection<P>, updates: number[][]): void {
+
+        updates.forEach( update => {
             const type = update[0],
                 userId = Math.abs(update[1]);
 
@@ -55,9 +96,59 @@ export default class ProfileColl<P extends Model> extends Collection<P> {
             // ($flags равен 0, если пользователь покинул сайт (например, нажал выход) и 1,
             // если оффлайн по таймауту (например, статус away))
             if (type === 9 || type === 8) {
-                const model = this.get(Number(userId));
+                const model = self.get(Number(userId));
+
                 if (model) model.set('online', Number(type === 8));
             }
-        }, this);
+        });
     }
+}
+
+class GUserProfileColl<P extends UserProfile> extends Collection<P> {
+
+    initialize() {
+        super.initialize();
+
+        this.subscribeForLpUpdates();
+    }
+
+    subscribeForLpUpdates(): void {
+        Mediator.sub(
+            Msg.LongpollUpdates,
+            (updates: number[][]) => GProfileCollCmpn._onFriendUpdates(this, updates)
+        );
+    }
+}
+
+export class ChatUserProfileColl extends GUserProfileColl<ChatUserProfile> {
+    model = ChatUserProfile;
+}
+
+export class UserProfileColl extends GUserProfileColl<UserProfile> {
+    model = UserProfile;
+}
+
+/*export class GroupOrUserProfileColl extends GUserProfileColl<GroupOrUserProfile> {
+    model = GroupOrUserProfile
+}*/
+
+
+export class Profiles extends GProfileColl<Profile> {
+    model = Profile;
+    namme = "RealProfilesColl";
+}
+
+class ProfilesAddOptions implements AddOptions {
+    parse = true;
+
+    merge = false;
+}
+
+class SilentAddOptions implements Silenceable {
+    silent: boolean = true
+}
+
+export class ProfilesCmpn {
+    static beSilentOptions = new SilentAddOptions();
+    static addOptions = new ProfilesAddOptions()
 }

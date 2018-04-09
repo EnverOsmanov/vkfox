@@ -1,12 +1,12 @@
 import * as React from "react"
 import Mediator from "../mediator/mediator.pu"
 import Msg from "../mediator/messages"
-import {ProfileI} from "../chat/collections/ProfilesColl"
 import {buddiesFilter, initBuddiesFilter} from "./buddies.pu"
 import BuddyItem from "../popup/buddy/BuddyItem";
 import BuddiesSearch from "./BuddiesSearch";
 import {BuddiesFilters} from "./types";
 import ItemList from "../popup/item-list/ItemList";
+import {ProfileI} from "../chat/types";
 
 
 
@@ -18,12 +18,12 @@ interface BuddiesState {
 
 class BuddiesPage extends React.Component<undefined, BuddiesState> {
 
-    filtersModel = initBuddiesFilter();
+    static filtersModel = initBuddiesFilter();
 
     constructor(props) {
         super(props);
 
-        const filters = this.filtersModel.toJSON();
+        const filters = BuddiesPage.filtersModel.toJSON();
 
         this.state = {
             data        : [],
@@ -89,7 +89,7 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
             };
             filters[filterName] = filterValue;
 
-            this.filtersModel.set(filters);
+            BuddiesPage.filtersModel.set(filters);
 
             return {
                 ...prevState,
@@ -113,7 +113,7 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
         const profiles = this.state.data;
         const filters = this.state.filters;
 
-        return buddiesFilter()(profiles, filters, searchInput)
+        return buddiesFilter(profiles, filters, searchInput)
             .map(this.buddieItem);
     };
 

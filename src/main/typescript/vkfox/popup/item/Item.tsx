@@ -1,7 +1,7 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import {ReplyI} from "../../chat/Chat";
-import {ProfileI} from "../../chat/collections/ProfilesColl";
+import {ReplyI} from "../chat/Chat";
+import {ProfileI} from "../../chat/types";
 import {addVKBase, profile2Name} from "../filters/filters.pu";
 
 interface ItemProps {

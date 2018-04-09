@@ -2,9 +2,9 @@ import * as React from "react"
 import Item from "../item/Item";
 import I18N from "../../i18n/i18n";
 import ItemActions from "../itemActions/ItemActions";
-import {ProfileI} from "../../chat/collections/ProfilesColl";
+import {ProfileI} from "../../chat/types";
 import ItemAction from "../itemActions/ItemAction";
-import {ReplyI} from "../../chat/Chat";
+import {ReplyI} from "../chat/Chat";
 import Request from "../../request/request.pu"
 import {SendMessageParams} from "../../chat/collections/DialogColl";
 

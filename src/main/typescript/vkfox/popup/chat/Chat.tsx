@@ -1,12 +1,13 @@
 import * as React from "react"
-import Mediator from "../mediator/mediator.pu"
+import Mediator from "../../mediator/mediator.pu"
 
-import {Profile, ProfileI, ProfilesColl} from "./collections/ProfilesColl"
-import {ChatDataI, DialogI, Message} from "./collections/DialogColl"
+import {PuChatUserProfile, PuChatUserProfilesColl} from "../../chat/collections/ProfilesColl"
 import {Collection} from "backbone"
-import Msg from "../mediator/messages";
-import I18N from "../i18n/i18n";
-import DialogItem from "../popup/chat/dialogActions/DialogItem";
+import Msg from "../../mediator/messages";
+import I18N from "../../i18n/i18n";
+import DialogItem from "./dialogActions/DialogItem";
+import {ChatDataI, DialogI} from "./types";
+import {Message, ProfileI} from "../../chat/types";
 
 
 export interface ReplyI {
@@ -16,7 +17,7 @@ export interface ReplyI {
 
 interface ChatState {
     dialogs     : DialogI[]
-    profilesColl: Collection<Profile>
+    profilesColl: Collection<PuChatUserProfile>
 }
 
 class ChatPage extends React.Component<undefined, ChatState> {
@@ -24,7 +25,7 @@ class ChatPage extends React.Component<undefined, ChatState> {
     constructor(props) {
         super(props);
 
-        const profilesColl = new ProfilesColl();
+        const profilesColl = new PuChatUserProfilesColl();
 
         this.state = {
             dialogs: [],
@@ -43,7 +44,8 @@ class ChatPage extends React.Component<undefined, ChatState> {
 
     private onChatData = ({dialogs, profiles}: ChatDataI) => {
 
-        const profilesColl: Collection<Profile> = new Collection<Profile>(profiles, {model: Profile});
+        const profilesColl: Collection<PuChatUserProfile> =
+            new Collection(profiles, {model: PuChatUserProfile});
 
         this.setState(prevState => {
                 return {

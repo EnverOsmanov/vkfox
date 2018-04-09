@@ -9,7 +9,7 @@ const request: RequestT = ProxyMethods.forward('../request/request.bg.ts', ['api
 
 
 interface RequestT {
-    api(params: any): Promise<any>
+    api<R>(params: any): Promise<R>
     post(url: string, data: object|string): Promise<any>
     get(url: string, data: object|string): Promise<any>
 }

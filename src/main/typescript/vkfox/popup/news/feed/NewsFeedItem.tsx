@@ -1,8 +1,8 @@
 import * as React from "react"
 import Item from "../../item/Item";
-import {ReplyI} from "../../../chat/Chat";
+import {ReplyI} from "../../chat/Chat";
 import {
-    AttachmentContainer, AudioAudio, AudioItem, Friend, FriendItem, ItemObj, Photo, PhotoTagItem, PostItem,
+    AttachmentContainer, AudioAudio, AudioItem, FriendItem, ItemObj, Photo, PhotoTagItem, PostItem,
     WallPhotoItem
 } from "../../../newsfeed/types";
 import I18N from "../../../i18n/i18n";
@@ -12,10 +12,11 @@ import ItemAction from "../../itemActions/ItemAction";
 import ItemActions from "../../itemActions/ItemActions";
 import {addVKBase, profile2Name} from "../../filters/filters.pu";
 import AttachmentC from "../../attachment/AttachmentC";
-import {ProfileI} from "../../../chat/collections/ProfilesColl";
+import {ProfileI} from "../../../chat/types";
 import Request from "../../../request/request.pu";
 import {SendMessageI} from "../../itemActions/types";
 import RectifyPu from "../../../rectify/rectify.pu";
+import {UserI} from "../../../back/users/types";
 
 
 interface NewsFeedItemProps {
@@ -82,7 +83,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         if (method) {
             const code = `return API.${ method }(${ JSON.stringify(params) });`;
 
-            return Request.api({ code })
+            return Request.api<void>({ code })
                 .catch(err => console.error("Couldn't send message", err));
         }
         else return Promise.resolve();
@@ -156,10 +157,10 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         return photos.slice(1).map(singleAttachment)
     };
 
-    friendsElms = (friends: Friend[]) => {
+    friendsElms = (friends: UserI[]) => {
         const lastIndex = friends.length - 2;
 
-        const singleFrined = (friend: Friend, i: number) => {
+        const singleFrined = (friend: UserI, i: number) => {
             const profile = this.props.profiles
                 .find(profile => profile.id === friend.uid);
 
@@ -243,7 +244,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 return (
                     <div>
                         {I18N.get("New friends:")}
-                        {this.friendsElms((item as FriendItem).friends as Friend[])}
+                        {this.friendsElms((item as FriendItem).friends as UserI[])}
                     </div>
                 );
 

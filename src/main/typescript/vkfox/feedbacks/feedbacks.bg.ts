@@ -1,23 +1,30 @@
 "use strict";
 import Request from '../request/request.bg'
 import * as _ from "underscore"
-import User from "../users/users.bg"
+import User from "../back/users/users.bg"
 import Mediator from "../mediator/mediator.bg"
 import Router from "../back/router/router.bg"
 import Browser from "../browser/browser.bg"
 import I18N from "../i18n/i18n"
 import PersistentModel from "../persistent-model/persistent-model"
 import Notifications from "../notifications/notifications.bg"
-import {Profiles} from "./collections/ProfilesColl";
+import {Profiles, ProfilesCmpn} from "../profiles-collection/profiles-collection.bg";
 import {Item, ItemColl} from "./collections/ItemColl";
 import {NotifType} from "../notifications/Notification";
-import {
-    CommentsNewsItem, CommentsNews, FeedbackObj, FeedbackRS, FeedbacksCollection,
-    NotificationObj, ReplyFeedback, WallPostMentionFeedback
+import {FeedbacksCollection
 } from "./collections/FeedBacksCollection";
 import Msg from "../mediator/messages";
 import {LikesChanged} from "../newsfeed/types";
 import {AccessTokenError} from "../request/models";
+import {AuthModelI} from "../auth/types";
+import {
+    CommentsNews,
+    CommentsNewsItem,
+    FeedbackObj,
+    FeedbackRS,
+    NotificationObj, ReplyFeedback,
+    WallPostMentionFeedback
+} from "./types";
 
 /**
  * Responsible for "News -> My" page
@@ -75,7 +82,7 @@ const fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
 //
 // Functions:
 
-function onChangeUser(data) {
+function onChangeUser(data: AuthModelI): void {
     userId = data.userId;
     itemsColl.reset();
     profilesColl.reset();
@@ -370,10 +377,10 @@ function fetchFeedbacks() {
             (notifications.items && notifications.items.length > 1) ||
             (newsAboutComments.items && newsAboutComments.items.length)
         ) {
-            profilesColl.add(newsAboutComments.profiles, Profiles.addOptions);
-            profilesColl.add(newsAboutComments.groups, Profiles.addOptions);
-            profilesColl.add(notifications.profiles, Profiles.addOptions);
-            profilesColl.add(notifications.groups, Profiles.addOptions);
+            profilesColl.add(newsAboutComments.profiles, ProfilesCmpn.addOptions);
+            profilesColl.add(newsAboutComments.groups, ProfilesCmpn.addOptions);
+            profilesColl.add(notifications.profiles, ProfilesCmpn.addOptions);
+            profilesColl.add(notifications.groups, ProfilesCmpn.addOptions);
 
             notifications.items.slice(1).forEach(addRawNotificationsItem);
             newsAboutComments.items.forEach(addRawCommentsItem);

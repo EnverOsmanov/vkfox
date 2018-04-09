@@ -1,8 +1,8 @@
 import * as React from "react"
 import I18N from "../../i18n/i18n";
-import {LikesObj, NewsLikesObj} from "../../feedbacks/collections/FeedBacksCollection";
 import Msg from "../../mediator/messages";
 import Mediator from "../../mediator/mediator.pu"
+import {LikesObj, NewsLikesObj} from "../../feedbacks/types";
 
 
 interface ItemActionProps {

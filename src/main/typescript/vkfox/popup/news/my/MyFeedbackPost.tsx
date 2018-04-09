@@ -1,12 +1,11 @@
 "use strict";
 
 import * as React from "react"
-import {ItemObj} from "../../../feedbacks/collections/ItemColl";
 import AttachmentC from "../../attachment/AttachmentC";
-import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {html2text} from "../../../rectify/helpers";
+import {ItemObj} from "../types";
+import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/types";
 
 
 interface MyFeedbackPostProps {

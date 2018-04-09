@@ -1,45 +1,66 @@
 
-import ProfilesCollection from "../profiles-collection/profiles-collection.bg"
-import * as Backbone from "backbone"
+import GProfileColl, {GProfile} from "../profiles-collection/profiles-collection.bg"
 import Request from "../request/request.bg"
 
-class BuddiesCollection extends ProfilesCollection<Buddy> {
+class BuddiesCollection extends GProfileColl<Buddy> {
     model = Buddy;
+    namme = "buddiesColl";
 
     comparator = (buddie: Buddy) => {
-        if (buddie.get('isWatched')) {
-            if (buddie.get('lastActivityTime')) return -buddie.get('lastActivityTime');
+        if (buddie.isWatched) {
+            if (buddie.lastActivityTime) return -buddie.lastActivityTime;
             else return -2;
         }
-        else if (buddie.get('isFave')) return -1;
-        else return buddie.get('originalIndex') || 0;
+        else if (buddie.get("isFave")) return -1;
+        else return buddie.get("originalIndex") || 0;
     }
 }
 
 interface LastActivityI {
-    online  : boolean
+    online  : number // 0 or 1
     time    : number
 }
 
-export class Buddy extends Backbone.Model {
-    idAttribute: 'uid';
+export class Buddy extends GProfile {
+    get idAttribute(): string { return "uid" }
 
     get photo(): string { return super.get("photo")}
+    get uid(): number { return super.get("uid")}
+
+    get isWatched(): boolean { return super.get("isWatched")}
+    set isWatched(value: boolean) { super.set("isWatched", value)}
+
+    set online(value: number) { super.set("online", value)}
+
+    get lastActivityTime(): number { return super.get("lastActivityTime")}
+    set lastActivityTime(value: number) { super.set("lastActivityTime", value)}
+
+    get originalIndex(): number { return super.get("originalIndex")}
+    set originalIndex(value: number) { super.set("originalIndex", value)}
 
     // Automatically set last activity time
     // for all watched items
-    initialize() {
-        this.on('change:isWatched', function (model: Buddy) {
-            function handleResponse(response: LastActivityI) {
-                model
-                    .set('online', response.online)
-                    .set('lastActivityTime', response.time * 1000);
+
+    parse(model: Buddy, options?: any): Buddy {
+        model.id = model.uid;
+        return model;
+    }
+
+    initialize(attrs?: any) {
+        super.initialize(attrs);
+
+        this.on("change:isWatched",  (model: Buddy) => {
+
+            function handleResponse(response: LastActivityI): void {
+
+                model.online = response.online;
+                model.lastActivityTime = response.time * 1000;
 
                 buddiesColl.sort();
             }
 
-            if (model.get('isWatched')) {
-                const code = `return API.messages.getLastActivity({user_id: ${ model.get("uid") })`;
+            if (model.isWatched) {
+                const code = `return API.messages.getLastActivity({user_id: ${ model.uid }})`;
 
                 Request.api({ code })
                     .then(handleResponse);

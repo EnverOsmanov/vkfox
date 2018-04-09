@@ -1,15 +1,16 @@
 import * as React from "react"
 import Item from "../../item/Item";
-import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/collections/FeedBacksCollection";
-import {ReplyI} from "../../../chat/Chat";
+import {ReplyI} from "../../chat/Chat";
 import AttachmentC from "../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
+import {ProfileI} from "../../../chat/types";
+import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/types";
 
 
 interface FeedbackItemProps {
     feedback: FeedbackObj
-    owners
+    owner  ?: ProfileI
 }
 
 interface FeedbackItemState {
@@ -95,11 +96,11 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
 
 
     render() {
-        const feedback = this.props.feedback;
+        const {feedback, owner} = this.props;
 
         return (
             <Item
-                owners={this.props.owners}
+                owners={owner}
                 reply={this.state.reply}>
                 {this.feedbackElm(feedback)}
             </Item>

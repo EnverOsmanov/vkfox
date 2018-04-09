@@ -3,11 +3,14 @@ import * as Config from '../../config/config'
 import Mediator from '../../mediator/mediator.pu'
 import Msg from "../../mediator/messages"
 
+import {ItemObj} from "./types";
 import {
-    PhotoFeedback, PostFeedback, TopicFeedback, VideoFeedback,
+    PhotoFeedback,
+    PostFeedback,
+    TopicFeedback,
+    VideoFeedback,
     WallPostMentionFeedback
-} from "../../feedbacks/collections/FeedBacksCollection";
-import {ItemObj} from "../../feedbacks/collections/ItemColl";
+} from "../../feedbacks/types";
 
 export interface CommentsDataI {
     ownerId : number,

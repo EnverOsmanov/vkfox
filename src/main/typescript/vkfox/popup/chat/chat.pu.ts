@@ -1,13 +1,27 @@
 "use strict";
-import Request from "../request/request.pu";
+import Request from "../../request/request.pu";
 import * as _ from "underscore";
-import Users from "../users/users.pu";
+import Users from "../../users/users.pu";
 import * as Backbone from "backbone"
-import {Profile, ProfileI} from "./collections/ProfilesColl"
-import {DialogI, GetHistoryParams, Message, MessageHistoryI, MessageMemo} from "./collections/DialogColl";
+import {PuChatUserProfile} from "../../chat/collections/ProfilesColl"
+import {GetHistoryParams, Message, ProfileI} from "../../chat/types";
+import {DialogI, MessageHistoryI, MessageMemo} from "./types";
 
+function getProfiles(dialog: DialogI, messages: Message[]): Promise<ProfileI[]> {
+    if (dialog.chat_active) {
+        //after fetching of news profiles,
+        //we must make sure that we have
+        //required profile objects
+        const userIds = messages
+            .slice(1)
+            .map(message => message.uid);
 
-export function getHistory(dialog: DialogI, offset: number): Promise<MessageHistoryI> {
+        return Users.getProfilesById( userIds )
+    }
+    else return Promise.resolve([]);
+}
+
+function buildParams(dialog: DialogI, offset: number) {
     const params: GetHistoryParams = {
         offset,
         count: 5
@@ -16,25 +30,19 @@ export function getHistory(dialog: DialogI, offset: number): Promise<MessageHist
     if (dialog.chat_active) params.chat_id = dialog.chat_id;
     else params.user_id = dialog.uid;
 
+    return params;
+}
+
+export async function getHistory(dialog: DialogI, offset: number): Promise<MessageHistoryI> {
+    const params = buildParams(dialog, offset);
+
     const code = `return  API.messages.getHistory(${ JSON.stringify(params) });`;
 
-    function handleResponse(messages: Message[]) {
-        if (dialog.chat_active) {
-            //after fetching of news profiles,
-            //we must make sure that we have
-            //required profile objects
-            const userIds = messages
-                .slice(1)
-                .map(message => message.uid);
+    const messages = await Request.api<Message[]>({ code });
 
-            return Users.getProfilesById( userIds )
-                .then(profiles => ({messages, profiles}));
-        }
-        else return Promise.resolve({ messages, profiles: []});
-    }
+    const profiles = await getProfiles(dialog, messages);
 
-    return Request.api({ code })
-        .then(handleResponse);
+    return {messages, profiles}
 }
 
 /**
@@ -44,7 +52,7 @@ export function getHistory(dialog: DialogI, offset: number): Promise<MessageHist
  *
  * @returns {Array}
  */
-export function foldMessagesByAuthor(messages: Message[], profilesColl: Backbone.Collection<Profile>) {
+export function foldMessagesByAuthor(messages: Message[], profilesColl: Backbone.Collection<PuChatUserProfile>) {
     const selfProfile: ProfileI = profilesColl.findWhere({isSelf: true}).toJSON();
 
     function messageReducer(memo: MessageMemo[], message: Message) {
