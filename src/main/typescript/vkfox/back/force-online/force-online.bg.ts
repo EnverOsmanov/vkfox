@@ -36,7 +36,7 @@ export default function init() {
 function markAsOffline(): Promise<number> {
     clearTimeout(timeoutId);
 
-    return Request.api({code: 'return API.account.setOffline();'})
+    return Request.api<number>({code: 'return API.account.setOffline();'})
         .then(() => timeoutId = window.setTimeout(markAsOffline, MARK_PERIOD))
 }
 

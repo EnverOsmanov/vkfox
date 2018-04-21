@@ -6,7 +6,7 @@ import * as $ from "jquery"
 
 
 (window as any).jQuery = $;
-require('bootstrapDropdown');
+require('bootstrap/js/dropdown.js');
 
 interface BuddiesSearchMenuProps {
     filters: BuddiesFilters
@@ -16,6 +16,8 @@ interface BuddiesSearchMenuProps {
 
 class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, undefined> {
     render() {
+        const {male, female, offline, faves} = this.props.filters;
+
         return (
             <div
                 role="menu"
@@ -29,7 +31,7 @@ class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, undefine
                     <li>
                         <Checkbox
                             className="buddies__checkbox"
-                            isChecked={this.props.filters.male}
+                            isChecked={male}
                             filterName="male"
                             onToggle={this.props.handleFilter}>
                             {I18N.get("Male")}
@@ -39,7 +41,7 @@ class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, undefine
                     <li>
                         <Checkbox
                             className="buddies__checkbox"
-                            isChecked={this.props.filters.female}
+                            isChecked={female}
                             filterName="female"
                             onToggle={this.props.handleFilter}>
                             {I18N.get("Female")}
@@ -51,7 +53,7 @@ class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, undefine
                     <li>
                         <Checkbox
                             className="buddies__checkbox"
-                            isChecked={this.props.filters.offline}
+                            isChecked={offline}
                             filterName="offline"
                             onToggle={this.props.handleFilter}>
 
@@ -64,7 +66,7 @@ class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, undefine
                     <li>
                         <Checkbox
                             className="buddies__checkbox"
-                            isChecked={this.props.filters.faves}
+                            isChecked={faves}
                             filterName="faves"
                             onToggle={this.props.handleFilter}>
                             {I18N.get("Bookmarked")}

@@ -1,11 +1,12 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import {ReplyI} from "../chat/Chat";
-import {ProfileI} from "../../chat/types";
+import {ReplyI} from "../chat/types";
 import {addVKBase, profile2Name} from "../filters/filters.pu";
+import {GroupProfile, ProfileI, UserProfile} from "../../back/users/types";
+import {profilePhotoPath} from "./item.pu";
 
 interface ItemProps {
-    owners      : ProfileI | ProfileI[],
+    owners      : UserProfile | UserProfile[] | GroupProfile | GroupProfile[],
     reply       : ReplyI
     itemClass  ?: string
     message    ?: string
@@ -20,7 +21,7 @@ interface ItemProps {
 class Item extends React.Component<ItemProps> {
 
     ownerDiv = () => {
-        const owners = this.props.owners;
+        const {owners} = this.props;
         const divForArray = (
             <div className="item__img">
                 <i className="fa fa-user"/>{(owners as ProfileI[]).length}
@@ -28,14 +29,17 @@ class Item extends React.Component<ItemProps> {
         );
 
         const divForNotArray = () => {
-            const cssProps: CSSProperties = {
-                backgroundImage: `url(${(owners as ProfileI).photo})`
-            };
 
-            const owner = owners as ProfileI;
-            const anchor = owner.uid && owner.uid > 0
-                ? `/id${owner.uid}`
-                : `/club${owner.gid}`;
+            const owner = owners as GroupProfile | UserProfile;
+            const photo = profilePhotoPath(owner);
+
+            const anchor = "type" in owner
+                ? `/club${owner.id}`
+                : `/id${owner.id}`;
+
+            const cssProps: CSSProperties = {
+                backgroundImage: `url(${photo})`
+            };
 
             return (
                 <div
@@ -57,7 +61,7 @@ class Item extends React.Component<ItemProps> {
 
         return Array.isArray(owners)
             ? title
-            : profile2Name(this.props.owners)
+            : profile2Name(owners)
     };
 
     handleMessageChange = (event) => {
@@ -68,7 +72,7 @@ class Item extends React.Component<ItemProps> {
     isOnlineClassName = () => {
         const {owners} = this.props;
 
-        return ("online" in owners) && owners.online
+        return ("online" in owners) && (owners as UserProfile).online
             ? "is-online"
             : "";
     };
@@ -79,7 +83,7 @@ class Item extends React.Component<ItemProps> {
 
 
     replyElm = () => {
-        const reply = this.props.reply;
+        const {reply, message} = this.props;
 
         return reply.visible
             ?
@@ -87,7 +91,7 @@ class Item extends React.Component<ItemProps> {
                 <textarea
                     autoFocus={true}
                     onKeyPress={this.handleKeyPress}
-                    value={this.props.message}
+                    value={message}
                     onChange={this.handleMessageChange}
                 />
             </div>
@@ -95,13 +99,13 @@ class Item extends React.Component<ItemProps> {
     };
 
     descriptionElm = () => {
-        const description = this.props.description;
+        const {description} = this.props;
 
         return description
             ?
             <span
                 className="item__description">
-                {this.props.description}
+                {description}
             </span>
             : null
     };

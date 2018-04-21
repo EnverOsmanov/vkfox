@@ -1,6 +1,6 @@
 "use strict";
 
-import Mediator from '../mediator/mediator.bg';
+import Mediator from "../mediator/mediator.bg";
 
 
 /**
@@ -20,28 +20,29 @@ export default {
      *
      * @returns {Object} returns second argument, used for chaining
      */
-    connect: function (namespace: string, Module: object) {
+    connect(namespace: string, Module: object): void {
 
-        Mediator.sub('proxy-methods:' + namespace, function ({method, args, id}) {
-            const result = Module[method].apply(Module, args);
+        function callMethod({method, args, id}) {
+            const result: Promise<any> = Module[method].apply(Module, args);
 
-            if (typeof result.then === "function") {
-                result
-                    .then(function (value) {
-                        Mediator.pub('proxy-methods:' + id, {
-                            method: 'resolve',
-                            'args': value
-                        });
-                    })
-                    .catch(function (value) {
-                        Mediator.pub('proxy-methods:' + id, {
-                            method: 'reject',
-                            'args': value
-                        });
-                    });
-            }
-        });
+            result
+                .then( args => {
+                    return {
+                        method: "resolve",
+                        args
+                    }
+                })
+                .catch( args => {
+                    return {
+                        method: "reject",
+                        args
+                    }
+                })
+                .then( callResult =>
+                    Mediator.pub(`proxy-methods:${id}`, callResult)
+                );
+        }
 
-        return Module;
+        Mediator.sub(`proxy-methods:${namespace}`, callMethod);
     }
 };

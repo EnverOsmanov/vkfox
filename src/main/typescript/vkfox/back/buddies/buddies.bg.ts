@@ -10,8 +10,10 @@ import Msg from "../../mediator/messages"
 import buddiesColl, {Buddy} from "../../buddies/buddiesColl";
 import {NotifType} from "../../notifications/Notification"
 import {ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
-import {ProfileI} from "../../chat/types";
-import {UserI} from "../users/types";
+
+import {UserProfile} from "../users/types";
+import {FaveGetUsersResponse} from "../../../vk/types";
+import {FoxUserProfileI} from "../../chat/types";
 
 
 const watchedBuddiesSet = new PersistentSet("watchedBuddies");
@@ -38,7 +40,7 @@ export default function initialize() {
 
     readyPromise.then( () => {
         buddiesColl.on("change", (model: Buddy) => {
-            const profile: ProfileI = model.toJSON();
+            const profile: FoxUserProfileI = model.toJSON();
 
             if (profile.isWatched && model.changed.hasOwnProperty("online")) {
 
@@ -103,13 +105,13 @@ function saveOriginalBuddiesOrder() {
  *
  * @returns [jQuery.Deferred]
  */
-function getFavouriteUsers(): Promise<ProfileI[]> {
+function getFavouriteUsers(): Promise<UserProfile[]> {
     return Request
-        .api({ code: "return API.fave.getUsers()" })
-        .then( (response: (number | UserI)[]) => {
+        .api<FaveGetUsersResponse>({ code: "return API.fave.getUsers()" })
+        .then( response => {
             const uids = response
-                .slice(1)
-                .map((u: UserI) => u.uid);
+                .items
+                .map((u: UserProfile) => u.id);
 
             return Users
                 .getProfilesById(uids)

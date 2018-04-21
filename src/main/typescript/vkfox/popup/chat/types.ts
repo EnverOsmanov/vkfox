@@ -1,16 +1,18 @@
 import {PuChatUserProfile} from "../../chat/collections/ProfilesColl";
-import {Message, ProfileI} from "../../chat/types";
+import {FoxUserProfileI} from "../../chat/types";
+import {UserProfile} from "../../back/users/types";
+import {Message} from "../../../vk/types";
 
-export interface MessageMemo {
+export interface Speech {
     items   : Message[]
     out     : boolean
-    author  : ProfileI
+    author  : FoxUserProfileI
 }
 
 
 export interface MessageHistoryI {
     messages: Message[]
-    profiles: ProfileI[]
+    profiles: UserProfile[]
 }
 
 export interface DialogI {
@@ -25,4 +27,9 @@ export interface DialogI {
 export interface ChatDataI {
     dialogs : DialogI[]
     profiles: PuChatUserProfile[]
+}
+
+
+export interface ReplyI {
+    visible     : boolean
 }

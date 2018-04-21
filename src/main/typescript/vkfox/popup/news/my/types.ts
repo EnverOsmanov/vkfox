@@ -1,7 +1,7 @@
-import {ProfileI} from "../../../chat/types";
-import {ItemObj} from "../types";
+import {UserProfile} from "../../../back/users/types";
+import {FeedbackItemObj} from "../types";
 
 export interface FeedbacksData {
-    profiles: ProfileI[],
-    items   : ItemObj[]
+    profiles: UserProfile[],
+    items   : FeedbackItemObj[]
 }

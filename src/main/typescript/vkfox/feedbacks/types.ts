@@ -1,5 +1,5 @@
 import {GroupProfile, UserProfile} from "../back/users/types";
-import {Attachment, AttachmentContainer} from "../newsfeed/types";
+import {Attachment, AttachmentContainer} from "../../vk/types/newsfeed";
 
 
 export interface LikesObj {
@@ -79,8 +79,15 @@ export interface FeedbackObjShort {
 export interface NotificationObj {
     type    : string
     feedback: FeedbackObj | FeedbackObjShort[]
-    parent  : FeedbackObj
     date    : number
+}
+
+interface MentionNotification extends  NotificationObj {
+    // type = "mention"
+}
+
+export interface ReplyCommentNotification extends NotificationObj {
+    parent  : FeedbackObj
 }
 
 interface CNewsCommentObj {

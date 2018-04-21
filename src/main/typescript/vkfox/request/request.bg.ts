@@ -5,13 +5,13 @@ import ProxyMethods from '../proxy-methods/proxy-methods.bg'
 import * as _ from "underscore"
 import Auth from '../auth/auth.bg'
 import {AccessTokenError, ApiOptions, ApiQuery, ApiResponse} from "./models";
+import {API_VERSION} from "../config/config";
 
 const apiQueriesQueue: ApiQuery[] = [];
 
 const API_DOMAIN              = 'https://api.vk.com/';
 const API_QUERIES_PER_REQUEST = 15;
 const API_REQUESTS_DEBOUNCE   = 400;
-const API_VERSION             = 4.99;
 const REAUTH_DEBOUNCE         = 2000;
 const networkErrorMessage = "NetworkError when attempting to fetch resource.";
 
@@ -184,7 +184,7 @@ class Request {
         return xhrMy('post', url, data)
     }
 
-    static api(params: ApiOptions): Promise<any> {
+    static api<R>(params: ApiOptions): Promise<R> {
         function promisify(resolve, reject) {
             apiQueriesQueue.push({ params, resolve, reject });
         }

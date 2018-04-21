@@ -9,16 +9,17 @@ import {profile2Name, timeAgo} from "../../filters/filters.pu";
 import AttachmentC from "../../attachment/AttachmentC";
 import {PuChatUserProfile} from "../../../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
-import {ReplyI} from "../Chat";
+import {ReplyI} from "../types";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {DialogI, MessageMemo} from "../types";
-import {Message, ProfileI} from "../../../chat/types";
+import {DialogI, Speech} from "../types";
+import {UserProfile} from "../../../back/users/types";
+import {Message} from "../../../../vk/types";
 
 interface DialogItemProps {
     dialog      : DialogI
     profilesColl: Collection<PuChatUserProfile>
 
-    addToProfilesColl(profiles: ProfileI[]): void
+    addToProfilesColl(profiles: UserProfile[]): void
     addToMessages(dialogId: string, messages: Message[]): void
 }
 
@@ -60,21 +61,21 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         const params: SendMessageParams = { message };
 
         if (chatId) params.chat_id = chatId;
-        else params.uid = uid;
+        else params.user_id = uid;
 
         const code = `return API.messages.send(${ JSON.stringify(params) });`;
 
         Request
             .api({ code })
-            .then(() => this.handleMessageChange(""));
+            .then(() => this.handleMessageChange("")).catch(console.error);
 
         // mark messages if not from chat
-        if (params.uid) {
+        if (params.user_id) {
             const code =
                 'return API.messages.markAsRead({message_ids: API.messages.getHistory({user_id:'
-                + params.uid + '})@.mid});';
+                + params.user_id + '})@.mid});';
 
-            Request.api({code});
+            Request.api({code}).catch(console.error);
         }
     };
 
@@ -94,7 +95,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     };
 
 
-    getOwners = (dialog: DialogI): ProfileI | ProfileI[] =>{
+    getOwners = (dialog: DialogI): UserProfile | UserProfile[] =>{
         const {profilesColl} = this.props;
 
         if (dialog.chat_id) {
@@ -120,7 +121,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
             );
 
         return (
-            <div key={messageItem.mid}>
+            <div key={messageItem.id}>
                 <span>
                     <RectifyPu
                         text={messageItem.body}
@@ -137,7 +138,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     messages = (messageItems: Message[]) => messageItems.map(this.singleMessage);
 
 
-    blockquotes = (foldedMessages: MessageMemo[], owners: ProfileI | ProfileI[]) => {
+    blockquotes = (foldedMessages: Speech[], owners: UserProfile | UserProfile[]) => {
 
 
         return foldedMessages.map((foldedMessage, i) => {
@@ -146,7 +147,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                     ? "chat__messages_out"
                     : "";
 
-                const messageAuthor = foldedMessage.author.uid !== (owners as ProfileI).uid
+                const messageAuthor = foldedMessage.author.id !== (owners as UserProfile).id
                     ?
                     <small className="chat__author">
                         {profile2Name(foldedMessage.author)}
@@ -172,9 +173,9 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
 
     render(): React.ReactNode {
-        const dialog = this.props.dialog;
+        const {dialog, profilesColl} = this.props;
 
-        const foldedMessages = foldMessagesByAuthor(dialog.messages, this.props.profilesColl);
+        const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
         const out = _(foldedMessages).last().author.isSelf;
         const datetime = timeAgo(dialog.messages.slice(-1)[0].date * 1000);
 

@@ -1,0 +1,563 @@
+
+
+@peterRiver: #3498db;
+@belizeHole: #2980b9;
+@caroot: #e67e22;
+@amethyst: #9b59b6;
+@wisteria: #8e44ad;
+@emerald: #2ecc71;
+@midnightBlue: #2c3e50;
+@silver: #bdc3c7;
+@clouds: #ecf0f1;
+@alizarin: #e74c3c;
+
+@padding: 10px;
+@contentWidth: 980px;
+@headerHeight: 90px;
+@headerBgColor: @midnightBlue;
+@headerColor: lighten(@headerBgColor, 55);
+
+@desktopThreshold: 1200px;
+
+html {
+  font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+  background: @clouds;
+  min-width: 1024px;
+  height: 100%;
+}
+body {
+  height: 100%;
+  min-width: 640px;
+  position: relative;
+}
+h1 {
+  @fontSize: 45px;
+  font-weight: bold;
+  font-size: @fontSize;
+  line-height: @fontSize;
+  margin: 0;
+  margin-bottom: @headerHeight / 2;
+}
+h2 {
+  margin: 0;
+  font-size: 23px;
+}
+a {
+  color: @belizeHole;
+  text-decoration: none;
+
+  &:hover {
+    color: @peterRiver;
+  }
+
+  &:visited {
+    color: @wisteria;
+
+    &:hover {
+      color: @amethyst;
+    }
+  }
+}
+p {
+  margin: 2 * @padding 0;
+  font-size: 18px;
+  text-indent: 2 * @padding;
+}
+.header {
+  background: @headerBgColor;
+  overflow: hidden;
+  padding: 0 4 * @padding;
+
+  @media (max-width: @desktopThreshold) {
+    & {
+      padding: 0 2 * @padding;
+    }
+  }
+}
+.header-brand {
+  color: @headerColor;
+  font-weight: 100;
+  font-weight: bold;
+  overflow: hidden;
+  float: left;
+  line-height: @headerHeight;
+  height: @headerHeight;
+
+  &__name {
+    color: @headerColor !important;
+    display: inline-block;
+    @fontSize: 48px;
+    font-size: @fontSize;
+    text-transform: uppercase;
+
+    &:hover {
+      color: white !important;
+    }
+  }
+}
+.navigation {
+  display: block;
+  float: right;
+  margin: 0;
+  padding: 0;
+  height: @headerHeight;
+  line-height: @headerHeight;
+
+  &__item {
+    margin: @padding;
+    padding: 0;
+    @fontSize: 19px;
+    line-height: @fontSize;
+    font-size: @fontSize;
+    display: inline-block;
+    padding: @padding;
+    text-transform: uppercase;
+    cursor: default;
+
+    a {
+      color: @headerColor;
+
+      &:hover {
+        color: white;
+      }
+    }
+    &_selected_yes a {
+      color: white;
+    }
+  }
+}
+.description {
+  overflow: hidden;
+  padding-right: @headerHeight / 2;
+  @fontSize: 23px;
+  font-size: @fontSize;
+  color: lighten(@peterRiver, 45%);
+
+  &__title {
+    color: white;
+    margin-bottom: @headerHeight / 2;
+    @fontSize: 45px;
+    font-weight: bold;
+    font-size: @fontSize;
+    line-height: @fontSize;
+  }
+
+  &__button {
+    margin-top: @headerHeight / 2;
+  }
+}
+.button {
+  font-size: 27px;
+  text-transform: uppercase;
+  text-decoration: none;
+  margin-left: auto;
+  margin-right: auto;
+  @border: 3px;
+  display: inline-block;
+  border-radius: @border;
+  padding: @padding 2 * @padding;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+
+  &__icon {
+    display: none;
+  }
+  @media (max-width: @desktopThreshold) {
+    &__text {
+      display: none;
+    }
+    &__icon {
+      display: inline;
+    }
+  }
+
+  &:active {
+    border-bottom: 0;
+    position: relative;
+    top: @border;
+    margin-bottom: @border;
+  }
+  &_type_media {
+    font-size: 20px;
+    line-height: 31px;
+
+    background: @emerald;
+    border-bottom: @border solid darken(@emerald, 15%);
+    color: darken(@emerald, 25) !important;
+    background: darken(@midnightBlue, 5%);
+    border-bottom: @border solid darken(@midnightBlue, 10%);
+    color: @headerColor !important;
+
+  }
+  &_type_install {
+    font-size: 27px;
+    background: @emerald;
+    border-bottom: @border solid darken(@emerald, 15%);
+    color: darken(@emerald, 25) !important;
+  }
+  &_type_image {
+    float: right;
+  }
+}
+.brand-image {
+  float: right;
+  display: block;
+  width: @contentWidth / 2;
+  height: 421px;
+}
+
+.slide {
+  &__content {
+    padding: @headerHeight 0;
+    width: @contentWidth;
+    margin: auto;
+    overflow: hidden;
+    font-size: 18px;
+  }
+}
+.main {
+  background: @peterRiver;
+}
+.features {
+  background: @clouds;
+}
+.grid {
+  &_type_features {
+    .grid__cell {
+      width: 50%;
+    }
+  }
+  &__row  {
+    overflow: hidden;
+
+    & + .grid__row  {
+      margin-top: @headerHeight;
+    }
+  }
+  &__cell {
+    float: left;
+  }
+}
+.feature {
+  overflow: hidden;
+  padding-right: @headerHeight;
+  box-sizing: border-box;
+  color: #2c3e50;
+
+  &__image {
+    float: left;
+    margin-right: 2 * @padding;
+    width: 115px;
+  }
+  &__title {
+    font-weight: bold;
+    font-size: 23px;
+    overflow: hidden;
+    margin-bottom: 2 * @padding;
+  }
+  &__description {
+    overflow: hidden;
+    font-size: 18px;
+  }
+}
+.social-proof {
+  background: @peterRiver;
+
+  &__group {
+    float: left;
+  }
+  &__reviews {
+    overflow: hidden;
+  }
+  &__title {
+    @fontSize: 45px;
+    color: white;
+    font-weight: bold;
+    font-size: @fontSize;
+    line-height: @fontSize;
+    text-align: center;
+    margin-bottom: @headerHeight;
+  }
+  &__button {
+    margin-top : @headerHeight;
+    text-align: center;
+  }
+}
+.review {
+  margin-left: @headerHeight;
+  color: @clouds;
+
+  & + .review {
+    margin-top: @headerHeight / 2;
+  }
+
+  &__image {
+    width: @headerHeight;
+    height: @headerHeight;
+    background-size: cover;
+    border-radius: @headerHeight / 2;
+    float: left;
+    margin-right: 2 * @padding;
+  }
+  &__content {
+    overflow: hidden;
+  }
+  &__body {
+    font-size: 18px;
+    font-style: italic;
+
+    &:before {
+      content: '“ ';
+      font-size: 30px;
+      line-height: 18px;
+      vertical-align: bottom;
+    }
+    &:after {
+      content: ' ”';
+      font-size: 30px;
+      line-height: 18px;
+      vertical-align: bottom;
+    }
+  }
+  &__author {
+    text-align: right;
+    font-weight: bold;
+    font-size: 16px;
+  }
+}
+.thanks {
+  background: @clouds;
+  color: @silver;
+
+  .slide__content {
+    font-size: 56px;
+    text-align: center;
+  }
+}
+.license {
+  background: @emerald;
+  color: white;
+  text-align: justify;
+
+  h1 {
+    text-align: center;
+  }
+
+  h2 {
+    text-indent: 2 * @padding;
+  }
+}
+.help {
+  background: @clouds;
+  color: @midnightBlue;
+  text-align: justify;
+  padding-bottom: 2 * @headerHeight;
+
+  h1 {
+    margin-left: 4 * @padding;
+  }
+}
+.questions {
+  margin: 0;
+  padding: 0;
+  font-size: 30px;
+
+  &__link {
+    line-height: 45px;
+
+    &:before {
+      -webkit-transition: all 0.1s ease;  /* Chrome 1-25, Safari 3.2+ */
+      -moz-transition: all 0.1s ease;  /* Firefox 4-15 */
+      -o-transition: all 0.1s ease;  /* Opera 10.50–12.00 */
+      transition: all 0.1s ease;
+
+      line-height: 45px;
+      vertical-align: middle;
+      display: inline-block;
+      width: @padding;
+      height: @padding;
+      border-radius: @padding / 2;
+      background: @midnightBlue;
+      content: '';
+      margin-right: 3 * @padding;
+    }
+
+    &:hover:before {
+      margin-right: 2 * @padding;
+      margin-left: @padding;
+    }
+  }
+}
+.post {
+  background: @clouds;
+  color: @midnightBlue;
+
+  h1 {
+    margin-left: 4 * @padding;
+  }
+}
+.image-area {
+  position: relative;
+  max-height: calc(~'100%' - @headerHeight);
+  max-height: -webkit-calc(~'100%' - @headerHeight);
+  min-height: calc(~'100%' - 2 * @headerHeight);
+  min-height: -webkit-calc(~'100%' - 2 * @headerHeight);
+  overflow: hidden;
+
+  &__placeholder {
+    visibility: hidden;
+    max-width: 100%;
+    display: block;
+  }
+  &__image {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 100%;
+    max-height: calc(~'100%' - 2 * @padding);
+    max-height: -webkit-calc(~'100%' - 2 * @padding);
+  }
+}
+.video {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  max-width: 100%;
+  width: 640px;
+  height: 360px;
+}
+.doc-area {
+  position: absolute;
+  left: 0;
+  top: @headerHeight;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+
+  .doc {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+.large-player {
+  min-height: 660px;
+
+  .video {
+    width: 854px;
+    height: 480px;
+  }
+  .button {
+    &:extend(.button:active);
+  }
+}
+.media-controls {
+  height: @headerHeight;
+  line-height: @headerHeight;
+  float: right;
+}
+.banner {
+  float: left;
+  padding: (@headerHeight - 90px)/2 0;
+  margin-left: 4 * @padding;
+
+  @media (max-width: @desktopThreshold) {
+    & {
+      margin-left: 2 * @padding;
+    }
+  }
+
+
+  img {
+    display: block;
+  }
+}
+.error-404 {
+  overflow: hidden;
+  @errorHeight: 150px;
+  margin: auto;
+  margin-top: 2 * @headerHeight;
+  text-align: center;
+
+  &__number {
+    line-height: @errorHeight;
+    font-size: @errorHeight;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  &__number_color_green {
+    color: @emerald;
+  }
+  &__number_color_blue {
+    color: @peterRiver;
+  }
+  &__ghost {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .ghost {
+    @headRadius: @errorHeight / 2.5;
+
+    .ghost__head {
+      border-radius: @headRadius;
+      background: @alizarin;
+      width: @headRadius * 2;
+      height: @headRadius * 2;
+      position: relative;
+    }
+    .ghost__eyes {
+      @eyeRadius: @headRadius / 5;
+      margin: auto;
+      overflow: hidden;
+      position: absolute;
+      left: @headRadius - 2 * @eyeRadius;
+      top: @headRadius - 2 * @eyeRadius;
+
+      .ghost__eye {
+        border-radius: @eyeRadius;
+        width: 2 * @eyeRadius;
+        height: 2 * @eyeRadius;
+        background: @clouds;
+        float: left;
+      }
+    }
+    .ghost__body {
+      margin-top: -@headRadius;
+      height: 1.5 * @headRadius;
+      width: 2 * @headRadius;
+      background: @alizarin;
+      position: relative;
+    }
+    .ghost__triangles {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+    .ghost__triangle {
+      @height: @headRadius / 5;
+      @width: @height * 2;
+      width: 0;
+      height: 0;
+      border-left: @width / 2 solid transparent;
+      border-right: @width / 2 solid transparent;
+      border-bottom: @height solid @clouds;
+      bottom: 0;
+      float: left;
+    }
+  }
+  &__message {
+    margin-top: @padding;
+    color: @midnightBlue;
+    font-size: 23px;
+  }
+}
+

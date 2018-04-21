@@ -1,4 +1,12 @@
 "use strict";
 import ProxyMethods from '../proxy-methods/proxy-methods.pu';
+import {ProfileI, UserProfile} from "../back/users/types";
 
-export default ProxyMethods.forward('../users/users.bg.ts', ['getProfilesById']);
+
+const namespace = "../users/users.bg.ts";
+
+export default {
+    getProfilesById(userIds: number[]): Promise<UserProfile[]> {
+        return ProxyMethods.forwardM(namespace, "getProfilesById", userIds)
+    }
+}

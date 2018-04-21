@@ -10,7 +10,6 @@ export class PuChatUserProfile extends Model {
         super.set("isSelf", value)
     }
 
-    get idAttribute(): string { return "uid" }
 }
 
 export class PuChatUserProfilesColl extends Collection<PuChatUserProfile> {

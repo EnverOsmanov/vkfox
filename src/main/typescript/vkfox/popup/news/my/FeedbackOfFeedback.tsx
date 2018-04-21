@@ -1,16 +1,16 @@
 import * as React from "react"
 import Item from "../../item/Item";
-import {ReplyI} from "../../chat/Chat";
+import {ReplyI} from "../../chat/types";
 import AttachmentC from "../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {ProfileI} from "../../../chat/types";
 import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/types";
+import {GroupProfile, UserProfile} from "../../../back/users/types";
 
 
 interface FeedbackItemProps {
     feedback: FeedbackObj
-    owner  ?: ProfileI
+    owner  ?: UserProfile | GroupProfile
 }
 
 interface FeedbackItemState {

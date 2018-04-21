@@ -1,23 +1,23 @@
 "use strict";
-import Request from '../../request/request.bg';
+import Request from "../../request/request.bg";
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import Msg from "../../mediator/messages"
 import {Profiles, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
 import {
-    AttachmentPhoto,
-    AttachmentPhotoContainer,
     ItemDulpColl,
-    ItemObj,
     ItemsColl,
     LikesChanged,
-    Photo,
-    PostItem,
-    WallPhotoItem
 } from "../../newsfeed/types";
 import {AccessTokenError} from "../../request/models";
 import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
-import {NewsfeedRequestParams, NewsfeedResp} from "./types";
+import {
+    AttachmentPhoto,
+    AttachmentPhotoContainer,
+    ItemObj, NewsfeedRequestParams, NewsfeedResp,
+    PostItem,
+    WallPhotoItem
+} from "../../../vk/types/newsfeed";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -41,6 +41,12 @@ const autoUpdateParams: NewsfeedRequestParams = {
 //
 //Functions
 
+export function idMaker(item: ItemObj): string {
+    const post_id = "post_id" in item ? (item as PostItem).post_id : "";
+
+    return [item.source_id, post_id, item.type].join(":");
+}
+
 /**
  * Generates unique id for every item,
  * or merges new item into existing one with the same id;
@@ -49,17 +55,18 @@ const autoUpdateParams: NewsfeedRequestParams = {
 function processRawItem(item: ItemObj) {
     let collisionItem;
     const typeToPropertyMap = {
-        'wall_photo': 'photos',
-        'photo'     : 'photos',
-        'photo_tag' : 'photo_tags',
-        'note'      : 'notes',
-        'friend'    : 'friends'
+        "wall_photo": "photos",
+        "photo"     : "photos",
+        "photo_tag" : "photo_tags",
+        "note"      : "notes",
+        "friend"    : "friends"
     };
 
     // used to eliminate duplicate items during merge
     const collection = new ItemDulpColl();
 
-    item.id = [item.source_id, item.post_id, item.type].join(':');
+
+    item.id = idMaker(item);
 
     if (item.source_id > 0) {
         collisionItem = friendItemsColl.get(item.id);
@@ -78,10 +85,13 @@ function processRawItem(item: ItemObj) {
         if (propertyName) {
             // type "photo" item has "photos" property; note - notes etc
 
-            collection.add(item[propertyName].slice(1), ProfilesCmpn.addOptions);
-            collection.add(collisionItem[propertyName].slice(1), ProfilesCmpn.addOptions);
+            collection.add(item[propertyName].items, ProfilesCmpn.addOptions);
+            collection.add(collisionItem[propertyName].items, ProfilesCmpn.addOptions);
 
-            item[propertyName] = [collection.size()].concat(collection.toJSON());
+            item[propertyName] = {
+                count: collection.size(),
+                items: collection.toJSON()
+            }
         }
     }
 
@@ -90,29 +100,29 @@ function processRawItem(item: ItemObj) {
 }
 
 /**
- * API returns 'wall_photo' item for every post item with photo.
+ * API returns "wall_photo" item for every post item with photo.
  *
  * @param {Array} items
  * return {Array} filtered array of items
  */
 function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
     return items.filter( item => {
-        let wallPhotos: Photo[];
+        let wallPhotos: AttachmentPhoto[];
 
-        if (item.type === 'wall_photo') {
+        if (item.type === "wall_photo") {
             const wallPhotoItem = item as WallPhotoItem;
-            wallPhotos = (wallPhotoItem.photos as Photo[]).slice(1);
+            wallPhotos = wallPhotoItem.photos.items;
 
             // collect all attachments from source_id's posts
             const postProperties = {
-                type: 'post',
+                type: "post",
                 source_id: item.source_id
             };
 
             function takePhotos(attachedPhotos: AttachmentPhoto[], post: PostItem): AttachmentPhoto[] {
                 if (post.attachments) {
                     const curPhotos = _
-                        .where(post.attachments, { type: 'photo' })
+                        .where(post.attachments, { type: "photo" })
                         .map( (attachment: AttachmentPhotoContainer) => attachment.photo );
 
                     return attachedPhotos.concat(curPhotos);
@@ -126,9 +136,15 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
                 .reduce(takePhotos, []);
 
             //exclude attachedPhotos from wallPhotos
-            wallPhotos = wallPhotos.filter( ({pid}) => !(_.findWhere(attachedPhotos, { pid })) );
+            wallPhotos = wallPhotos
+                .filter( wallP => !attachedPhotos.some( attachedP => attachedP.id === wallP.id) );
 
-            wallPhotoItem.photos = (<(number | Photo)[]>[wallPhotos.length]).concat(wallPhotos);
+
+            wallPhotoItem.photos = {
+                count: wallPhotos.length,
+                items: wallPhotos
+            };
+
             return  wallPhotos.length;
         }
         return true;
@@ -150,19 +166,22 @@ function freeSpace() {
         // gather required profiles' ids from new friends
         required_uids = _(
             friendItemsColl
-                .where({ type: 'friend' })
+                .where({ type: "friend" })
                 // first element contains quantity
-                .map( model => (model.friends || []).slice(1) )
-        ).chain().flatten().pluck('uid').value();
+                .map( model => (model.friends || []) )
+        ).chain()
+            .flatten()
+            .map(f => f.id)
+            .value();
 
         // gather required profiles from source_ids
         required_uids = _(required_uids.concat(
-            groupItemsColl.pluck('source_id'),
-            friendItemsColl.pluck('source_id')
+            groupItemsColl.map(gi => gi.source_id),
+            friendItemsColl.map(fi => fi.source_id)
         )).uniq();
 
         profilesColl.reset(profilesColl.filter(
-            model => required_uids.indexOf(model.get('id')) !== -1
+            model => required_uids.indexOf(model.get("id")) !== -1
         ));
     }
 }
@@ -199,7 +218,7 @@ function fetchNewsfeed() {
     }
 
     return Request
-        .api({ code })
+        .api<NewsfeedResp>({ code })
         .then(responseHandler)
         .catch(handleError);
 }
@@ -245,8 +264,8 @@ export default function initialize() {
     readyPromise.then( () => {
         Mediator.sub(Msg.LikesChanged, onLikesChanged);
 
-        groupItemsColl.on('change add', _.debounce(publishNewsfeedGroups, 0), 0);
-        friendItemsColl.on('change add', _.debounce(publishNewsfeedFriends, 0), 0);
+        groupItemsColl.on("change add", _.debounce(publishNewsfeedGroups, 0), 0);
+        friendItemsColl.on("change add", _.debounce(publishNewsfeedFriends, 0), 0);
     });
 
 }

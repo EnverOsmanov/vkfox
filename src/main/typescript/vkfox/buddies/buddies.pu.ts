@@ -1,8 +1,9 @@
 "use strict";
 import PersistentModel from '../persistent-model/persistent-model'
-import {ProfileI} from "../chat/types";
 import {profile2Name} from "../popup/filters/filters.pu";
 import {BuddiesFilters} from "./types";
+import {UserProfile} from "../back/users/types";
+import {FoxUserProfileI} from "../chat/types";
 
 
 /**
@@ -14,14 +15,14 @@ import {BuddiesFilters} from "./types";
  *
  * @returns [Boolean]
  */
-export function matchProfile(profile: ProfileI, searchClue: string): boolean {
+export function matchProfile(profile: UserProfile, searchClue: string): boolean {
     return profile2Name(profile)
         .toLowerCase()
         .indexOf(searchClue.toLowerCase()) !== -1;
 }
 
 
-export function buddiesFilter(input: ProfileI[], filters: BuddiesFilters, searchClue: string): ProfileI[] {
+export function buddiesFilter(input: FoxUserProfileI[], filters: BuddiesFilters, searchClue: string): FoxUserProfileI[] {
 
     return input.filter( (profile) => {
         if (searchClue) {

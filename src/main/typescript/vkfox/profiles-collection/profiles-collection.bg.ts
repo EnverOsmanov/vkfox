@@ -1,10 +1,8 @@
 "use strict";
 /*import Users from '../back/users/users.bg'*/
-import * as _ from "underscore"
 import Mediator from '../mediator/mediator.bg'
 import {AddOptions, Collection, Model, Silenceable} from "backbone";
 import Msg from "../mediator/messages";
-import {ProfileI} from "../chat/types";
 
 
 const UPDATE_NON_FRIENDS_PERIOD = 10000;
@@ -14,22 +12,18 @@ export abstract class GProfile extends Model {}
 
 class Profile extends GProfile {
 
-    parse(profile: ProfileI) {
+/*    parse(profile: ProfileI) {
         if (profile.gid) profile.id = -profile.gid;
-        else profile.id = profile.uid;
+        else profile.id = profile.id;
 
         return profile;
-    }
+    }*/
 }
 
-class UserProfile extends GProfile {
-    get idAttribute(): string { return "uid" }
-
-
-    get uid(): number { return super.get("uid")}
+class UProfileM extends GProfile {
 }
 
-class ChatUserProfile extends UserProfile {
+class ChatUserProfile extends UProfileM {
     set isSelf(value: boolean) {
         super.set("isSelf", value)
     }
@@ -104,7 +98,7 @@ class GProfileCollCmpn {
     }
 }
 
-class GUserProfileColl<P extends UserProfile> extends Collection<P> {
+class GUserProfileColl<P extends UProfileM> extends Collection<P> {
 
     initialize() {
         super.initialize();
@@ -124,8 +118,8 @@ export class ChatUserProfileColl extends GUserProfileColl<ChatUserProfile> {
     model = ChatUserProfile;
 }
 
-export class UserProfileColl extends GUserProfileColl<UserProfile> {
-    model = UserProfile;
+export class UserProfileColl extends GUserProfileColl<UProfileM> {
+    model = UProfileM;
 }
 
 /*export class GroupOrUserProfileColl extends GUserProfileColl<GroupOrUserProfile> {

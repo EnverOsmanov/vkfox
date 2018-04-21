@@ -1,22 +1,25 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import Browser from '../../browser/browser.pu'
-import Request from '../../request/request.pu'
+import Browser from "../../browser/browser.pu"
+import Request from "../../request/request.pu"
+import {docViewPath, imageViewPath, stickerImageUrl, stickerViewPath} from "../item/item.pu";
+import {duration} from "../filters/filters.pu";
+import {VideoGetUserVideosResponse} from "../../../vk/types";
 import {
     Attachment,
     AttachmentAudio,
     AttachmentDoc,
-    AttachmentGraffiti,
     AttachmentLink,
     AttachmentNote,
-    AttachmentPoll, AttachmentSticker,
-    AttachmentVideo, AttachmentWall
-} from "../../newsfeed/types";
-import {docViewPath, imageViewPath, stickerViewPath} from "../item/item.pu";
-import {duration} from "../filters/filters.pu";
+    AttachmentPhoto,
+    AttachmentPoll,
+    AttachmentSticker,
+    AttachmentVideo,
+    AttachmentWall
+} from "../../../vk/types/newsfeed";
 
 
-const VIDEO_VIEW_URL = 'http://vkfox.io/video/';
+const VIDEO_VIEW_URL = "/pages/video.html";
 
 function imageProperties(src: string): CSSProperties {
     return {
@@ -25,16 +28,16 @@ function imageProperties(src: string): CSSProperties {
 }
 
 function onVideoClick(dataVideo: AttachmentVideo) {
-    const videos = `${dataVideo.owner_id}_${dataVideo.vid}_${dataVideo.access_key}`;
+    const videos = `${dataVideo.owner_id}_${dataVideo.id}_${dataVideo.access_key}`;
 
     const params = {videos};
     const code = `return API.video.get(${ JSON.stringify(params) });`;
 
     Request
-        .api({code})
+        .api<VideoGetUserVideosResponse>({code})
         .then((data) => {
-            return data && data[1]
-                ? Browser.createTab(VIDEO_VIEW_URL + '#' + btoa(data[1].player))
+            return data && data.items[0]
+                ? Browser.createTab(VIDEO_VIEW_URL + "#" + btoa(data.items[0].player)).then(_ => {})
                 : Promise.resolve()
         });
 }
@@ -48,7 +51,7 @@ export function attachmentDiv(type: string, data: Attachment) {
             return (
                 <div>
                     <i className="fa fa-music"/>
-                    {dataAudio.performer} - {dataAudio.title}
+                    {dataAudio.artist} - {dataAudio.title}
                 </div>
             );
 
@@ -64,7 +67,7 @@ export function attachmentDiv(type: string, data: Attachment) {
         case "doc":
             const dataDoc = data as AttachmentDoc;
             return (
-                <a className="item__link" data-anchor={docViewPath()(dataDoc)}>
+                <a className="item__link" data-anchor={docViewPath(dataDoc)}>
                     <i className="fa fa-file"/>
                     {dataDoc.title}
                 </a>
@@ -92,11 +95,12 @@ export function attachmentDiv(type: string, data: Attachment) {
         case "graffiti":
         case "photo":
         case "posted_photo":
-            const dataGraffiti = data as AttachmentGraffiti;
+            const dataGraffiti = data as AttachmentPhoto;
+
             return (
                 <div
                     className="item__picture"
-                    style={imageProperties(dataGraffiti.src_big)}
+                    style={imageProperties(dataGraffiti.photo_604)}
                     data-anchor={imageViewPath(dataGraffiti)}>
                 </div>
             );
@@ -106,7 +110,7 @@ export function attachmentDiv(type: string, data: Attachment) {
             return (
                 <div
                     className="item__video"
-                    style={imageProperties(dataVideo.image)}
+                    style={imageProperties(dataVideo.photo_320)}
                     onClick={() => onVideoClick(dataVideo)}>
 
                     <div className="item__video-desc">
@@ -121,7 +125,7 @@ export function attachmentDiv(type: string, data: Attachment) {
             return (
                 <div
                     className="item__sticker"
-                    style={imageProperties(sticker.photo_256)}
+                    style={imageProperties(stickerImageUrl(sticker))}
                     data-anchor={stickerViewPath(sticker)}>
 
                 </div>

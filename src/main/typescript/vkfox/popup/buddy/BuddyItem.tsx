@@ -2,14 +2,14 @@ import * as React from "react"
 import Item from "../item/Item";
 import I18N from "../../i18n/i18n";
 import ItemActions from "../itemActions/ItemActions";
-import {ProfileI} from "../../chat/types";
 import ItemAction from "../itemActions/ItemAction";
-import {ReplyI} from "../chat/Chat";
+import {ReplyI} from "../chat/types";
 import Request from "../../request/request.pu"
 import {SendMessageParams} from "../../chat/collections/DialogColl";
+import {FoxUserProfileI} from "../../chat/types";
 
 interface BuddyItemProps {
-    buddie  : ProfileI
+    buddie  : FoxUserProfileI
 
     toggleFriendWatching(): void
 }
@@ -77,7 +77,7 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
         const params: SendMessageParams = { message };
 
         if (chatId) params.chat_id = chatId;
-        else params.uid = uid;
+        else params.user_id = uid;
 
         const code = `return API.messages.send(${ JSON.stringify(params) });`;
 
@@ -86,10 +86,10 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
             .then(() => this.handleMessageChange(""));
 
         // mark messages if not from chat
-        if (params.uid) {
+        if (params.user_id) {
             const code =
                 'return API.messages.markAsRead({message_ids: API.messages.getHistory({user_id:'
-                + params.uid + '})@.mid});';
+                + params.user_id + '})@.mid});';
 
             Request.api({code});
         }
@@ -101,12 +101,12 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
 
         return (
             <Item
-                key={buddie.uid}
+                key={buddie.id}
                 itemClass={`buddies__item ${buddie.isFave && "buddies__item_is-fave"}`}
                 description={buddie.description}
                 owners={buddie}
                 message={this.state.message}
-                sendMessage={() => this.onSendMessage(null, buddie.uid)}
+                sendMessage={() => this.onSendMessage(null, buddie.id)}
                 handleMessageChange={this.handleMessageChange}
                 reply={this.state.reply}>
 

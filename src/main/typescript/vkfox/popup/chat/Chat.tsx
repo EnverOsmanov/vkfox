@@ -7,12 +7,8 @@ import Msg from "../../mediator/messages";
 import I18N from "../../i18n/i18n";
 import DialogItem from "./dialogActions/DialogItem";
 import {ChatDataI, DialogI} from "./types";
-import {Message, ProfileI} from "../../chat/types";
-
-
-export interface ReplyI {
-    visible     : boolean
-}
+import {UserProfile} from "../../back/users/types";
+import {Message} from "../../../vk/types";
 
 
 interface ChatState {
@@ -48,17 +44,42 @@ class ChatPage extends React.Component<undefined, ChatState> {
             new Collection(profiles, {model: PuChatUserProfile});
 
         this.setState(prevState => {
+
+            function mergeDialogs(bgDialog: DialogI): DialogI {
+                const maybeUiDialog = prevState.dialogs.find( d => d.id === bgDialog.id);
+
+                function mergeMessages() {
+                    const onlyNewUimessages =
+                        maybeUiDialog.messages
+                            .filter(ui => !bgDialog.messages.some(bg => bg.id === ui.id));
+
+                    bgDialog.messages =
+                        bgDialog.messages
+                            .concat(onlyNewUimessages)
+                            .sort((a, b) => a.date - b.date);
+
+
+                    return bgDialog
+                }
+
+                return maybeUiDialog
+                    ? mergeMessages()
+                    : bgDialog;
+            }
+
+            const mergedDialogs = dialogs.map(mergeDialogs);
+
                 return {
                     ...prevState,
-                    dialogs,
-                    profilesColl
+                    profilesColl,
+                    dialogs: mergedDialogs
                 }
             }
         );
 
     };
 
-    private addToProfilesColl = (profiles: ProfileI[]) => {
+    private addToProfilesColl = (profiles: UserProfile[]) => {
 
         this.setState(prevState => {
             prevState.profilesColl.add(profiles);
@@ -95,11 +116,13 @@ class ChatPage extends React.Component<undefined, ChatState> {
     }
 
     dialogElms = () => {
-        return this.state.dialogs.map( dialog =>
+        const {dialogs, profilesColl} = this.state;
+
+        return dialogs.map( dialog =>
             <DialogItem
                 key={dialog.uid}
                 dialog={dialog}
-                profilesColl={this.state.profilesColl}
+                profilesColl={profilesColl}
                 addToProfilesColl={this.addToProfilesColl}
                 addToMessages={this.addToMessages}
             />

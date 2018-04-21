@@ -1,10 +1,7 @@
 import * as React from "react"
 import Item from "../../item/Item";
-import {ReplyI} from "../../chat/Chat";
-import {
-    AttachmentContainer, AudioAudio, AudioItem, FriendItem, ItemObj, Photo, PhotoTagItem, PostItem,
-    WallPhotoItem
-} from "../../../newsfeed/types";
+import {ReplyI} from "../../chat/types";
+
 import I18N from "../../../i18n/i18n";
 import ItemActionLike from "../../itemActions/ItemActionLike";
 import ItemActionComment from "../../itemActions/ItemActionComment";
@@ -12,17 +9,24 @@ import ItemAction from "../../itemActions/ItemAction";
 import ItemActions from "../../itemActions/ItemActions";
 import {addVKBase, profile2Name} from "../../filters/filters.pu";
 import AttachmentC from "../../attachment/AttachmentC";
-import {ProfileI} from "../../../chat/types";
 import Request from "../../../request/request.pu";
 import {SendMessageI} from "../../itemActions/types";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {UserI} from "../../../back/users/types";
+import {UserProfile} from "../../../back/users/types";
+import {
+    AttachmentContainer, AttachmentPhoto, AudioItem, FriendItem,
+    ItemObj,
+    PhotoTagItem,
+    PostItem, UserId, VideoItem,
+    WallPhotoItem
+} from "../../../../vk/types/newsfeed";
+import {GenericRS} from "../../../../vk/types";
 
 
 interface NewsFeedItemProps {
     item    : ItemObj
-    owners  : ProfileI
-    profiles: ProfileI[]
+    owners  : UserProfile
+    profiles: UserProfile[]
 }
 
 interface NewsFeedItemState {
@@ -47,7 +51,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
     static onReply(scope: SendMessageI, message: string): Promise<void> {
         const params: any = {};
-        let method;
+        let method: string;
 
         switch (scope.type) {
             case 'wall':
@@ -78,6 +82,9 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 params.message = message;
                 method = 'video.createComment';
                 break;
+
+            default:
+                console.warn("Unknown newsfeed type", scope.type);
         }
 
         if (method) {
@@ -104,15 +111,20 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         const ownerId = this.props.owners.id;
         const item = this.props.item;
 
-        const scope: SendMessageI = {
-            type: item.type,
-            id  : item.post_id,
-            ownerId
-        };
+        if ("post_id" in item) {
+            const postItem = item as PostItem;
 
-        return NewsFeedItem.onReply(scope, this.state.message)
-            .then(() => this.handleMessageChange(""))
-            .catch(err => console.error("Couldn't send message", err));
+            const scope: SendMessageI = {
+                type: postItem.type,
+                id  : postItem.post_id,
+                ownerId
+            };
+
+            return NewsFeedItem.onReply(scope, this.state.message)
+                .then(() => this.handleMessageChange(""))
+                .catch(err => console.error("Couldn't send message", err));
+        }
+        else return Promise.resolve();
     };
 
 
@@ -145,8 +157,8 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             : null
     };
 
-    photoAttachmentElms = (photos: Photo[]) => {
-        const singleAttachment = (photo: Photo, i: number) => (
+    photoAttachmentElms = (photos: AttachmentPhoto[]) => {
+        const singleAttachment = (photo: AttachmentPhoto, i: number) => (
             <AttachmentC
                 key={i}
                 type="photo"
@@ -154,23 +166,24 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             />
         );
 
-        return photos.slice(1).map(singleAttachment)
+        return photos.map(singleAttachment)
     };
 
-    friendsElms = (friends: UserI[]) => {
-        const lastIndex = friends.length - 2;
+    friendsElms = (friends: GenericRS<UserId>) => {
+        const lastIndex = friends.count - 1;
 
-        const singleFrined = (friend: UserI, i: number) => {
+        const singleFrined = (friend: UserId, i: number) => {
+
             const profile = this.props.profiles
-                .find(profile => profile.id === friend.uid);
+                .find(profile => profile.id === friend.user_id);
 
             const comma = i === lastIndex
                 ? null
                 : <span>, </span>;
 
             return (
-                <span key={friend.uid}>
-                    <a data-anchor={addVKBase(`/id${friend.uid}`)}>
+                <span key={friend.user_id}>
+                    <a data-anchor={addVKBase(`/id${friend.user_id}`)}>
                         {profile2Name(profile)}
 
                         {comma}
@@ -179,15 +192,30 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             )
         };
 
-        return friends.slice(1).map(singleFrined)
+        return friends.items.map(singleFrined)
+    };
+
+
+    repostedText = (itemPost: PostItem) => {
+        if (itemPost.copy_history && itemPost.copy_history[0] && itemPost.copy_history[0].text) {
+            return (
+                <div>
+                    <i className="fa fa-bullhorn"/>
+                    {itemPost.copy_history[0].text}
+                </div>
+            )
+        }
+        else return null;
     };
 
     postElm = (itemPost: PostItem) => {
+
         return (
             <div>
                 <div
                     className="news__item-text">
                     <RectifyPu text={itemPost.text} hasEmoji={false}/>
+                    {this.repostedText(itemPost)}
                 </div>
 
                 {this.postAttachmentElms(itemPost)}
@@ -197,7 +225,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                     <ItemAction
                         className="fa fa-external-link-square"
                         title={I18N.get("Open in New Tab")}
-                        anchor={`http://vk.com/wall${itemPost.source_id}_${itemPost.post_id}`}
+                        anchor={`https://vk.com/wall${itemPost.source_id}_${itemPost.post_id}`}
                     />
 
                     <ItemActionComment
@@ -231,11 +259,11 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
             case "photo":
             case "wall_photo":
-                return this.photoAttachmentElms((item as WallPhotoItem).photos as Photo[]);
+                return this.photoAttachmentElms((item as WallPhotoItem).photos.items);
 
             case "photo_tag":
                 const photoTagItem = item as PhotoTagItem;
-                return this.photoAttachmentElms(photoTagItem.photo_tags);
+                return this.photoAttachmentElms(photoTagItem.photo_tags.items);
 
             case "note":
                 return JSON.stringify(item);
@@ -243,15 +271,15 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             case "friend":
                 return (
                     <div>
-                        {I18N.get("New friends:")}
-                        {this.friendsElms((item as FriendItem).friends as UserI[])}
+                        <div className="news__list_title">{I18N.get("New friends:")}</div>
+                        {this.friendsElms((item as FriendItem).friends)}
                     </div>
                 );
 
             case "audio":
                 const audioItem = item as AudioItem;
 
-                const audios = audioItem.audio.slice(1).map( (audio: AudioAudio, i: number) => {
+                const audios = audioItem.audio.items.map( (audio, i) => {
                     return (
                         <div key={i}>
                             <i className="fa fa-music"/>
@@ -268,7 +296,22 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 );
 
             case "video":
-                return <div>{I18N.get("New video:")}</div>;
+                const videoItem = item as VideoItem;
+                const videos = videoItem.video.items.map( (v, i) => {
+                    return (
+                        <div key={i}>
+                            <i className="fa fa-video-camera"/>
+                            {v.title}
+                        </div>
+                    );
+                });
+
+                return (
+                    <div>
+                        {I18N.get("New video:")}
+                        {videos}
+                        </div>
+                );
             default:
                 console.warn("Unknown feed item.type", item);
                 break;
@@ -277,8 +320,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
 
     render() {
-        const item = this.props.item;
-        const owners = this.props.owners;
+        const {item, owners} = this.props;
 
         return (
             <Item

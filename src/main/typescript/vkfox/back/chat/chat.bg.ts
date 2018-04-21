@@ -14,7 +14,15 @@ import {NotifType} from "../../notifications/Notification";
 import {LPMessage} from "../longpoll/models";
 import {ChatUserProfileColl, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
 import {AuthModelI} from "../../auth/types";
-import {Message, ProfileI} from "../../chat/types";
+import {UserProfile} from "../users/types";
+import {
+    VkDialog,
+    MessagesGetDialogsResponse,
+    MessagesGetHistoryResponse,
+    Message,
+    MessageHistory, MessagesGetByIdResponse
+} from "../../../vk/types";
+import {DialogI} from "../../popup/chat/types";
 
 const MAX_HISTORY_COUNT = 10;
 
@@ -60,7 +68,7 @@ function updateLatestMessageId(): void {
 
     if (dialogColl.size()) {
         const messages = dialogColl.first().messages;
-        const latestMessageId = messages[messages.length - 1].mid;
+        const latestMessageId = messages[messages.length - 1].id;
 
         persistentModel.set("latestMessageId", latestMessageId);
     }
@@ -68,10 +76,10 @@ function updateLatestMessageId(): void {
 
 function fetchProfiles(): Promise<void> {
 
-    function dialog2Uuids(uids: number[], dialog: Dialog): number[] {
-        const allDialogUids = dialog.messages.map( message => message.uid);
+    function dialog2Uuids(accUids: number[], dialog: Dialog): number[] {
+        const allDialogUids = dialog.messages.map( message => message.user_id);
 
-        uids = uids
+        const uids = accUids
             .concat(allDialogUids, dialog.uid)
             .filter(uid => uid > 0);
 
@@ -79,13 +87,13 @@ function fetchProfiles(): Promise<void> {
         else return uids;
     }
 
-    function addProfile(data: ProfileI[]) {
+    function addProfile(data: UserProfile[]) {
         profilesColl.add(data);
         profilesColl.get(userId).isSelf = true;
     }
 
     const requiredUids = dialogColl.reduce(dialog2Uuids, [userId]);
-    const cachesUids = profilesColl.map(p => p.uid);
+    const cachesUids = profilesColl.map(p => p.id);
     const missingUids = _
         .chain(requiredUids)
         .uniq()
@@ -105,7 +113,9 @@ function fetchProfiles(): Promise<void> {
  */
 function initialize(readyPromise: Promise<void>) {
 
-    Mediator.sub(Msg.ChatDataGet, () => readyPromise.then(publishData) );
+    Mediator.sub(Msg.ChatDataGet, () => {
+        readyPromise.then(publishData)
+    } );
 
     Mediator.sub(Msg.LongpollUpdates, onUpdates);
 
@@ -151,32 +161,40 @@ function removeReadMessages(dialog: Dialog) {
 function getDialogs(): Promise<void> {
     const code = "return API.messages.getDialogs({preview_length: 0});";
 
-    function handleRequest(response: Message[]): void {
+    function handleRequest(response: MessagesGetDialogsResponse): void {
 
-       function toDialog(message: Message): Dialog {
-           return new Dialog({
-            id          : message.chat_id ? 'chat_id_' + message.chat_id:'uid_' + message.uid,
-            chat_id     : message.chat_id,
-            chat_active : message.chat_active,
-            uid         : message.uid,
-            messages    : [message]
-        });
+       function toDialog(messageCnt: VkDialog): Dialog {
+           const message = messageCnt.message;
+
+           const id = message.chat_id
+               ? 'chat_id_' + message.chat_id
+               :'uid_' + message.user_id;
+
+           const dialog: DialogI = {
+               id,
+               chat_id     : message.chat_id,
+               chat_active : message.chat_active,
+               uid         : message.user_id,
+               messages    : [message]
+           };
+
+           return new Dialog(dialog);
        }
 
 
 
-        if (response && response[0]) {
+        if (response && response.count) {
             dialogColl.reset(
                 response
-                    .slice(1)
-                    .filter( item => item.uid > 0)
+                    .items
+                    .filter( item => item.message.user_id > 0)
                     .map(toDialog)
             );
         }
     }
 
     return Request
-        .api({ code })
+        .api<MessagesGetDialogsResponse>({ code })
         .then(handleRequest);
 }
 
@@ -194,7 +212,7 @@ function onUpdates(updates: LPMessage[]) {
                 if (messageId && mask && readState) {
                     dialogColl.some( (dialog: Dialog) => {
                         return dialog.messages.some( (message) => {
-                            if (message.mid === messageId) {
+                            if (message.id === messageId) {
                                 message.read_state = readState;
                                 removeReadMessages(dialog);
                                 if (readState) {
@@ -219,7 +237,7 @@ function onUpdates(updates: LPMessage[]) {
  * fetch dialog history and get last unread messages in a row
  */
 function getUnreadMessages(): Promise<void> {
-    function getHistory(dialog: Dialog): Promise<Message[]> {
+    function getHistory(dialog: Dialog): Promise<MessagesGetHistoryResponse> {
         const code = "return API.messages.getHistory({" +
             `user_id: ${dialog.uid},` +
             `count: ${MAX_HISTORY_COUNT} ` +
@@ -237,11 +255,11 @@ function getUnreadMessages(): Promise<void> {
 
     return Promise
         .all(unreadHistoryRequests)
-        .then( (args: Message[][]) => {
-            _(args).each(function (historyMessages, index) {
+        .then( (args: MessagesGetHistoryResponse[]) => {
+            args.forEach( (historyMessages, index) => {
                 if (historyMessages && historyMessages[0]) {
 
-                    unreadDialogs[index].messages = historyMessages.slice(1).reverse();
+                    unreadDialogs[index].messages = historyMessages.items.reverse();
 
                     removeReadMessages(unreadDialogs[index]);
                 }
@@ -260,29 +278,39 @@ function addNewMessage(update: LPMessage) {
       attachment         = update[7],
       dialogCompanionUid = update[3];
 
-    let messageDeferred: Promise<(number | Message)[]>;
+    let messageDeferred: Promise<MessagesGetByIdResponse>;
 
     // For messages from chat attachment contains "from" property
     if (_(attachment).isEmpty()) {
         // mimic response from server
-        messageDeferred = Promise.resolve([1, {
+        const message: Message = {
             body      : update[6],
             title     : update[5],
             date      : update[4],
-            uid       : dialogCompanionUid,
+            user_id   : dialogCompanionUid,
             read_state: +!(flags & 1),
-            mid       : messageId,
+            id        : messageId,
             out       : +!!(flags & 2)
-        }]);
+        };
+
+        const rs: MessagesGetByIdResponse = {
+            count   : 1,
+            items   : [message]
+        };
+
+
+        messageDeferred = Promise.resolve(rs);
     }
     else {
         const code = `return API.messages.getById({chat_active: 1, mid: ${messageId}});`;
-        messageDeferred = Request.api({ code });
+        messageDeferred = Request.api<MessagesGetByIdResponse>({ code });
     }
 
-    messageDeferred.then(function (response) {
-        const message: Message = response[1] as Message,
-          dialogId = message.chat_id ? 'chat_id_' + message.chat_id : 'uid_' + dialogCompanionUid;
+    messageDeferred.then( (response) => {
+        const message: Message = response.items[0];
+        const dialogId = message.chat_id
+            ? 'chat_id_' + message.chat_id
+            : 'uid_' + dialogCompanionUid;
 
         const dialog = dialogColl.get(dialogId);
         if (dialog) {
@@ -291,7 +319,7 @@ function addNewMessage(update: LPMessage) {
         }
         else dialogColl.add({
             id          : dialogId,
-            uid         : message.uid,
+            uid         : message.user_id,
             chat_id     : message.chat_id,
             chat_active : message.chat_active,
             messages    : [message]
@@ -317,7 +345,7 @@ function notifyAboutChange() {
 function onLatestMessageIdChange() {
     function notifyAboutMessage(): void {
 
-        const profile: ProfileI = profilesColl.get(lastMessage.uid).toJSON();
+        const profile: UserProfile = profilesColl.get(lastMessage.user_id).toJSON();
         const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
 
         const gender = profile.sex === 1 ? 'female' : 'male';

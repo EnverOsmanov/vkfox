@@ -4,14 +4,14 @@ import ProxyMethods from "../proxy-methods/proxy-methods.pu"
  * Returns a correct implementation
  * for background or popup page
  */
-const request: RequestT = ProxyMethods.forward('../request/request.bg.ts', ['api', 'post', 'get']);
+
+const namespace = "../request/request.bg.ts";
 
 
+export default {
 
-interface RequestT {
-    api<R>(params: any): Promise<R>
-    post(url: string, data: object|string): Promise<any>
-    get(url: string, data: object|string): Promise<any>
-}
+    api<R>(params: any): Promise<R> {
+        return ProxyMethods.forwardM(namespace, "api", params)
+    },
 
-export default request;
+};

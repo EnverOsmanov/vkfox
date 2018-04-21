@@ -3,7 +3,6 @@ import * as Config from '../../config/config'
 import Mediator from '../../mediator/mediator.pu'
 import Msg from "../../mediator/messages"
 
-import {ItemObj} from "./types";
 import {
     PhotoFeedback,
     PostFeedback,
@@ -11,6 +10,7 @@ import {
     VideoFeedback,
     WallPostMentionFeedback
 } from "../../feedbacks/types";
+import {FeedbackItemObj, FeedbackUnsubOptions} from "./types";
 
 export interface CommentsDataI {
     ownerId : number,
@@ -30,7 +30,7 @@ export function unsubscribe(type, ownerId, itemId) {
     Mediator.pub(Msg.FeedbacksUnsubscribe, options);
 }
 
-export function getCommentsData(item: ItemObj): CommentsDataI {
+export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
     const { parent } = item;
 
     switch (item.type) {

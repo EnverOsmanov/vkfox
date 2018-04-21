@@ -1,6 +1,6 @@
 import * as React from "react"
-import {Attachment} from "../../newsfeed/types";
 import {attachmentDiv} from "./AttachmentHelper";
+import {Attachment} from "../../../vk/types/newsfeed";
 
 interface AttachmentProps<A extends Attachment> {
     type: string

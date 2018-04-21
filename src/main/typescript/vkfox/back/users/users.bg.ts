@@ -5,15 +5,16 @@ import Mediator from "../../mediator/mediator.bg"
 import * as _ from "underscore"
 import Msg from "../../mediator/messages"
 import {UserProfileColl} from "../../profiles-collection/profiles-collection.bg";
-import {NameSurname, OnlyName, ProfileI} from "../../chat/types";
-import {UsersGetElem} from "./types";
+import {NameSurname, OnlyName} from "../../chat/types";
+import {FriendProfile, UserProfile, UsersGetElem} from "./types";
+import {FriendsRequest} from "../../../vk/types";
 
 const DROP_PROFILES_INTERVAL = 60000,
     USERS_GET_DEBOUNCE       = 400;
 
 let inProgress: boolean,
     usersGetQueue: UsersGetElem[],
-    friendsProfilesDefer: Promise<ProfileI[]>;
+    friendsProfilesDefer: Promise<FriendProfile[]>;
 
 const usersColl = new UserProfileColl();
 
@@ -30,28 +31,36 @@ const dropOldNonFriendsProfiles = _.debounce(function () {
  * @param {Array} queue
  */
 function publishUids(queue: UsersGetElem[]) {
-    let data: ProfileI[],
+    let data: UserProfile[],
         queueItem: UsersGetElem;
 
-    function getProfileById(uid: number) {
-        return _.clone(usersColl.get(Number(uid)));
+    function getProfileById(uid: number): UserProfile | undefined {
+        const userM = _.clone(usersColl.get(uid));
+
+        if (!userM) {
+            console.debug("[publish] NOT FOUND", uid)
+        }
+
+        return userM ? userM.toJSON() : userM;
     }
 
     while (queue.length) {
         queueItem = queue.pop();
-        data = queueItem.uids.map( uid => getProfileById(uid).toJSON() );
+        data = queueItem.uids
+            .map( uid => getProfileById(uid) )
+            .filter(up => up);
 
         queueItem.promise(data);
     }
 }
 
-const processGetUsersQueue = _.debounce(function (processedQueue: UsersGetElem[]) {
+const processGetUsersQueue = _.debounce( (processedQueue: UsersGetElem[]) => {
     const newUids = _
         .chain(processedQueue)
-        .pluck('uids')
+        .map(uge => uge.uids)
         .flatten()
         .unique()
-        .difference(usersColl.pluck('uid'))
+        .difference(usersColl.map(u => u.id))
         .value();
 
 
@@ -63,8 +72,8 @@ const processGetUsersQueue = _.debounce(function (processedQueue: UsersGetElem[]
 
         // TODO limit for uids.length
         Request
-            .api({
-                code: 'return API.users.get({uids: "' + newUids.join() + '", fields: "online,photo,sex,nickname,lists"})'
+            .api<UserProfile[]>({
+                code: 'return API.users.get({user_ids: "' + newUids.join() + '", fields: "online,photo,sex,nickname,lists"})'
             })
             .then( (response) => {
                 if (response && response.length) {
@@ -72,7 +81,7 @@ const processGetUsersQueue = _.debounce(function (processedQueue: UsersGetElem[]
                     publishUids(processedQueue);
                     inProgress = false;
                 }
-            });
+            }).catch(console.debug);
     }
     else publishUids(processedQueue);
 }, USERS_GET_DEBOUNCE);
@@ -96,17 +105,30 @@ class Users {
         ProxyMethods.connect('../users/users.bg.ts', Users);
     }
 
-    static getFriendsProfiles(): Promise<ProfileI[]> {
+    static getFriendsProfiles(): Promise<FriendProfile[]> {
         if (!friendsProfilesDefer) {
-            friendsProfilesDefer = Request.api({
+            friendsProfilesDefer = Request.api<FriendsRequest>({
                 code: 'return API.friends.get({ fields : "photo,sex,nickname,lists", order: "hints" })'
-            }).then(function (response) {
-                if (response && response.length) {
-                    response.forEach(friendData => friendData.isFriend = true);
-                    usersColl.add(response);
+            }).then( (response) => {
+                if (response && response.count) {
+                    const friendProfiles: FriendProfile[] =
+                        response.items
+                            .map(friendData => {
+                                return {
+                                    ...friendData,
+                                    isFriend: true
+                                }
+                            });
+
+                    usersColl.add(friendProfiles);
+
+                    return friendProfiles
                 }
-                return response;
-            }.bind(this));
+                else return [];
+            }).catch(e => {
+                console.error(e);
+                return [];
+            });
         }
 
         return friendsProfilesDefer;
@@ -118,8 +140,9 @@ class Users {
      *
      * @returns {Promise} Returns promise that will be fulfilled with profiles
      */
-    static getProfilesById(uids: number[]): Promise<ProfileI[]> {
-        function promisify(resolve: (_: ProfileI[]) => void) {
+    static getProfilesById(uids: number[]): Promise<UserProfile[]> {
+        function promisify(resolve: (_: UserProfile[]) => void) {
+
             usersGetQueue.push({
                 uids: positiveUids,
                 promise: resolve

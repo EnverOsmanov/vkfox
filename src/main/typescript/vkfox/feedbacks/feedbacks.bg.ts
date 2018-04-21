@@ -22,9 +22,11 @@ import {
     CommentsNewsItem,
     FeedbackObj,
     FeedbackRS,
-    NotificationObj, ReplyFeedback,
+    NotificationObj, ReplyCommentNotification, ReplyFeedback,
     WallPostMentionFeedback
 } from "./types";
+import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../vk/types";
+import {FeedbackUnsubOptions} from "../popup/news/types";
 
 /**
  * Responsible for "News -> My" page
@@ -35,7 +37,7 @@ import {
 
 const MAX_ITEMS_COUNT  = 50,
     MAX_COMMENTS_COUNT = 3,
-    UPDATE_PERIOD      = 2000; //ms
+    UPDATE_PERIOD      = 3000; //ms
 
 let persistentModel, userId;
 
@@ -43,13 +45,13 @@ const itemsColl = new ItemColl();
 const profilesColl = new Profiles();
 
 
-const autoUpdateNotificationsParams: { filters: string; count: number; start_time?: number } = {
+const autoUpdateNotificationsParams: NotificationsRequest = {
     filters: 'wall,mentions,likes,reposts,followers,friends',
     count  : MAX_ITEMS_COUNT
 };
 
-const autoUpdateCommentsParams: { last_comments: number; count: number; start_time?: number } = {
-    last_comments: 1,
+const autoUpdateCommentsParams: NewsfeedGetCommentsRequest = {
+    last_comments_count: 1,
     count        : MAX_ITEMS_COUNT
 };
 
@@ -58,7 +60,7 @@ const autoUpdateCommentsParams: { last_comments: number; count: number; start_ti
  * Notifies about current state of module.
  * Has a tiny debounce to make only one publish per event loop
  */
-const publishData = _.debounce(function publishData() {
+function publishData() {
     function itemsCollJS() {
         return itemsColl.map(item => {
             const itemJS = item.toJSON();
@@ -72,10 +74,12 @@ const publishData = _.debounce(function publishData() {
         profiles: profilesColl.toJSON(),
         items   : itemsCollJS()
     });
-}, 0);
+}
 
 
-const fetchFeedbacksDebounced = _.debounce(fetchFeedbacks, UPDATE_PERIOD);
+function fetchFeedbacksDebounced() {
+    setTimeout(fetchFeedbacks, UPDATE_PERIOD);
+}
 
 
 //
@@ -118,13 +122,13 @@ function onLikesChanged(params: LikesChanged) {
 }
 
 
-function onFeedbackUnsubcribe(params) {
+function onFeedbackUnsubcribe(params: FeedbackUnsubOptions) {
     const unsubscribeFromId = [
         params.type, params.item_id,
         'user', params.owner_id
     ].join(':');
 
-    Request.api({
+    Request.api<number>({
         code: `return API.newsfeed.unsubscribe(${JSON.stringify(params)});`
     }).then( (response) => {
         if (response) {
@@ -161,6 +165,10 @@ function updateLatestFeedbackId() {
  * @return {String}
  */
 function generateItemID(type: string, parent): string {
+    if (type == "photo") {
+        debugger;
+    }
+
     if (parent.owner_id) {
         return [
             // replace wall with post,
@@ -276,19 +284,20 @@ function isSupportedType(type: string): boolean {
  *
  * @param {Object} item
  */
-function addRawNotificationsItem(item: NotificationObj) {
+function addRawNotificationsItem(item: NotificationObj): void {
     const { feedback } = item;
 
-    let parentType, feedbackType,
-        { parent } = item;
+    let parentType: string,
+        feedbackType: string,
+        parent: FeedbackObj;
 
     if (!isSupportedType(item.type)) return;
 
     if (item.type === "friend_accepted") {
         parentType = item.type;
     }
-    else if (item.type.indexOf('_') !== -1) {
-        const typeTokens = item.type.split('_');
+    else if (item.type.indexOf("_") !== -1) {
+        const typeTokens = item.type.split("_");
 
         feedbackType = typeTokens[0];
         parentType   = typeTokens[1];
@@ -299,7 +308,13 @@ function addRawNotificationsItem(item: NotificationObj) {
         parentType   = item.type;
         parent       = <FeedbackObj>feedback;
     }
-    else parentType = item.type;
+    else {
+        if ("parent" in item) {
+            debugger;
+            parent = (item as ReplyCommentNotification).parent;
+        }
+        parentType = item.type;
+    }
 
     if (feedbackType) {
         parent.owner_id = Number(parent.from_id || parent.owner_id);
@@ -353,7 +368,7 @@ function addRawNotificationsItem(item: NotificationObj) {
     }
 }
 
-function fetchFeedbacks() {
+function fetchFeedbacks(): Promise<void> {
     const code = [
         'return {time: API.utils.getServerTime(),',
         ' notifications: API.notifications.get(', JSON.stringify(autoUpdateNotificationsParams), '),',
@@ -382,7 +397,7 @@ function fetchFeedbacks() {
             profilesColl.add(notifications.profiles, ProfilesCmpn.addOptions);
             profilesColl.add(notifications.groups, ProfilesCmpn.addOptions);
 
-            notifications.items.slice(1).forEach(addRawNotificationsItem);
+            notifications.items.forEach(addRawNotificationsItem);
             newsAboutComments.items.forEach(addRawCommentsItem);
             itemsColl.sort();
         }
@@ -396,7 +411,7 @@ function fetchFeedbacks() {
     }
 
     return Request
-        .api({ code })
+        .api<FeedbackRS>({ code })
         .then(feedbackHandler)
         .catch(handleError)
         .then(fetchFeedbacksDebounced);

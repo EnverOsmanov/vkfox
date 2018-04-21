@@ -4,17 +4,17 @@ import * as React from "react"
 import AttachmentC from "../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {ItemObj} from "../types";
 import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/types";
+import {FeedbackItemObj} from "../types";
 
 
 interface MyFeedbackPostProps {
-    item: ItemObj
+    item: FeedbackItemObj
 }
 
 class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
 
-    postCommentOrWallElm = (item: ItemObj) => {
+    postCommentOrWallElm = (item: FeedbackItemObj) => {
         const postParent = item.parent as WallPostMentionFeedback;
         const attachments = postParent.attachments
             ? postParent.attachments.map((attachment, i) => {
@@ -41,7 +41,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
         );
     };
 
-    myFeedbackPost = (item: ItemObj) => {
+    myFeedbackPost = (item: FeedbackItemObj) => {
 
         switch (item.type) {
             case "photo":

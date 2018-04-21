@@ -1,6 +1,6 @@
 import {FeedbackObj} from "../../feedbacks/types";
 
-export interface ItemObj {
+export interface FeedbackItemObj {
     parent: FeedbackObj
     type  : string
     id    : string
@@ -8,4 +8,10 @@ export interface ItemObj {
 
     // added by VKfox
     feedbacks       : FeedbackObj[]
+}
+
+export interface FeedbackUnsubOptions {
+    type    : string
+    owner_id: number
+    item_id : number
 }

@@ -6,14 +6,13 @@ import BuddyItem from "../popup/buddy/BuddyItem";
 import BuddiesSearch from "./BuddiesSearch";
 import {BuddiesFilters} from "./types";
 import ItemList from "../popup/item-list/ItemList";
-import {ProfileI} from "../chat/types";
-
+import {FoxUserProfileI} from "../chat/types";
 
 
 interface BuddiesState {
     searchInput : string
     filters     : BuddiesFilters
-    data        : ProfileI[]
+    data        : FoxUserProfileI[]
 }
 
 class BuddiesPage extends React.Component<undefined, BuddiesState> {
@@ -41,7 +40,7 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
         Mediator.unsub(Msg.BuddiesData);
     }
 
-    onBuddiesData = (data: ProfileI[]) => {
+    onBuddiesData = (data: FoxUserProfileI[]) => {
         this.setState(prevState => {
             return {
                 ...prevState,
@@ -50,10 +49,10 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
         })
     };
 
-    toggleFriendWatching = (oldProfile: ProfileI) => {
+    toggleFriendWatching = (oldProfile: FoxUserProfileI) => {
         this.setState( prevState => {
             const data = prevState.data.slice();
-            const i = prevState.data.findIndex( profile => profile.uid == oldProfile.uid);
+            const i = prevState.data.findIndex( profile => profile.id == oldProfile.id);
 
             const prevProfile = data[i];
             data[i] = {
@@ -67,7 +66,7 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
             }
         });
 
-        Mediator.pub(Msg.BuddiesWatchToggle, oldProfile.uid);
+        Mediator.pub(Msg.BuddiesWatchToggle, oldProfile.id);
     };
 
     onSearchChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -98,10 +97,10 @@ class BuddiesPage extends React.Component<undefined, BuddiesState> {
         })
     };
 
-    buddieItem = (buddie: ProfileI) => {
+    buddieItem = (buddie: FoxUserProfileI) => {
         return (
            <BuddyItem
-               key={buddie.uid}
+               key={buddie.id}
                buddie={buddie}
                toggleFriendWatching={() => this.toggleFriendWatching(buddie)}
            />

@@ -5,22 +5,22 @@ import I18N from "../../../i18n/i18n";
 import ItemActions from "../../itemActions/ItemActions";
 
 import {getHistory, markAsRead} from "../chat.pu";
-import {ProfileI} from "../../../chat/types";
 import * as _ from "underscore"
 import * as $ from "jquery"
-import {DialogI, MessageHistoryI, MessageMemo} from "../types";
-import {Message} from "../../../chat/types";
+import {DialogI, MessageHistoryI, Speech} from "../types";
+import {UserProfile} from "../../../back/users/types";
+import {Message} from "../../../../vk/types";
 
 interface DialogActionsProps {
     dialog  : DialogI
     out     : boolean
-    foldedMessages: MessageMemo[]
+    foldedMessages: Speech[]
 
     chatId ?: number
     uid ?: number
 
     showReply(): void
-    addToProfilesColl(profiles: ProfileI[]): void
+    addToProfilesColl(profiles: UserProfile[]): void
     addToMessages(dialogId: string, messages: Message[]): void
 }
 
@@ -35,15 +35,13 @@ class DialogActions extends React.Component<DialogActionsProps, undefined> {
             this.props.addToProfilesColl(profiles);
 
             if (messages.length > 1) {
-                messages.shift();
-
                 const newMessages = dialog.messages.slice();
                 newMessages.unshift(...messages.reverse());
                 this.props.addToMessages(dialog.id, newMessages)
             }
         };
 
-        return getHistory(dialog, dialog.messages.length)
+        return getHistory(dialog)
             .then(handleHistory)
     };
 

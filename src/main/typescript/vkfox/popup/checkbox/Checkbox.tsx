@@ -14,13 +14,16 @@ interface CheckboxProps {
 class Checkbox extends React.Component<CheckboxProps> {
 
     onChange = () => {
-        this.props.onToggle(this.props.filterName, !this.props.isChecked)
+        const {filterName, isChecked} = this.props;
+
+        this.props.onToggle(filterName, !isChecked)
     };
 
     render(){
+        const {className, children} = this.props;
 
         return(
-            <label className={`checkbox ${this.props.className}`}>
+            <label className={`checkbox ${className}`}>
                 <input
                     className="checkbox__input"
                     type="checkbox"
@@ -28,7 +31,7 @@ class Checkbox extends React.Component<CheckboxProps> {
                     onChange={this.onChange}
                 />
                 <div className="checkbox__text">
-                    {this.props.children}
+                    {children ? children : ""}
                 </div>
             </label>
         )

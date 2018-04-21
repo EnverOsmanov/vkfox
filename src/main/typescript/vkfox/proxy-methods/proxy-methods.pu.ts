@@ -16,33 +16,25 @@ export default {
      * Another side must call 'connect' method to make it work.
      * Can forward only methods that return promise or undefined.
      *
-     * @param {String} namespace Name of module, whose methods will be proxied
-     * @param {Array} methodNames Contains names of methods, that will be proxied
+     * @ {String} namespace Name of module, whose methods will be proxied
+     * @ {Array} methodNames Contains names of methods, that will be proxied
      *
      * @returns {Object}
      */
-    forward: function (namespace: string, methodNames: string[]): any {
-        return methodNames.reduce( (exports: object, methodName: string) => {
-            exports[methodName] = function (...args) {
-                const id = _.uniqueId();
 
-                Mediator.pub('proxy-methods:' + namespace, {
-                    method: methodName,
-                    id,
-                    'args': [].slice.apply(args)
-                });
+    forwardM<R>(namespace: string, method: string, ...args) {
+        const id = _.uniqueId();
 
-                function promisify(resolve, reject) {
-                    Mediator.once('proxy-methods:' + id, ({method, args}) => {
-                        if (method === "resolve") resolve(args);
-                        else reject(args);
-                    });
-                }
+        Mediator.pub(`proxy-methods:${namespace}`, {method, id, args});
 
-                return new Promise(promisify);
-            };
+        function promisify(resolve: (R) => void, reject: (any) => void) {
+            Mediator.once(`proxy-methods:${id}`, ({method, args}) => {
+                if (method === "resolve") resolve(args);
+                else reject(args);
+            });
+        }
 
-            return exports;
-        }, {});
+        return new Promise<R>(promisify);
+
     }
 };

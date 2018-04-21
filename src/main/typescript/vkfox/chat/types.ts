@@ -1,5 +1,6 @@
-import {AttachmentContainer} from "../newsfeed/types";
+
 import {UserProfile} from "../back/users/types";
+import {AttachmentContainer} from "../../vk/types/newsfeed";
 
 export interface GetHistoryParams {
     offset  : number
@@ -8,19 +9,6 @@ export interface GetHistoryParams {
     user_id?: number
 }
 
-export interface Message {
-    mid         : number;
-    uid         : number;
-    chat_id    ?: number;
-    read_state  : number;
-    date        : number;
-    out         : number;
-    body        : string
-    title       : string
-    attachments?: AttachmentContainer[]
-
-    chat_active ?: number[];
-}
 
 export interface OnlyName {
     name: string
@@ -32,12 +20,10 @@ export interface NameSurname {
 }
 
 
-export interface ProfileI extends UserProfile {
+export interface FoxUserProfileI extends UserProfile {
 
 
     // Properties added by Vkfox
-    id                   : number
-    gid                 ?: number
     isSelf              ?: boolean
     isWatched           ?: boolean
     lastActivityTime    ?: number

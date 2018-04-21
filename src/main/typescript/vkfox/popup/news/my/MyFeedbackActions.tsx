@@ -6,12 +6,12 @@ import I18N from "../../../i18n/i18n";
 import ItemAction from "../../itemActions/ItemAction";
 import ItemActionComment from "../../itemActions/ItemActionComment";
 import ItemActionLike from "../../itemActions/ItemActionLike";
-import {ItemObj} from "../types";
 import {FeedbackObj} from "../../../feedbacks/types";
+import {FeedbackItemObj} from "../types";
 
 
 interface MyFeedbackActionsProps {
-    item: ItemObj
+    item: FeedbackItemObj
 
     showOrHideReply(): void
 }

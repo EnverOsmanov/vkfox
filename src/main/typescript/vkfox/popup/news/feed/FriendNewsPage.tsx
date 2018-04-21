@@ -3,11 +3,10 @@ import Mediator from "../../../mediator/mediator.pu"
 import {RouteComponentProps} from "react-router"
 import Msg from "../../../mediator/messages"
 import Feeds from "./Feeds";
-import {NewsfeedData} from "../../../newsfeed/types";
+import {NewsfeedData} from "../../../../vk/types/newsfeed";
 
 
-interface ChatState {
-    data: NewsfeedData
+interface ChatState extends NewsfeedData {
 }
 
 interface ChatProps extends RouteComponentProps<any> {
@@ -19,29 +18,20 @@ class FriendNewsPage extends React.Component<ChatProps, ChatState> {
     constructor(props) {
         super(props);
 
-        const data = {
+        this.state = {
             profiles: [],
             items: []
         };
-
-        this.state = { data };
     }
 
     componentWillMount() {
-        Mediator.sub(Msg.NewsfeedFriends, this.onNewsfeedData);
+        Mediator.sub(Msg.NewsfeedFriends, this.setState.bind(this));
         Mediator.pub(Msg.NewsfeedFriendsGet);
     }
 
     componentWillUnmount() {
         Mediator.unsub(Msg.NewsfeedFriends);
     }
-
-    componentDidMount() {
-    }
-
-    onNewsfeedData = (data) => {
-        this.setState(  {data})
-    };
 
 
     render() {
@@ -52,7 +42,7 @@ class FriendNewsPage extends React.Component<ChatProps, ChatState> {
                 <div className="item-list__content">
                     <div className="item-list__scroll">
 
-                        <Feeds data={this.state.data}/>
+                        <Feeds data={this.state}/>
 
                     </div>
                 </div>

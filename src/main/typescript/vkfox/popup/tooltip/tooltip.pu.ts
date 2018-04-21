@@ -4,29 +4,31 @@ import * as $ from "jquery"
 import "bootstrap/js/tooltip.js";
 
 export default function init() {
+    const options: TooltipOptions = {
+        selector: '[title]',
+        delay: {show: 1000, hide: false},
+        placement: function (tooltip) {
+            setTimeout(() => {
+                const $tooltip = $(tooltip),
+                    $inner = $('.tooltip-inner', tooltip);
+
+                //if no item, then will return outerWidth of root
+                const offset = $tooltip.parents('.item').add((<any>window)).width()
+                    - $tooltip.offset().left - $tooltip.width();
+
+                if (offset < 0) {
+                    $inner.css({
+                        'position': 'relative',
+                        'left': offset + 'px'
+                    });
+                }
+            });
+            return 'bottom';
+        }
+    };
+
     $(() =>
-        $("[data-toggle='tooltip']").tooltip({
-            selector: '[title]',
-            delay: {show: 1000, hide: false},
-            placement: function (tooltip) {
-                setTimeout(() => {
-                    const $tooltip = $(tooltip),
-                        $inner = $('.tooltip-inner', tooltip);
-
-                    //if no item, then will return outerWidth of root
-                    const offset = $tooltip.parents('.item').add((<any>window)).width()
-                        - $tooltip.offset().left - $tooltip.width();
-
-                    if (offset < 0) {
-                        $inner.css({
-                            'position': 'relative',
-                            'left': offset + 'px'
-                        });
-                    }
-                });
-                return 'bottom';
-            }
-        })
+        $("[data-toggle='tooltip']").tooltip(options)
     );
 
 // Hide popup on click

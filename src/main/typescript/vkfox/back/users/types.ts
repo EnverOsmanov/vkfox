@@ -1,24 +1,32 @@
-import {NameSurname, OnlyName, ProfileI} from "../../chat/types";
+import {NameSurname, OnlyName } from "../../chat/types";
 
-export interface UserI {
-    uid: number
-}
 
 type IsOnline = 0 | 1;
 export type Sex = 0 | 1 | 2
 
-export interface UserProfile extends UserI, NameSurname {
-    photo   : string;
-    sex     : Sex;
-    nickname: string;
-    lists   : string
+export interface ProfileI {
+    id      : number
+
+    photo_200   ?: string
+    photo_100   ?: string
+    photo_50    ?: string
+    photo       ?: string
+}
+
+export interface UserProfile extends NameSurname, ProfileI {
+    sex     : Sex
+    nickname: string
+    lists  ?: string
     isFave ?: boolean
     online  : IsOnline
 }
 
-export interface GroupProfile extends OnlyName {
-    id      : number
-    photo   : string
+export interface FriendProfile extends UserProfile {
+    isFriend: boolean
+}
+
+export interface GroupProfile extends OnlyName, ProfileI {
+    type: string
 }
 
 

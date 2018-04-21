@@ -4,7 +4,7 @@ import {RouteComponentProps} from "react-router"
 import Msg from "../../../mediator/messages"
 import FeedbackItem from "./FeedbackItem";
 import {FeedbacksData} from "./types";
-import {ItemObj} from "../types";
+import {FeedbackItemObj} from "../types";
 
 
 interface MyNewsProps extends RouteComponentProps<any> {}
@@ -38,9 +38,9 @@ class MyNewsPage extends React.Component<MyNewsProps, MyNewsState> {
     newsElms = () => {
         const {profiles} = this.state;
 
-        const singleNewsItem = (item: ItemObj) => {
+        const singleNewsItem = (item: FeedbackItemObj) => {
 
-            const itemProfile = profiles.find(profile => profile.id === item.parent.owner_id);
+            const itemProfile = profiles.find(profile => profile.id === Math.abs(item.parent.owner_id));
 
             return (
                 <FeedbackItem

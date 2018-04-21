@@ -1,12 +1,12 @@
 import {Collection, Model} from "backbone";
 import {ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
-import {Message} from "../types";
+import {Message, MessageHistory} from "../../../vk/types";
 
 
 export interface SendMessageParams {
     message  : string
     chat_id ?: number
-    uid     ?: number
+    user_id  ?: number
 }
 
 

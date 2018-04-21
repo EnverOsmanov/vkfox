@@ -2,8 +2,8 @@
 import Request from "../../request/request.bg";
 import Mediator from "../../mediator/mediator.bg";
 import Msg from "../../mediator/messages";
-import {LongPollRS, LongPollServerRS} from "./models";
 import {AccessTokenError, LongPollKeyError} from "../../request/models";
+import {LongPollRS, LongPollServerRS} from "../../../vk/types";
 
 const LONG_POLL_WAIT = 25,
     DEBOUNCE_RATE    = 1000;
@@ -53,7 +53,7 @@ function fetchUpdates(serverRS: LongPollServerRS) {
 
 export default function enableLongPollUpdates(ts?: number) {
     return Request
-        .api({ code: "return API.messages.getLongPollServer();" })
+        .api<LongPollServerRS>({ code: "return API.messages.getLongPollServer();" })
         .then(server => {
             if (ts) server.ts = ts;
             return fetchUpdates(server)

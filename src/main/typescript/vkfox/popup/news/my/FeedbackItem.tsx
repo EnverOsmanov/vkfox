@@ -1,21 +1,21 @@
 import * as React from "react"
 import Item from "../../item/Item";
-import {ReplyI} from "../../chat/Chat";
+import {ReplyI} from "../../chat/types";
 import I18N from "../../../i18n/i18n";
-import {ProfileI} from "../../../chat/types";
 import MyFeedbackPost from "./MyFeedbackPost";
 import MyFeedbackActions from "./MyFeedbackActions";
 import FeedbackOfFeedback from "./FeedbackOfFeedback";
 import {SendMessageI} from "../../itemActions/types";
 import NewsFeedItem from "../feed/NewsFeedItem";
-import {ItemObj} from "../types";
 import {FeedbackObj, WallPostMentionFeedback} from "../../../feedbacks/types";
+import {GroupProfile, UserProfile} from "../../../back/users/types";
+import {FeedbackItemObj} from "../types";
 
 
 interface FeedbackItemProps {
-    item        : ItemObj
-    itemProfile : ProfileI
-    profiles    : ProfileI[]
+    item        : FeedbackItemObj
+    itemProfile : UserProfile | GroupProfile
+    profiles    : UserProfile[]
 }
 
 interface FeedbackItemState {
@@ -95,7 +95,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         })
     };
 
-    showAll = (item: ItemObj) => {
+    showAll = (item: FeedbackItemObj) => {
         const text = this.state.showAllFeedbacks ? "hide" : "show all";
 
         if (item.feedbacks && item.feedbacks.length > 3) return (
@@ -107,11 +107,15 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         )
     };
 
-    feedbacks = (item: ItemObj) => {
+    feedbacks = (item: FeedbackItemObj) => {
         const sliceI = this.state.showAllFeedbacks ? 0 : -3;
 
         const singleFeedback = (feedback: FeedbackObj) => {
-            const owner = this.props.profiles.find(profile => profile.id === feedback.feedback.owner_id);
+            const owner = this.props.profiles.find(profile => profile.id === Math.abs(feedback.feedback.owner_id));
+
+            if (!owner) {
+                debugger;
+            }
 
             return (
                 <FeedbackOfFeedback
@@ -127,8 +131,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
 
 
     render() {
-        const item = this.props.item;
-        const itemProfile = this.props.itemProfile;
+        const {item, itemProfile} = this.props;
 
         return (
             <Item

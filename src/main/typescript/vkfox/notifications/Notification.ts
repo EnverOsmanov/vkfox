@@ -4,7 +4,7 @@ import Mediator from "../mediator/mediator.bg";
 import Msg from "../mediator/messages"
 import Settings from "./settings"
 import PersistentModel from "../persistent-model/persistent-model";
-import {Message} from "../chat/types";
+import {Message} from "../../vk/types";
 
 interface PopupSetting {
     enabled : boolean;

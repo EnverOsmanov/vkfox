@@ -1,6 +1,7 @@
 
 import GProfileColl, {GProfile} from "../profiles-collection/profiles-collection.bg"
 import Request from "../request/request.bg"
+import {MessagesLastActivityResponse} from "../../vk/types";
 
 class BuddiesCollection extends GProfileColl<Buddy> {
     model = Buddy;
@@ -16,16 +17,10 @@ class BuddiesCollection extends GProfileColl<Buddy> {
     }
 }
 
-interface LastActivityI {
-    online  : number // 0 or 1
-    time    : number
-}
 
 export class Buddy extends GProfile {
-    get idAttribute(): string { return "uid" }
 
     get photo(): string { return super.get("photo")}
-    get uid(): number { return super.get("uid")}
 
     get isWatched(): boolean { return super.get("isWatched")}
     set isWatched(value: boolean) { super.set("isWatched", value)}
@@ -41,17 +36,13 @@ export class Buddy extends GProfile {
     // Automatically set last activity time
     // for all watched items
 
-    parse(model: Buddy, options?: any): Buddy {
-        model.id = model.uid;
-        return model;
-    }
 
     initialize(attrs?: any) {
         super.initialize(attrs);
 
         this.on("change:isWatched",  (model: Buddy) => {
 
-            function handleResponse(response: LastActivityI): void {
+            function handleResponse(response: MessagesLastActivityResponse): void {
 
                 model.online = response.online;
                 model.lastActivityTime = response.time * 1000;
@@ -60,9 +51,9 @@ export class Buddy extends GProfile {
             }
 
             if (model.isWatched) {
-                const code = `return API.messages.getLastActivity({user_id: ${ model.uid }})`;
+                const code = `return API.messages.getLastActivity({user_id: ${ model.id }})`;
 
-                Request.api({ code })
+                Request.api<MessagesLastActivityResponse>({ code })
                     .then(handleResponse);
             }
             else model.unset("lastActivityTime");

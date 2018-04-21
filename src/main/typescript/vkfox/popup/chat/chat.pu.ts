@@ -1,30 +1,31 @@
 "use strict";
 import Request from "../../request/request.pu";
-import * as _ from "underscore";
 import Users from "../../users/users.pu";
-import * as Backbone from "backbone"
+import {Collection} from "backbone"
 import {PuChatUserProfile} from "../../chat/collections/ProfilesColl"
-import {GetHistoryParams, Message, ProfileI} from "../../chat/types";
-import {DialogI, MessageHistoryI, MessageMemo} from "./types";
+import {GetHistoryParams} from "../../chat/types";
+import {DialogI, MessageHistoryI, Speech} from "./types";
+import {UserProfile} from "../../back/users/types";
+import {Message, MessagesGetHistoryResponse} from "../../../vk/types";
 
-function getProfiles(dialog: DialogI, messages: Message[]): Promise<ProfileI[]> {
+function getProfiles(dialog: DialogI, messages: Message[]): Promise<UserProfile[]> {
+
     if (dialog.chat_active) {
         //after fetching of news profiles,
         //we must make sure that we have
         //required profile objects
         const userIds = messages
-            .slice(1)
-            .map(message => message.uid);
+            .map(message => message.user_id);
 
         return Users.getProfilesById( userIds )
     }
     else return Promise.resolve([]);
 }
 
-function buildParams(dialog: DialogI, offset: number) {
+function buildParams(dialog: DialogI) {
     const params: GetHistoryParams = {
-        offset,
-        count: 5
+        offset  : dialog.messages.length,
+        count   : 5
     };
 
     if (dialog.chat_active) params.chat_id = dialog.chat_id;
@@ -33,12 +34,14 @@ function buildParams(dialog: DialogI, offset: number) {
     return params;
 }
 
-export async function getHistory(dialog: DialogI, offset: number): Promise<MessageHistoryI> {
-    const params = buildParams(dialog, offset);
+export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
+    const params = buildParams(dialog);
 
     const code = `return  API.messages.getHistory(${ JSON.stringify(params) });`;
 
-    const messages = await Request.api<Message[]>({ code });
+    const historyR = await Request.api<MessagesGetHistoryResponse>({ code });
+
+    const messages = historyR.items;
 
     const profiles = await getProfiles(dialog, messages);
 
@@ -52,26 +55,26 @@ export async function getHistory(dialog: DialogI, offset: number): Promise<Messa
  *
  * @returns {Array}
  */
-export function foldMessagesByAuthor(messages: Message[], profilesColl: Backbone.Collection<PuChatUserProfile>) {
-    const selfProfile: ProfileI = profilesColl.findWhere({isSelf: true}).toJSON();
+export function foldMessagesByAuthor(messages: Message[], profilesColl: Collection<PuChatUserProfile>) {
+    const selfProfile: UserProfile = profilesColl.findWhere({isSelf: true}).toJSON();
 
-    function messageReducer(memo: MessageMemo[], message: Message) {
-        const lastItem = memo[memo.length - 1];
-        const author: ProfileI = message.out
+    function messageReducer(speeches: Speech[], message: Message): Speech[] {
+        const lastItem = speeches[speeches.length - 1];
+        const author: UserProfile = message.out
             ? selfProfile
-            : profilesColl.get(message.uid).toJSON();
+            : profilesColl.get(message.user_id).toJSON();
 
-        if (lastItem && (author.uid === lastItem.author.uid))
+        if (lastItem && (author.id === lastItem.author.id))
             lastItem.items.push(message);
         else {
-            memo.push({
+            speeches.push({
                 items : [message],
-                out   : author === selfProfile,
+                out   : Boolean(message.out),
                 author
             });
         }
 
-        return memo;
+        return speeches;
     }
 
     return messages.reduce(messageReducer, []);
@@ -82,8 +85,8 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: Backbone
  *
  * @param {Array} messages
  */
-export function markAsRead(messages): Promise<any> {
-    const code = `return API.messages.markAsRead({mids: [${_.pluck(messages, 'mid') }]});`;
+export function markAsRead(messages: Message[]): Promise<any> {
+    const code = `return API.messages.markAsRead({mids: [${messages.map(m => m.id) }]});`;
 
     return Request.api({code});
 }

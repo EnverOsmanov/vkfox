@@ -1,6 +1,6 @@
 import * as React from "react"
-import {ItemObj, NewsfeedData} from "../../../newsfeed/types";
 import NewsFeedItem from "./NewsFeedItem";
+import {ItemObj, NewsfeedData} from "../../../../vk/types/newsfeed";
 
 interface FeedsProps {
     data: NewsfeedData
@@ -10,11 +10,11 @@ class Feeds extends React.Component<FeedsProps, undefined> {
 
     render() {
 
-        const profiles = this.props.data.profiles;
+        const {profiles, items} = this.props.data;
 
         const singleFeedItem = (item: ItemObj) => {
 
-            const owners = profiles.find(profile => profile.id === item.source_id);
+            const owners = profiles.find(profile => profile.id === Math.abs(item.source_id));
 
             return owners
                 ?
@@ -29,7 +29,7 @@ class Feeds extends React.Component<FeedsProps, undefined> {
 
         return (
             <div>
-                {this.props.data.items.map(singleFeedItem)}
+                {items.map(singleFeedItem)}
             </div>
         )
     }

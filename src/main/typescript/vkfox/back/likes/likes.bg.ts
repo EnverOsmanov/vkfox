@@ -4,6 +4,7 @@ import * as _ from "underscore"
 import Request from '../../request/request.bg'
 import Msg from "../../mediator/messages";
 import {LikesChanged} from "../../newsfeed/types";
+import {LikesGenereicResponse} from "../../../vk/types";
 
 
 
@@ -13,8 +14,8 @@ function likesChange(params: LikesChanged) {
     delete params.action;
 
     Request
-        .api({code: 'return API.likes.' + action + '(' + JSON.stringify(params) + ');'})
-        .then(function (response) {
+        .api<LikesGenereicResponse>({code: 'return API.likes.' + action + '(' + JSON.stringify(params) + ');'})
+        .then( (response) => {
 
             Mediator.pub(Msg.LikesChanged, _.extend(params, {
                 likes: {
