@@ -11,22 +11,36 @@ import Notifications from "../notifications/notifications.bg"
 import {Profiles, ProfilesCmpn} from "../profiles-collection/profiles-collection.bg";
 import {Item, ItemColl} from "./collections/ItemColl";
 import {NotifType} from "../notifications/Notification";
-import {FeedbacksCollection
-} from "./collections/FeedBacksCollection";
+import {FeedbacksCollection} from "./collections/FeedBacksCollection";
 import Msg from "../mediator/messages";
 import {LikesChanged} from "../newsfeed/types";
 import {AccessTokenError} from "../request/models";
-import {AuthModelI} from "../auth/types";
+import {AuthModelI} from "../back/auth/types";
 import {
-    CommentsNews,
-    CommentsNewsItem,
     FeedbackObj,
-    FeedbackRS,
-    NotificationObj, ReplyCommentNotification, ReplyFeedback,
+    FeedbackObjShort,
+    FoxCommentsNewsItem,
+    ParentWithOwnerId,
+    ReplyFeedback,
     WallPostMentionFeedback
 } from "./types";
 import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../vk/types";
 import {FeedbackUnsubOptions} from "../popup/news/types";
+import {
+    CommentsNews,
+    CommentsNewsItem,
+    FeedbackRS,
+    FeedbackTypes,
+    FollowNoti,
+    FriendAcceptedNoti,
+    LikePostNoti,
+    MentionNoti,
+    NotificationObj,
+    ParentTypes,
+    PhotoFeedback,
+    PostFeedback,
+    WallPublishNoti
+} from "../../vk/types/feedback";
 
 /**
  * Responsible for "News -> My" page
@@ -170,19 +184,24 @@ function generateItemID(type: string, parent): string {
     }
 
     if (parent.owner_id) {
-        return [
-            // replace wall with post,
-            // to make correct merging items from 'notifications.get' and 'newsfeed.getComments'
-            type === 'wall' ? 'post':type,
-            parent.id || parent.pid || parent.cid || parent.post_id,
-            'user', parent.owner_id
-        ].join(':');
+
+        // replace wall with post,
+        // to make correct merging items from 'notifications.get' and 'newsfeed.getComments'
+        const f = type === 'wall'
+            ? 'post'
+            :type;
+
+        const s = ("id" in parent)
+            ? (parent as PhotoFeedback).id
+            : parent.post_id;
+
+        return `${f}:${s}:user:${parent.owner_id}`;
     }
     else return _.uniqueId(type);
 }
 
 
-function getOrCreateFeedbackItem(parentType: string, parent: FeedbackObj): Item {
+function getOrCreateFeedbackItem(parentType: string, parent: FeedbackObj | FoxCommentsNewsItem): Item {
     const itemID = generateItemID(parentType, parent);
     const itemModel = itemsColl.get(itemID);
 
@@ -216,25 +235,34 @@ function createItemModel(type: string, parent: FeedbackObj, itemID?: string): It
  * @param {Object} newsItem
  */
 function addRawCommentsItem(newsItem: CommentsNewsItem) {
-    const parent = newsItem,
-      parentType = newsItem.type;
+    const parentType = newsItem.type;
 
     let lastCommentDate: number;
 
-    function comment2Feedback(feedback: FeedbackObj) {
-        feedback.owner_id = Number(feedback.from_id);
+    function comment2Feedback(comment: any) {
+        const feedback: FeedbackObjShort = {
+            ...comment,
+            owner_id: comment.from_id
+        };
+
         return {
-            id      : generateItemID('comment', feedback),
-            type    : 'comment',
+            id      : generateItemID("comment", feedback),
+            type    : "comment",
             feedback: feedback,
-            date    : feedback.date
+            date    : comment.date
         };
     }
 
     // do nothing if no comments
     if (newsItem.comments.list && newsItem.comments.list.length) {
+        const owner_id = ("from_id" in newsItem)
+            ? (newsItem as PostFeedback).from_id
+            : newsItem.source_id;
 
-        parent.owner_id = Number(parent.from_id || parent.source_id);
+        const parent: FoxCommentsNewsItem = {
+            ...newsItem,
+            owner_id
+        };
 
         const fbItemModel = getOrCreateFeedbackItem(parentType, parent);
 
@@ -285,11 +313,10 @@ function isSupportedType(type: string): boolean {
  * @param {Object} item
  */
 function addRawNotificationsItem(item: NotificationObj): void {
-    const { feedback } = item;
 
     let parentType: string,
         feedbackType: string,
-        parent: FeedbackObj;
+        parent: ParentTypes;
 
     if (!isSupportedType(item.type)) return;
 
@@ -306,49 +333,62 @@ function addRawNotificationsItem(item: NotificationObj): void {
     if (item.type === "mention" || item.type == "wall_publish") {
         feedbackType = item.type;
         parentType   = item.type;
-        parent       = <FeedbackObj>feedback;
+        parent       = (item as MentionNoti | WallPublishNoti).feedback;
     }
     else {
         if ("parent" in item) {
             debugger;
-            parent = (item as ReplyCommentNotification).parent;
+            parent = (item as LikePostNoti).parent;
         }
         parentType = item.type;
     }
 
     if (feedbackType) {
-        parent.owner_id = Number(parent.from_id || parent.owner_id);
-        const itemID = generateItemID(parentType, parent);
+        let parentWithOwnerId: ParentWithOwnerId;
+        if ("from_id" in parent) {
+            parentWithOwnerId = {
+                ...parent,
+                owner_id: parent.from_id
+            }
+        }
+        else parentWithOwnerId = parent as ParentWithOwnerId;
+
+        const itemID = generateItemID(parentType, parentWithOwnerId);
 
         let itemModel: Item;
 
         if (!(itemModel = itemsColl.get(itemID))) {
-            itemModel = createItemModel(parentType, parent, itemID);
+            itemModel = createItemModel(parentType, (parentWithOwnerId as FeedbackObj), itemID);
             itemsColl.add(itemModel, ItemColl.addOptions);
         }
 
         if (!itemModel.has('feedbacks')) itemModel.feedbacks = new FeedbacksCollection();
 
+        const feedback: FeedbackTypes
+            = (item as MentionNoti | WallPublishNoti).feedback;
+
+        const feedbacks: FeedbackObj[] = [].concat(feedback).map( (feedback: FeedbackObj) => {
+            let id: string;
+
+            feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
+
+            if (feedbackType === 'like' || feedbackType === 'copy') {
+                // 'like' and 'post', so we need to pass 'parent'
+                // to make difference for two likes from the same user to different objects
+                id = generateItemID(feedbackType, parent);
+            }
+            else id = generateItemID(feedbackType, feedback);
+
+            return {
+                id,
+                type    : feedbackType,
+                feedback: feedback,
+                date    : item.date
+            };
+        });
+
         itemModel.feedbacks
-            .add([].concat(feedback).map( (feedback: FeedbackObj) => {
-                let id;
-
-                feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
-
-                if (feedbackType === 'like' || feedbackType === 'copy') {
-                    // 'like' and 'post', so we need to pass 'parent'
-                    // to make difference for two likes from the same user to different objects
-                    id = generateItemID(feedbackType, parent);
-                }
-                else id = generateItemID(feedbackType, feedback);
-
-                return {
-                    id      : id,
-                    type    : feedbackType,
-                    feedback: feedback,
-                    date    : item.date
-                };
-            }));
+            .add(feedbacks);
 
         if (!itemModel.has('date') || itemModel.date < item.date) itemModel.date = item.date;
 
@@ -356,7 +396,8 @@ function addRawNotificationsItem(item: NotificationObj): void {
     }
     else {
         //follows and friend_accepter types are array
-        [].concat(feedback).forEach( (feedback: FeedbackObj) => {
+        const arrayItem = (item as FriendAcceptedNoti | FollowNoti);
+        [].concat(arrayItem.feedback).forEach( (feedback: FeedbackObj) => {
 
             feedback.owner_id = Number(feedback.owner_id || feedback.from_id);
 
@@ -387,9 +428,8 @@ function fetchFeedbacks(): Promise<void> {
 
         autoUpdateNotificationsParams.start_time = autoUpdateCommentsParams.start_time = response.time;
 
-        // first item in notifications contains quantity
         if (
-            (notifications.items && notifications.items.length > 1) ||
+            (notifications.items && notifications.items.length) ||
             (newsAboutComments.items && newsAboutComments.items.length)
         ) {
             profilesColl.add(newsAboutComments.profiles, ProfilesCmpn.addOptions);

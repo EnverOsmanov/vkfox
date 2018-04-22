@@ -37,9 +37,9 @@ function buildParams(dialog: DialogI) {
 export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
     const params = buildParams(dialog);
 
-    const code = `return  API.messages.getHistory(${ JSON.stringify(params) });`;
+    const method = "messages.getHistory";
 
-    const historyR = await Request.api<MessagesGetHistoryResponse>({ code });
+    const historyR = await Request.directApi<MessagesGetHistoryResponse>(method, params);
 
     const messages = historyR.items;
 
@@ -86,9 +86,14 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: Collecti
  * @param {Array} messages
  */
 export function markAsRead(messages: Message[]): Promise<any> {
-    const code = `return API.messages.markAsRead({mids: [${messages.map(m => m.id) }]});`;
+    const message_ids = messages.map(m => m.id);
 
-    return Request.api({code});
+    const method = "messages.markAsRead";
+    const params = {
+        message_ids
+    };
+
+    return Request.directApi(method, params);
 }
 
 

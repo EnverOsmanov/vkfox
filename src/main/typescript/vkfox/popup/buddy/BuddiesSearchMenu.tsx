@@ -1,8 +1,8 @@
 import * as React from "react"
-import I18N from "../i18n/i18n";
-import {BuddiesFilters} from "./types";
-import Checkbox from "../popup/checkbox/Checkbox";
+import I18N from "../../i18n/i18n";
+import Checkbox from "../checkbox/Checkbox";
 import * as $ from "jquery"
+import {BuddiesFilters} from "./types";
 
 
 (window as any).jQuery = $;

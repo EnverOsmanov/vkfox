@@ -181,7 +181,7 @@ function freeSpace() {
         )).uniq();
 
         profilesColl.reset(profilesColl.filter(
-            model => required_uids.indexOf(model.get("id")) !== -1
+            model => required_uids.indexOf(model.id) !== -1
         ));
     }
 }

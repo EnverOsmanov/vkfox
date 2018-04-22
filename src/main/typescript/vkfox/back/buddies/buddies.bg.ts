@@ -7,7 +7,7 @@ import I18N from "../../i18n/i18n"
 import Notifications from "../../notifications/notifications.bg"
 import PersistentSet from "../persistent-set/persistent-set.bg"
 import Msg from "../../mediator/messages"
-import buddiesColl, {Buddy} from "../../buddies/buddiesColl";
+import buddiesColl, {Buddy} from "./buddiesColl";
 import {NotifType} from "../../notifications/Notification"
 import {ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
 

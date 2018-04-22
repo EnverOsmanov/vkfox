@@ -9,7 +9,7 @@ import LikesBg from "../likes/likes.bg";
 import ForceOnlineBg from "../force-online/force-online.bg";
 import LongpollBg from "../longpoll/longpoll.bg";
 import InstallPageOrLogin from "../yandex/yandex.bg";
-import Auth from "../../auth/auth.bg";
+import Auth from "../auth/auth.bg";
 import Users from "../users/users.bg";
 
 

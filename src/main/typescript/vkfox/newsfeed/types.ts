@@ -1,14 +1,15 @@
 import {Collection, Model} from "backbone";
-import {LikesObj} from "../feedbacks/types";
 import {FoxUserProfileI} from "../chat/types";
 import {ItemObj} from "../../vk/types/newsfeed";
 import {idMaker} from "../back/newsfeed/newsfeed.bg";
+import {LikesObj} from "../../vk/types/objects";
 
 
 
 
 class ItemDupl extends Model {
     parse(item) {
+        console.debug("Item Dupl", item);
         item.id = item.pid || item.nid || item.pid;
         return item;
     }

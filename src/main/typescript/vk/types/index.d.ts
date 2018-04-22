@@ -222,3 +222,29 @@ export interface MessagesGetHistoryResponse extends GenericRS<Message>{
 export interface MessagesGetByIdResponse extends GenericRS<Message>{
 
 }
+
+export interface WallCreateComment {
+    owner_id: number
+    post_id : number
+    message : string
+
+    reply_to_comment ?: number
+}
+
+export interface BoardCreateComment {
+    group_id: number
+    topic_id: number
+    message : string
+}
+
+export interface PhotosCreateComment {
+    owner_id: number
+    photo_id: number
+    message : string
+}
+
+export interface VideoCreateComment {
+    owner_id: number
+    video_id: number
+    message : string
+}

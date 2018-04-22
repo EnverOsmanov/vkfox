@@ -79,11 +79,12 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
         if (chatId) params.chat_id = chatId;
         else params.user_id = uid;
 
-        const code = `return API.messages.send(${ JSON.stringify(params) });`;
+        const method = "messages.send";
 
         Request
-            .api({ code })
-            .then(() => this.handleMessageChange(""));
+            .directApi(method, params)
+            .then(() => this.handleMessageChange(""))
+            .catch(console.error);
 
         // mark messages if not from chat
         if (params.user_id) {
@@ -117,7 +118,7 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
                     <ItemAction
                         className="fa fa-envelope"
                         title={I18N.get("Private message")}
-                        onClick={e => this.showOrHideReply()}
+                        onClick={_ => this.showOrHideReply()}
                     />
 
                     <ItemAction

@@ -2,7 +2,7 @@
 import Mediator from "../../mediator/mediator.bg"
 import Browser from "../../browser/browser.bg"
 import PersistentModel from "../../persistent-model/persistent-model"
-import Auth from "../../auth/auth.bg";
+import Auth from "../auth/auth.bg";
 import Msg from "../../mediator/messages";
 
 

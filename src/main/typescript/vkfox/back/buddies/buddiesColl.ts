@@ -1,7 +1,7 @@
 
-import GProfileColl, {GProfile} from "../profiles-collection/profiles-collection.bg"
-import Request from "../request/request.bg"
-import {MessagesLastActivityResponse} from "../../vk/types";
+import GProfileColl, {GProfile} from "../../profiles-collection/profiles-collection.bg"
+import Request from "../../request/request.bg"
+import {MessagesLastActivityResponse} from "../../../vk/types/index";
 
 class BuddiesCollection extends GProfileColl<Buddy> {
     model = Buddy;

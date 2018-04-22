@@ -3,13 +3,14 @@
 // @see http://vk.com/pages?oid=-1&p=%D0%92%D1%8B%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2_%D0%BA_API
 import ProxyMethods from '../proxy-methods/proxy-methods.bg'
 import * as _ from "underscore"
-import Auth from '../auth/auth.bg'
-import {AccessTokenError, ApiOptions, ApiQuery, ApiResponse} from "./models";
+import Auth from '../back/auth/auth.bg'
+import {AccessTokenError} from "./models";
 import {API_VERSION} from "../config/config";
+import {ApiOptions, ApiQuery, DErrorResponse, DResponse, ExecuteResponse} from "./types";
 
 const apiQueriesQueue: ApiQuery[] = [];
 
-const API_DOMAIN              = 'https://api.vk.com/';
+const API_DOMAIN              = 'https://api.vk.com';
 const API_QUERIES_PER_REQUEST = 15;
 const API_REQUESTS_DEBOUNCE   = 400;
 const REAUTH_DEBOUNCE         = 2000;
@@ -108,7 +109,7 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
     const executeCode = `return [${executeCodeTokens}];`;
 
     return Auth.getAccessToken().then( (accessToken) => {
-        function handleSuccess(data: ApiResponse) {
+        function handleSuccess(data: ExecuteResponse) {
             function rejectAll() {
                 queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
             }
@@ -160,7 +161,7 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
         const method = "execute";
 
         return Request
-            .post(`${API_DOMAIN}method/${method}`, params)
+            .post(`${API_DOMAIN}/method/${method}`, params)
             .then(handleSuccess)
             .catch(handleFailure);
     });
@@ -177,11 +178,11 @@ class Request {
     }, API_REQUESTS_DEBOUNCE);
 
     static get(url: string, data: object, dataType?: string) {
-        return xhrMy('get', url, data)
+        return xhrMy("get", url, data)
     }
 
     static post(url: string, data: object, dataType?: string) {
-        return xhrMy('post', url, data)
+        return xhrMy("post", url, data)
     }
 
     static api<R>(params: ApiOptions): Promise<R> {
@@ -190,6 +191,33 @@ class Request {
         }
         Request._processApiQueries();
         return new Promise(promisify);
+    }
+
+    static async directApi(method: string, params: object): Promise<any> {
+
+        const accessToken = await Auth.getAccessToken();
+
+        const fullParams = {
+            ...params,
+            access_token: accessToken,
+            v           : API_VERSION
+        };
+
+        const response: DResponse | DErrorResponse<object>
+            = await Request.get(`${API_DOMAIN}/method/${method}`, fullParams);
+
+        if ("response" in response) return response.response;
+        else if (response.error.error_code == 5) {
+            console.debug("[R]... Retrying", response.error.error_msg);
+            await Auth.login(true);
+
+            return Request.directApi(method, params);
+        }
+        else {
+            console.error("[R]", response.error);
+
+            return Promise.reject(new Error(`VK: ${response.error.error_msg}`))
+        }
     }
 
 }

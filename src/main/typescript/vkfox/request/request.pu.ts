@@ -14,4 +14,8 @@ export default {
         return ProxyMethods.forwardM(namespace, "api", params)
     },
 
+    directApi<R>(method: string, params: object): Promise<R> {
+        return ProxyMethods.forwardM(namespace, "directApi", method, params)
+    }
+
 };

@@ -13,7 +13,7 @@ import {Dialog, DialogColl} from "../../chat/collections/DialogColl";
 import {NotifType} from "../../notifications/Notification";
 import {LPMessage} from "../longpoll/models";
 import {ChatUserProfileColl, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
-import {AuthModelI} from "../../auth/types";
+import {AuthModelI} from "../auth/types";
 import {UserProfile} from "../users/types";
 import {
     VkDialog,

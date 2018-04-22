@@ -1,9 +1,9 @@
 "use strict";
-import PersistentModel from '../persistent-model/persistent-model'
-import {profile2Name} from "../popup/filters/filters.pu";
+import PersistentModel from '../../persistent-model/persistent-model'
+import {profile2Name} from "../filters/filters.pu";
 import {BuddiesFilters} from "./types";
-import {UserProfile} from "../back/users/types";
-import {FoxUserProfileI} from "../chat/types";
+import {UserProfile} from "../../back/users/types";
+import {FoxUserProfileI} from "../../chat/types";
 
 
 /**

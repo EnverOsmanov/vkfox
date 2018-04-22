@@ -78,11 +78,13 @@ class Browser {
 
 
     static getOrCreate(url: string): Promise<Tab> {
-        function findOrCreate(tabs: Tab[]) {
+        function findOrCreate(tabs: Tab[]): Promise<Tab> {
             const found = tabs.find( tab => tab.url.includes(url));
             if (found && !found.selected) browser.tabs.update(found.id, {active: true});
 
-            return found ? found : Browser.createTab(url)
+            return found
+                ? Promise.resolve(found)
+                : Browser.createTab(url)
         }
 
         return browser.tabs.query({})

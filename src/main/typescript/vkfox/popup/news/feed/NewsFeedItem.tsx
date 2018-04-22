@@ -12,7 +12,7 @@ import AttachmentC from "../../attachment/AttachmentC";
 import Request from "../../../request/request.pu";
 import {SendMessageI} from "../../itemActions/types";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {UserProfile} from "../../../back/users/types";
+import {GroupProfile, UserProfile} from "../../../back/users/types";
 import {
     AttachmentContainer, AttachmentPhoto, AudioItem, FriendItem,
     ItemObj,
@@ -20,12 +20,18 @@ import {
     PostItem, UserId, VideoItem,
     WallPhotoItem
 } from "../../../../vk/types/newsfeed";
-import {GenericRS} from "../../../../vk/types";
+import {
+    BoardCreateComment,
+    GenericRS,
+    PhotosCreateComment,
+    VideoCreateComment,
+    WallCreateComment
+} from "../../../../vk/types";
 
 
 interface NewsFeedItemProps {
     item    : ItemObj
-    owners  : UserProfile
+    owner  : UserProfile | GroupProfile
     profiles: UserProfile[]
 }
 
@@ -50,36 +56,56 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     }
 
     static onReply(scope: SendMessageI, message: string): Promise<void> {
-        const params: any = {};
         let method: string;
+        let params: WallCreateComment | BoardCreateComment | PhotosCreateComment | VideoCreateComment;
 
         switch (scope.type) {
             case 'wall':
             case 'post':
-                params.owner_id = scope.ownerId;
-                params.post_id = scope.id;
-                method = 'wall.addComment';
-                params.text = message;
+                const wallP: WallCreateComment = {
+                    owner_id: scope.ownerId,
+                    post_id : scope.id,
+                    message
+                };
                 if (scope.replyTo) {
-                    params.reply_to_cid = scope.replyTo;
+
+                    wallP.reply_to_comment = scope.replyTo;
                 }
+
+                params = wallP;
+                method = "wall.createComment";
                 break;
+
             case 'topic':
-                params.gid = Math.abs(scope.ownerId);
-                params.tid = scope.id;
-                params.text = message;
-                method = 'board.addComment';
+                const topicP: BoardCreateComment = {
+                    group_id: Math.abs(scope.ownerId),
+                    topic_id: scope.id,
+                    message
+                };
+
+                params = topicP;
+                method = 'board.createComment';
                 break;
+
             case 'photo':
-                params.oid = scope.ownerId;
-                params.pid = scope.id;
-                params.message = message;
+                const photosP: PhotosCreateComment = {
+                    owner_id: Math.abs(scope.ownerId),
+                    photo_id: scope.id,
+                    message
+                };
+
+                params = photosP;
                 method = 'photos.createComment';
                 break;
+
             case 'video':
-                params.owner_id = scope.ownerId;
-                params.video_id = scope.id;
-                params.message = message;
+                const videoP: VideoCreateComment = {
+                    owner_id: Math.abs(scope.ownerId),
+                    video_id: scope.id,
+                    message
+                };
+
+                params = videoP;
                 method = 'video.createComment';
                 break;
 
@@ -88,9 +114,8 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         }
 
         if (method) {
-            const code = `return API.${ method }(${ JSON.stringify(params) });`;
 
-            return Request.api<void>({ code })
+            return Request.directApi<void>(method, params)
                 .catch(err => console.error("Couldn't send message", err));
         }
         else return Promise.resolve();
@@ -108,16 +133,15 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     sendMessage = () => {
         this.showOrHideReply();
 
-        const ownerId = this.props.owners.id;
-        const item = this.props.item;
+        const {item, owner} = this.props;
 
         if ("post_id" in item) {
             const postItem = item as PostItem;
 
             const scope: SendMessageI = {
-                type: postItem.type,
-                id  : postItem.post_id,
-                ownerId
+                type    : postItem.type,
+                id      : postItem.post_id,
+                ownerId : postItem.source_id
             };
 
             return NewsFeedItem.onReply(scope, this.state.message)
@@ -320,11 +344,11 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
 
     render() {
-        const {item, owners} = this.props;
+        const {item, owner} = this.props;
 
         return (
             <Item
-                owners={owners}
+                owners={owner}
                 reply={this.state.reply}
                 sendMessage={() => this.sendMessage()}
                 handleMessageChange={this.handleMessageChange}>

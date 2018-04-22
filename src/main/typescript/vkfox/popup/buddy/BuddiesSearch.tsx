@@ -1,5 +1,5 @@
 import * as React from "react"
-import I18N from "../i18n/i18n";
+import I18N from "../../i18n/i18n";
 import BuddiesSearchMenu from "./BuddiesSearchMenu";
 import {BuddiesFilters} from "./types";
 

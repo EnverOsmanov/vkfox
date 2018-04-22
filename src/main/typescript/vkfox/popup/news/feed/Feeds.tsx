@@ -21,7 +21,7 @@ class Feeds extends React.Component<FeedsProps, undefined> {
                 <NewsFeedItem
                     key={item.id}
                     item={item}
-                    owners={owners}
+                    owner={owners}
                     profiles={profiles}
                 />
                 : null

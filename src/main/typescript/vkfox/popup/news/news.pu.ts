@@ -33,15 +33,17 @@ export function unsubscribe(type, ownerId, itemId) {
 export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
     const { parent } = item;
 
+    console.debug("NewsPu", item.type, (parent as any).id, parent);
+
     switch (item.type) {
         case 'wall':
         case 'post':
         case 'mention':
-            const wpmParent = <WallPostMentionFeedback>parent;
+            const wpmParent = parent as WallPostMentionFeedback;
             if (wpmParent.comments.can_post) {
                 return {
                     ownerId: wpmParent.source_id || wpmParent.owner_id,
-                    id     : wpmParent.id || wpmParent.post_id,
+                    id     : (wpmParent as any).id || wpmParent.post_id,
                     type   : 'post'
                 };
             }
@@ -49,10 +51,11 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
         case 'comment':
             const cmmntParent = <PostFeedback>parent;
             if (cmmntParent.post && cmmntParent.post.comments.can_post) {
+                const post = cmmntParent.post as PostFeedback;
                 return {
-                    ownerId: cmmntParent.post.from_id,
-                    id     : cmmntParent.post.id,
-                    replyTo: cmmntParent.id,
+                    ownerId: post.from_id,
+                    id     : post.id,
+                    replyTo: (cmmntParent as any).id,
                     type   : 'post'
                 };
             }
@@ -73,21 +76,21 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
             const topicParent = <TopicFeedback>parent;
             return {
                 ownerId: topicParent.owner_id,
-                id     : topicParent.id || topicParent.tid || topicParent.post_id,
+                id     : topicParent.post_id,
                 type   : 'topic'
             };
         case 'photo':
             const phParent = <PhotoFeedback>parent;
             return {
                 ownerId: phParent.owner_id,
-                id     : phParent.id || phParent.pid,
+                id     : phParent.id,
                 type   : 'photo'
             };
         case 'video':
             const viParent = <VideoFeedback>parent;
             return {
                 ownerId: viParent.owner_id,
-                id     : viParent.id || viParent.vid,
+                id     : viParent.id,
                 type   : 'video'
             };
     }

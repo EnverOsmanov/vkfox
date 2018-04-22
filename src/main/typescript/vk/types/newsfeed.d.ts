@@ -1,7 +1,6 @@
-import {FoxUserProfileI} from "../../vkfox/chat/types";
-import {LikesObj} from "../../vkfox/feedbacks/types";
 import {ProfileI, UserProfile} from "../../vkfox/back/users/types";
 import {GenericRS} from "./index";
+import {LikesObj} from "./objects";
 
 export interface ItemObj {
     id      ?: string;
@@ -90,7 +89,7 @@ export interface AttachmentContainer {
     type: string
 }
 
-export interface AttachmentPhoto {
+export interface AttachmentPhoto extends Attachment {
     id          : number
     owner_id    : number
     date        : number

@@ -1,12 +1,12 @@
 import * as React from "react"
-import Mediator from "../mediator/mediator.pu"
-import Msg from "../mediator/messages"
+import Mediator from "../../mediator/mediator.pu"
+import Msg from "../../mediator/messages"
 import {buddiesFilter, initBuddiesFilter} from "./buddies.pu"
-import BuddyItem from "../popup/buddy/BuddyItem";
+import BuddyItem from "./BuddyItem";
 import BuddiesSearch from "./BuddiesSearch";
+import ItemList from "../item-list/ItemList";
+import {FoxUserProfileI} from "../../chat/types";
 import {BuddiesFilters} from "./types";
-import ItemList from "../popup/item-list/ItemList";
-import {FoxUserProfileI} from "../chat/types";
 
 
 interface BuddiesState {

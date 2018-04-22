@@ -1,11 +1,15 @@
-import {GroupProfile, UserProfile} from "../back/users/types";
-import {Attachment, AttachmentContainer} from "../../vk/types/newsfeed";
+import {UserProfile} from "../back/users/types";
+import {Attachment, AttachmentContainer, CanPostable, PhotoItem, VideoItem} from "../../vk/types/newsfeed";
+import {LikesObj} from "../../vk/types/objects";
+import {
+    CommentsNewsItem,
+    CopyItem,
+    FeedbackComment,
+    ParentComment,
+    PorFPostItem,
+    TopicItem
+} from "../../vk/types/feedback";
 
-
-export interface LikesObj {
-    count: number
-    user_likes: number
-}
 
 export interface NewsLikesObj extends LikesObj {
     can_like   : number
@@ -16,7 +20,7 @@ export interface FeedbackObj extends Attachment{
     owner_id?: number
     from_id ?: number
     date     : number
-    likes    : LikesObj
+    likes    ?: LikesObj
 
     type: string
 
@@ -25,9 +29,8 @@ export interface FeedbackObj extends Attachment{
 }
 
 export interface WallPostMentionFeedback extends FeedbackObj {
-    comments    : CNewsCommentObj
+    comments    : CanPostable
     source_id?  : number
-    id          ?: number
     post_id     : number
     text        : string
 
@@ -45,88 +48,66 @@ interface TopicObj {
     is_closed: boolean
 }
 
+interface CommentsNewsItemWithId extends CommentsNewsItem {
+    id: number
+}
+
 export interface PostFeedback extends FeedbackObj {
-    post?: CommentsNewsItem
+    post?: CommentsNewsItemWithId
     id   : number
     topic?: TopicObj
 }
 
 export interface TopicFeedback extends FeedbackObj {
-    id     ?: number
-    tid    ?: number
+    source_id: number
     post_id : number
     text    : string
 }
 
 export interface PhotoFeedback extends FeedbackObj {
-    id     ?: number
-    pid     : number
+    id: number
 }
 
 export interface VideoFeedback extends FeedbackObj {
-    id     ?: number
-    vid     : number
+    id: number
 }
 
 export interface FeedbackObjShort {
-    owner_id: number
+    owner_id?: number
 
 
     // added by VKfox ?
     attachments ?: AttachmentContainer[]
 }
 
-export interface NotificationObj {
-    type    : string
-    feedback: FeedbackObj | FeedbackObjShort[]
-    date    : number
+
+export interface FoxCommentsNewsItem extends CommentsNewsItem {
+    owner_id: number
 }
 
-interface MentionNotification extends  NotificationObj {
-    // type = "mention"
+export interface IdGeneretable {
+    owner_id    ?: number
+    id          ?: number
+    post_id     ?: number
 }
 
-export interface ReplyCommentNotification extends NotificationObj {
-    parent  : FeedbackObj
+interface WithOwnerId {
+    owner_id: number
 }
 
-interface CNewsCommentObj {
-    count: number
-    can_post: number
+export type ParentWithOwnerId =
+    PostWithOwnerId |
+    PhotoWithOwnerId |
+    VideoWithOwnerId |
+    ParentComment |
+    TopicWithOwnerId
 
-    list: FeedbackObj[]
-}
+export interface PostWithOwnerId extends PorFPostItem, WithOwnerId {}
+export interface PhotoWithOwnerId extends PhotoItem, WithOwnerId {}
+export interface VideoWithOwnerId extends VideoItem, WithOwnerId {}
+export interface TopicWithOwnerId extends TopicItem, WithOwnerId {}
 
-export interface CommentsNewsItem {
-    id          : number;
-    type        : string
-    from_id    ?: number
-    source_id   : number
-    likes       : NewsLikesObj
-
-
-    comments    : CNewsCommentObj
-    owner_id   ?: number
-    date        : number
-
-}
-
-interface Notifications {
-    items   : NotificationObj[]
-
-    profiles: UserProfile[]
-    groups  : GroupProfile[]
-}
-
-export interface CommentsNews {
-    items: CommentsNewsItem[]
-
-    profiles: UserProfile[]
-    groups: GroupProfile[]
-}
-
-export interface FeedbackRS {
-    notifications: Notifications
-    comments     : CommentsNews | boolean
-    time         : number
-}
+export type FeedbackType =
+    PorFPostItem |
+    FeedbackComment |
+    UserProfile[] | CopyItem[]
