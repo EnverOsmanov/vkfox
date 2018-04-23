@@ -1,5 +1,5 @@
 import {UserProfile} from "../back/users/types";
-import {Attachment, AttachmentContainer, CanPostable, PhotoItem, VideoItem} from "../../vk/types/newsfeed";
+import {Attachment, AttachmentContainer, CanPostable, PhotoItem, PostItem, VideoItem} from "../../vk/types/newsfeed";
 import {LikesObj} from "../../vk/types/objects";
 import {
     CommentsNewsItem,
@@ -16,11 +16,10 @@ export interface NewsLikesObj extends LikesObj {
     can_publish: number
 }
 
-export interface FeedbackObj extends Attachment{
+export interface FeedbackObj {
     owner_id?: number
     from_id ?: number
     date     : number
-    likes    ?: LikesObj
 
     type: string
 
@@ -28,13 +27,17 @@ export interface FeedbackObj extends Attachment{
     feedback?: FeedbackObjShort;
 }
 
-export interface WallPostMentionFeedback extends FeedbackObj {
+export interface WallMentionFeedback extends FeedbackObj {
     comments    : CanPostable
     source_id?  : number
     post_id     : number
     text        : string
 
     attachments : AttachmentContainer[]
+}
+
+export interface PostParent extends FeedbackObj, PostItem {
+    can_delete: number
 }
 
 export interface ReplyFeedback extends FeedbackObj {
@@ -52,7 +55,7 @@ interface CommentsNewsItemWithId extends CommentsNewsItem {
     id: number
 }
 
-export interface PostFeedback extends FeedbackObj {
+export interface PostFeedbackNot extends FeedbackObj {
     post?: CommentsNewsItemWithId
     id   : number
     topic?: TopicObj
@@ -62,6 +65,7 @@ export interface TopicFeedback extends FeedbackObj {
     source_id: number
     post_id : number
     text    : string
+    likes       : LikesObj
 }
 
 export interface PhotoFeedback extends FeedbackObj {

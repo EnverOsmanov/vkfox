@@ -5,12 +5,13 @@ import Msg from "../../mediator/messages"
 
 import {
     PhotoFeedback,
-    PostFeedback,
+    PostFeedbackNot,
+    PostParent,
     TopicFeedback,
     VideoFeedback,
-    WallPostMentionFeedback
+    WallMentionFeedback
 } from "../../feedbacks/types";
-import {FeedbackItemObj, FeedbackUnsubOptions} from "./types";
+import {FeedbackItemObj} from "./types";
 
 export interface CommentsDataI {
     ownerId : number,
@@ -30,16 +31,18 @@ export function unsubscribe(type, ownerId, itemId) {
     Mediator.pub(Msg.FeedbacksUnsubscribe, options);
 }
 
-export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
+export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefined {
     const { parent } = item;
 
-    console.debug("NewsPu", item.type, (parent as any).id, parent);
+    if (item.type !== "post" && item.type !== "topic") {
+        console.debug("NewsPu", item.type, (parent as any).id, parent);
+    }
 
     switch (item.type) {
         case 'wall':
         case 'post':
         case 'mention':
-            const wpmParent = parent as WallPostMentionFeedback;
+            const wpmParent = (parent as WallMentionFeedback | PostParent);
             if (wpmParent.comments.can_post) {
                 return {
                     ownerId: wpmParent.source_id || wpmParent.owner_id,
@@ -47,11 +50,12 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
                     type   : 'post'
                 };
             }
-            break;
+            else return;
+
         case 'comment':
-            const cmmntParent = <PostFeedback>parent;
+            const cmmntParent = <PostFeedbackNot>parent;
             if (cmmntParent.post && cmmntParent.post.comments.can_post) {
-                const post = cmmntParent.post as PostFeedback;
+                const post = cmmntParent.post as PostFeedbackNot;
                 return {
                     ownerId: post.from_id,
                     id     : post.id,
@@ -66,18 +70,20 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
                 });
             }
             else {
-                return ['photo', 'video']
+                const a = ['photo', 'video']
                     .filter(Object.hasOwnProperty, parent)
                     .map(function (type) {
                         return this.getSourceLink({type: type, parent: parent[type]});
                     }, this)[0];
+
+                return a;
             }
-        case 'topic':
-            const topicParent = <TopicFeedback>parent;
+        case "topic":
+            const topicParent = parent as TopicFeedback;
             return {
                 ownerId: topicParent.owner_id,
                 id     : topicParent.post_id,
-                type   : 'topic'
+                type   : "topic"
             };
         case 'photo':
             const phParent = <PhotoFeedback>parent;
@@ -93,6 +99,9 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI {
                 id     : viParent.id,
                 type   : 'video'
             };
+
+            default:
+                console.warn("Unknown feedback type", item.type)
     }
 }
 
@@ -111,7 +120,7 @@ export function getSourceLink(item): string {
             return ['post', 'topic', 'photo', 'video']
                 .filter(Object.hasOwnProperty, parent)
                 .map(function (type) {
-                    const parentLink = this.getSourceLink({type: type, parent: parent[type]});
+                    const parentLink = getSourceLink({type: type, parent: parent[type]});
                     // replace query params
                     return parentLink.replace(/\?[^?]+$/, '?reply=' + item.parent.id);
                 }, this)[0];

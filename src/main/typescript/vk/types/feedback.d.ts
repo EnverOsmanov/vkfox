@@ -25,12 +25,11 @@ interface CommentReply {
 }
 
 interface WithLikes {
-    from_id : number
     likes   : LikesObj
 }
 
 export interface CommentFromNews extends Comment, WithLikes {
-
+    from_id : number
 }
 
 interface FeedbackComment extends Comment, CommentReply {}
@@ -194,15 +193,15 @@ export interface CommentsNewsItem {
     post_id     : number
 }
 
-interface TopicFeedback extends CommentsNewsItem {
+interface TopicCommentN extends CommentsNewsItem {
     // type = "topic"
 }
 
-export interface PhotoFeedback extends CommentsNewsItem, AttachmentPhoto {
+export interface PhotoCommentN extends CommentsNewsItem, AttachmentPhoto {
     // type = "photo"
 }
 
-export interface PostFeedback extends CommentsNewsItem {
+export interface PostCommentN extends CommentsNewsItem {
     // type = "post"
 
     from_id: number

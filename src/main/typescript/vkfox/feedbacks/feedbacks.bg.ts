@@ -20,9 +20,9 @@ import {
     FeedbackObj,
     FeedbackObjShort,
     FoxCommentsNewsItem,
-    ParentWithOwnerId,
-    ReplyFeedback,
-    WallPostMentionFeedback
+    ParentWithOwnerId, PostParent,
+    ReplyFeedback, TopicFeedback,
+    WallMentionFeedback
 } from "./types";
 import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../vk/types";
 import {FeedbackUnsubOptions} from "../popup/news/types";
@@ -37,9 +37,9 @@ import {
     MentionNoti,
     NotificationObj,
     ParentTypes,
-    PhotoFeedback,
-    PostFeedback,
-    WallPublishNoti
+    PhotoCommentN,
+    PostCommentN,
+    WallPublishNoti, WithLikes
 } from "../../vk/types/feedback";
 
 /**
@@ -130,7 +130,7 @@ function onLikesChanged(params: LikesChanged) {
         changedModel          = itemsColl.get(changedItemUniqueId);
 
     if (changedModel) {
-        changedModel.parent.likes = params.likes;
+        (changedModel.parent as PostParent | TopicFeedback).likes = params.likes;
         itemsColl.trigger('change');
     }
 }
@@ -192,7 +192,7 @@ function generateItemID(type: string, parent): string {
             :type;
 
         const s = ("id" in parent)
-            ? (parent as PhotoFeedback).id
+            ? (parent as PhotoCommentN).id
             : parent.post_id;
 
         return `${f}:${s}:user:${parent.owner_id}`;
@@ -256,7 +256,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
     // do nothing if no comments
     if (newsItem.comments.list && newsItem.comments.list.length) {
         const owner_id = ("from_id" in newsItem)
-            ? (newsItem as PostFeedback).from_id
+            ? (newsItem as PostCommentN).from_id
             : newsItem.source_id;
 
         const parent: FoxCommentsNewsItem = {
@@ -490,7 +490,7 @@ function tryNotification() {
 
     // Don't show self messages
     if (ownerId !== userId) {
-        const profile = profilesColl.get(ownerId).toJSON();
+        const profile = profilesColl.get(Math.abs(ownerId)).toJSON();
         const name = User.getName(profile);
         const gender = profile.sex === 1 ? "female" : "male";
 
@@ -504,11 +504,11 @@ function tryNotification() {
                 break;
             case 'mention':
                 title = makeTitle(I18N.get('mentioned you', { GENDER: gender }));
-                message = (<WallPostMentionFeedback>notificationItem).text;
+                message = (<WallMentionFeedback>notificationItem).text;
                 break;
             case 'wall':
                 title = makeTitle(I18N.get('posted on your wall', { GENDER: gender }));
-                message = (<WallPostMentionFeedback>notificationItem).text;
+                message = (<WallMentionFeedback>notificationItem).text;
                 break;
             case 'like':
                 title = makeTitle(I18N.get('liked your ' + parentType, { GENDER: gender }));

@@ -219,9 +219,7 @@ export interface MessagesGetHistoryResponse extends GenericRS<Message>{
     unread  : number
 }
 
-export interface MessagesGetByIdResponse extends GenericRS<Message>{
-
-}
+export type MessagesGetByIdResponse = GenericRS<Message> | boolean
 
 export interface WallCreateComment {
     owner_id: number

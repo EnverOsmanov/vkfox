@@ -7,7 +7,7 @@ import MyFeedbackActions from "./MyFeedbackActions";
 import FeedbackOfFeedback from "./FeedbackOfFeedback";
 import {SendMessageI} from "../../itemActions/types";
 import NewsFeedItem from "../feed/NewsFeedItem";
-import {FeedbackObj, WallPostMentionFeedback} from "../../../feedbacks/types";
+import {FeedbackObj, WallMentionFeedback} from "../../../feedbacks/types";
 import {GroupProfile, UserProfile} from "../../../back/users/types";
 import {FeedbackItemObj} from "../types";
 
@@ -69,7 +69,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
 
         const item = this.props.item;
         if (item.parent.type == "post") {
-            const parent = item.parent as WallPostMentionFeedback;
+            const parent = item.parent as WallMentionFeedback;
 
             const scope: SendMessageI = {
                 type    : item.type,

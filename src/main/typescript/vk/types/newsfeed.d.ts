@@ -1,6 +1,6 @@
 import {ProfileI, UserProfile} from "../../vkfox/back/users/types";
 import {GenericRS} from "./index";
-import {LikesObj} from "./objects";
+import {WithLikes} from "./feedback";
 
 export interface ItemObj {
     id      ?: string;
@@ -10,12 +10,10 @@ export interface ItemObj {
 }
 
 
-
-export interface PostItem extends ItemObj {
+export interface PostItem extends ItemObj, WithLikes {
     text       ?: string
     attachments?: AttachmentContainer[]
     comments    : CanPostable
-    likes       : LikesObj
 
     post_id     : number
     post_type   : string
@@ -61,7 +59,7 @@ export interface NewsfeedData {
 
 
 interface CanPostable {
-    can_post: boolean
+    can_post: number
 }
 
 interface UserMeta {

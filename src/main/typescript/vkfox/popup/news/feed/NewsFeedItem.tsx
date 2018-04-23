@@ -256,7 +256,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                         type={itemPost.type}
                         ownerId={itemPost.source_id}
                         id={itemPost.post_id}
-                        showIf={itemPost.comments.can_post}
+                        showIf={itemPost.comments.can_post === 1}
                         showOrHideReply={this.showOrHideReply}
                     />
 

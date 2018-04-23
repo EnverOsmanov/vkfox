@@ -16,11 +16,12 @@ import {ChatUserProfileColl, ProfilesCmpn} from "../../profiles-collection/profi
 import {AuthModelI} from "../auth/types";
 import {UserProfile} from "../users/types";
 import {
-    VkDialog,
+    GenericRS,
+    Message,
+    MessagesGetByIdResponse,
     MessagesGetDialogsResponse,
     MessagesGetHistoryResponse,
-    Message,
-    MessageHistory, MessagesGetByIdResponse
+    VkDialog
 } from "../../../vk/types";
 import {DialogI} from "../../popup/chat/types";
 
@@ -302,11 +303,12 @@ function addNewMessage(update: LPMessage) {
         messageDeferred = Promise.resolve(rs);
     }
     else {
-        const code = `return API.messages.getById({chat_active: 1, mid: ${messageId}});`;
+        const code = `return API.messages.getById({chat_active: 1, message_ids: [${messageId}]});`;
         messageDeferred = Request.api<MessagesGetByIdResponse>({ code });
     }
 
-    messageDeferred.then( (response) => {
+    function handleMessage(response: GenericRS<Message>) {
+
         const message: Message = response.items[0];
         const dialogId = message.chat_id
             ? 'chat_id_' + message.chat_id
@@ -331,7 +333,17 @@ function addNewMessage(update: LPMessage) {
             dialogColl.trigger('change');
             return message;
         });
-    }).catch(e => console.error(`Error during AddNewMessage`, e));
+    }
+
+    function handleResponse(response: MessagesGetByIdResponse): Promise<Message> {
+        return response
+            ? handleMessage(response as GenericRS<Message>)
+            : Promise.reject(new Error("VK response sucks, maybe I used incorrect parameters :("))
+    }
+
+    messageDeferred
+        .then(handleResponse)
+        .catch(e => console.error(`Error during AddNewMessage`, e));
 }
 
 

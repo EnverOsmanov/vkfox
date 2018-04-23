@@ -6,7 +6,7 @@ import I18N from "../../../i18n/i18n";
 import ItemAction from "../../itemActions/ItemAction";
 import ItemActionComment from "../../itemActions/ItemActionComment";
 import ItemActionLike from "../../itemActions/ItemActionLike";
-import {FeedbackObj} from "../../../feedbacks/types";
+import {FeedbackObj, PostParent, TopicFeedback} from "../../../feedbacks/types";
 import {FeedbackItemObj} from "../types";
 
 
@@ -34,14 +34,14 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, undefine
     };
 
     actionLike = (comment: CommentsDataI, parent: FeedbackObj) => {
-        if (comment)
+        if ("likes" in parent)
             return (
                 <ItemActionLike
                     hidden={!comment}
                     type={comment.type}
                     ownerId={comment.ownerId}
                     itemId={comment.id}
-                    likes={parent.likes}
+                    likes={(parent as PostParent | TopicFeedback).likes}
                 />
             )
     };
@@ -61,25 +61,29 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, undefine
     };
 
     render() {
-        const item = this.props.item;
+        const {item} = this.props;
         const comment = getCommentsData(item);
         const parent = item.parent;
 
-        return (
-            <ItemActions>
+        if (comment) {
 
-                <i
-                    onClick={() => unsubscribe(comment.type, comment.ownerId, comment.id)}
-                    title={Capitalize(I18N.get("unsubscribe"))}
-                    className="item__action fa fa-ban"
-                />
+            return (
+                <ItemActions>
 
-                {this.actionOpenLink()}
-                {this.actionComment(comment)}
-                {this.actionLike(comment, parent)}
+                    <i
+                        onClick={() => unsubscribe(comment.type, comment.ownerId, comment.id)}
+                        title={Capitalize(I18N.get("unsubscribe"))}
+                        className="item__action fa fa-ban"
+                    />
 
-            </ItemActions>
-        )
+                    {this.actionOpenLink()}
+                    {this.actionComment(comment)}
+                    {this.actionLike(comment, parent)}
+
+                </ItemActions>
+            )
+        }
+        else return null;
     }
 }
 

@@ -4,7 +4,7 @@ import * as React from "react"
 import AttachmentC from "../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {TopicFeedback, WallPostMentionFeedback} from "../../../feedbacks/types";
+import {TopicFeedback, WallMentionFeedback} from "../../../feedbacks/types";
 import {FeedbackItemObj} from "../types";
 
 
@@ -15,7 +15,7 @@ interface MyFeedbackPostProps {
 class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
 
     postCommentOrWallElm = (item: FeedbackItemObj) => {
-        const postParent = item.parent as WallPostMentionFeedback;
+        const postParent = item.parent as WallMentionFeedback;
         const attachments = postParent.attachments
             ? postParent.attachments.map((attachment, i) => {
                     return (
@@ -53,7 +53,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, undefined> {
                 return <RectifyPu text={topicParent.text} hasEmoji={false}/>;
 
             case "mention":
-                const mentionParent = item.parent as WallPostMentionFeedback;
+                const mentionParent = item.parent as WallMentionFeedback;
                 return <RectifyPu text={mentionParent.text} hasEmoji={false}/>;
 
             case "follow":
