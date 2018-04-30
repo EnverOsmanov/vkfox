@@ -6,7 +6,7 @@ interface InstallStepTextProps {
     mainText: string
 }
 
-export default class InstallStepText extends React.Component<InstallStepTextProps, undefined> {
+export default class InstallStepText extends React.Component<InstallStepTextProps, object> {
 
 
     render() {

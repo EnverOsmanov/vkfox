@@ -9,24 +9,23 @@ import ItemAction from "../../itemActions/ItemAction";
 import ItemActions from "../../itemActions/ItemActions";
 import {addVKBase, profile2Name} from "../../filters/filters.pu";
 import AttachmentC from "../../attachment/AttachmentC";
-import Request from "../../../request/request.pu";
 import {SendMessageI} from "../../itemActions/types";
 import RectifyPu from "../../../rectify/rectify.pu";
 import {GroupProfile, UserProfile} from "../../../back/users/types";
 import {
-    AttachmentContainer, AttachmentPhoto, AudioItem, FriendItem,
+    AttachmentContainer,
+    AttachmentPhoto,
+    AudioItem,
+    FriendItem,
     ItemObj,
     PhotoTagItem,
-    PostItem, UserId, VideoItem,
+    PostItem,
+    UserId,
+    VideoItem,
     WallPhotoItem
 } from "../../../../vk/types/newsfeed";
-import {
-    BoardCreateComment,
-    GenericRS,
-    PhotosCreateComment,
-    VideoCreateComment,
-    WallCreateComment
-} from "../../../../vk/types";
+import {GenericRS} from "../../../../vk/types";
+import {onReply} from "../news.pu";
 
 
 interface NewsFeedItemProps {
@@ -55,71 +54,6 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         };
     }
 
-    static onReply(scope: SendMessageI, message: string): Promise<void> {
-        let method: string;
-        let params: WallCreateComment | BoardCreateComment | PhotosCreateComment | VideoCreateComment;
-
-        switch (scope.type) {
-            case 'wall':
-            case 'post':
-                const wallP: WallCreateComment = {
-                    owner_id: scope.ownerId,
-                    post_id : scope.id,
-                    message
-                };
-                if (scope.replyTo) {
-
-                    wallP.reply_to_comment = scope.replyTo;
-                }
-
-                params = wallP;
-                method = "wall.createComment";
-                break;
-
-            case 'topic':
-                const topicP: BoardCreateComment = {
-                    group_id: Math.abs(scope.ownerId),
-                    topic_id: scope.id,
-                    message
-                };
-
-                params = topicP;
-                method = 'board.createComment';
-                break;
-
-            case 'photo':
-                const photosP: PhotosCreateComment = {
-                    owner_id: Math.abs(scope.ownerId),
-                    photo_id: scope.id,
-                    message
-                };
-
-                params = photosP;
-                method = 'photos.createComment';
-                break;
-
-            case 'video':
-                const videoP: VideoCreateComment = {
-                    owner_id: Math.abs(scope.ownerId),
-                    video_id: scope.id,
-                    message
-                };
-
-                params = videoP;
-                method = 'video.createComment';
-                break;
-
-            default:
-                console.warn("Unknown newsfeed type", scope.type);
-        }
-
-        if (method) {
-
-            return Request.directApi<void>(method, params)
-                .catch(err => console.error("Couldn't send message", err));
-        }
-        else return Promise.resolve();
-    }
 
     handleMessageChange = (message: string) => {
         this.setState(prevState => {
@@ -144,7 +78,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 ownerId : postItem.source_id
             };
 
-            return NewsFeedItem.onReply(scope, this.state.message)
+            return onReply(scope, this.state.message)
                 .then(() => this.handleMessageChange(""))
                 .catch(err => console.error("Couldn't send message", err));
         }

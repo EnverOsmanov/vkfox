@@ -9,7 +9,7 @@ interface InstallControlsProps {
     onButtonClick(makeAuth?: boolean): void
 }
 
-export default class InstallControls extends React.Component<InstallControlsProps, undefined> {
+export default class InstallControls extends React.Component<InstallControlsProps, object> {
 
 
     render() {

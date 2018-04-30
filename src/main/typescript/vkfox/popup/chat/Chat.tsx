@@ -16,7 +16,7 @@ interface ChatState {
     profilesColl: Collection<PuChatUserProfile>
 }
 
-class ChatPage extends React.Component<undefined, ChatState> {
+class ChatPage extends React.Component<object, ChatState> {
 
     constructor(props) {
         super(props);

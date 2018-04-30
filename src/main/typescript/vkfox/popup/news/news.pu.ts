@@ -4,14 +4,17 @@ import Mediator from '../../mediator/mediator.pu'
 import Msg from "../../mediator/messages"
 
 import {
+    ParentObjPost,
     PhotoFeedback,
-    PostFeedbackNot,
-    PostParent,
+    ParentObjComment,
     TopicFeedback,
     VideoFeedback,
-    WallMentionFeedback
+    WallMentionFeedback, CommentsNewsItemWithId
 } from "../../feedbacks/types";
 import {FeedbackItemObj} from "./types";
+import Request from "../../request/request.pu";
+import {BoardCreateComment, PhotosCreateComment, VideoCreateComment, WallCreateComment} from "../../../vk/types";
+import {SendMessageI} from "../itemActions/types";
 
 export interface CommentsDataI {
     ownerId : number,
@@ -34,18 +37,14 @@ export function unsubscribe(type, ownerId, itemId) {
 export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefined {
     const { parent } = item;
 
-    if (item.type !== "post" && item.type !== "topic") {
-        console.debug("NewsPu", item.type, (parent as any).id, parent);
-    }
-
     switch (item.type) {
         case 'wall':
         case 'post':
         case 'mention':
-            const wpmParent = (parent as WallMentionFeedback | PostParent);
+            const wpmParent = (parent as WallMentionFeedback | ParentObjPost);
             if (wpmParent.comments.can_post) {
                 return {
-                    ownerId: wpmParent.source_id || wpmParent.owner_id,
+                    ownerId: wpmParent.source_id || (wpmParent as ParentObjPost).owner_id,
                     id     : (wpmParent as any).id || wpmParent.post_id,
                     type   : 'post'
                 };
@@ -53,9 +52,9 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefine
             else return;
 
         case 'comment':
-            const cmmntParent = <PostFeedbackNot>parent;
+            const cmmntParent = <ParentObjComment>parent;
             if (cmmntParent.post && cmmntParent.post.comments.can_post) {
-                const post = cmmntParent.post as PostFeedbackNot;
+                const post = cmmntParent.post as CommentsNewsItemWithId;
                 return {
                     ownerId: post.from_id,
                     id     : post.id,
@@ -136,5 +135,73 @@ export function getSourceLink(item): string {
                 + '_' + (parent.id || parent.vid);
     }
 }
+
+export function onReply(scope: SendMessageI, message: string): Promise<void> {
+    let method: string;
+    let params: WallCreateComment | BoardCreateComment | PhotosCreateComment | VideoCreateComment;
+
+    switch (scope.type) {
+        case "comment":
+        case 'wall':
+        case 'post':
+            const wallP: WallCreateComment = {
+                owner_id: scope.ownerId,
+                post_id: scope.id,
+                message
+            };
+            if (scope.replyTo) {
+
+                wallP.reply_to_comment = scope.replyTo;
+            }
+
+            params = wallP;
+            method = "wall.createComment";
+            break;
+
+        case 'topic':
+            const topicP: BoardCreateComment = {
+                group_id: Math.abs(scope.ownerId),
+                topic_id: scope.id,
+                message
+            };
+
+            params = topicP;
+            method = 'board.createComment';
+            break;
+
+        case 'photo':
+            const photosP: PhotosCreateComment = {
+                owner_id: Math.abs(scope.ownerId),
+                photo_id: scope.id,
+                message
+            };
+
+            params = photosP;
+            method = 'photos.createComment';
+            break;
+
+        case 'video':
+            const videoP: VideoCreateComment = {
+                owner_id: Math.abs(scope.ownerId),
+                video_id: scope.id,
+                message
+            };
+
+            params = videoP;
+            method = 'video.createComment';
+            break;
+
+        default:
+            console.warn("Unknown newsfeed type", scope.type);
+    }
+
+    if (method) {
+
+        return Request.directApi<void>(method, params)
+            .catch(err => console.error("Couldn't send message", err));
+    }
+    else return Promise.resolve();
+}
+
 
 

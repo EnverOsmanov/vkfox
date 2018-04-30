@@ -38,7 +38,7 @@ function fetchUpdates(serverRS: LongPollServerRS) {
             return Promise.resolve();
         }
         else {
-            console.debug("LP nothing", response);
+            //console.debug("LP nothing", response);
             if (response.ts) serverRS.ts = response.ts;
             return Promise.resolve();
         }

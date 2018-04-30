@@ -16,9 +16,9 @@ module.exports = {
     "app.install"   : "./vkfox/install/app/app.install.tsx",
     "app.pu"        : "./vkfox/popup/app/app.pu.tsx",
     "app.bg"        : "./vkfox/back/app/app.bg.ts",
-    "photo"         : "./vkfox/vkfox-io/photo.js",
-    "video"         : "./vkfox/vkfox-io/video.js",
-    "doc"           : "./vkfox/vkfox-io/doc.js"
+    "photo"         : "./vkfox/vkfox-io/photo.ts",
+    "video"         : "./vkfox/vkfox-io/video.ts",
+    "doc"           : "./vkfox/vkfox-io/doc.ts"
   },
   output: {
     path: __dirname + "/target/firefox/pages",

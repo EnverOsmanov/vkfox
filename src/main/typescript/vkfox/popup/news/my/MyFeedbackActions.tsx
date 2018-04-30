@@ -6,7 +6,7 @@ import I18N from "../../../i18n/i18n";
 import ItemAction from "../../itemActions/ItemAction";
 import ItemActionComment from "../../itemActions/ItemActionComment";
 import ItemActionLike from "../../itemActions/ItemActionLike";
-import {FeedbackObj, PostParent, TopicFeedback} from "../../../feedbacks/types";
+import {ParentObj, ParentObjPost, TopicFeedback} from "../../../feedbacks/types";
 import {FeedbackItemObj} from "../types";
 
 
@@ -16,7 +16,7 @@ interface MyFeedbackActionsProps {
     showOrHideReply(): void
 }
 
-class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, undefined> {
+class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, object> {
 
 
     actionComment = (comment: CommentsDataI) => {
@@ -33,7 +33,7 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, undefine
             )
     };
 
-    actionLike = (comment: CommentsDataI, parent: FeedbackObj) => {
+    actionLike = (comment: CommentsDataI, parent: ParentObj) => {
         if ("likes" in parent)
             return (
                 <ItemActionLike
@@ -41,7 +41,7 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, undefine
                     type={comment.type}
                     ownerId={comment.ownerId}
                     itemId={comment.id}
-                    likes={(parent as PostParent | TopicFeedback).likes}
+                    likes={(parent as ParentObjPost | TopicFeedback).likes}
                 />
             )
     };

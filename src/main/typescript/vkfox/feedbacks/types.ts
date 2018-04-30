@@ -1,5 +1,4 @@
-import {UserProfile} from "../back/users/types";
-import {Attachment, AttachmentContainer, CanPostable, PhotoItem, PostItem, VideoItem} from "../../vk/types/newsfeed";
+import {AttachmentContainer, CanPostable, PhotoItem, VideoItem} from "../../vk/types/newsfeed";
 import {LikesObj} from "../../vk/types/objects";
 import {
     CommentsNewsItem,
@@ -7,7 +6,8 @@ import {
     FeedbackComment,
     ParentComment,
     PorFPostItem,
-    TopicItem
+    TopicItem,
+    WithFromId
 } from "../../vk/types/feedback";
 
 
@@ -16,8 +16,18 @@ export interface NewsLikesObj extends LikesObj {
     can_publish: number
 }
 
+export interface ParentObj {
+    // TODO inherit for different parents
+    owner_id    : number
+    date: number
+}
+
+export interface ParentObjPost extends ParentObj, PorFPostItem {
+
+}
+
 export interface FeedbackObj {
-    owner_id?: number
+
     from_id ?: number
     date     : number
 
@@ -36,9 +46,6 @@ export interface WallMentionFeedback extends FeedbackObj {
     attachments : AttachmentContainer[]
 }
 
-export interface PostParent extends FeedbackObj, PostItem {
-    can_delete: number
-}
 
 export interface ReplyFeedback extends FeedbackObj {
     text      : string
@@ -51,28 +58,30 @@ interface TopicObj {
     is_closed: boolean
 }
 
-interface CommentsNewsItemWithId extends CommentsNewsItem {
+export interface CommentsNewsItemWithId extends CommentsNewsItem {
     id: number
+    from_id: number
 }
 
-export interface PostFeedbackNot extends FeedbackObj {
+export interface ParentObjComment extends ParentObj {
+   // Maybe if comment for post or for topic
     post?: CommentsNewsItemWithId
     id   : number
     topic?: TopicObj
 }
 
-export interface TopicFeedback extends FeedbackObj {
+export interface TopicFeedback extends ParentObj {
     source_id: number
     post_id : number
     text    : string
     likes       : LikesObj
 }
 
-export interface PhotoFeedback extends FeedbackObj {
+export interface PhotoFeedback extends ParentObj {
     id: number
 }
 
-export interface VideoFeedback extends FeedbackObj {
+export interface VideoFeedback extends ParentObj {
     id: number
 }
 
@@ -114,4 +123,11 @@ export interface TopicWithOwnerId extends TopicItem, WithOwnerId {}
 export type FeedbackType =
     PorFPostItem |
     FeedbackComment |
-    UserProfile[] | CopyItem[]
+    WithFromId[] | CopyItem[]
+
+export type FeedbackWithOwnerId =
+    FCommentWithOwnerId | FWithFromIdAndOwnerId
+
+interface FCommentWithOwnerId extends FeedbackComment, WithOwnerId {}
+
+interface FWithFromIdAndOwnerId extends WithFromId, WithOwnerId {}

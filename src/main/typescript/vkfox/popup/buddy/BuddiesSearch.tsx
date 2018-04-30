@@ -11,7 +11,7 @@ interface BuddiesSearchProps {
     handleFilter(filterName: string, filterValue: boolean): void
 }
 
-class BuddiesSearch extends React.Component<BuddiesSearchProps, undefined> {
+class BuddiesSearch extends React.Component<BuddiesSearchProps, object> {
 
     render() {
         return (

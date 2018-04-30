@@ -1,6 +1,6 @@
 import {AddOptions, Collection, Model} from "backbone";
 import {FeedbacksCollection} from "./FeedBacksCollection";
-import {FeedbackObj} from "../types";
+import {ParentObj} from "../types";
 
 
 class ItemAddOptions implements AddOptions {
@@ -20,7 +20,7 @@ export class Item extends Model {
         return super.get("feedbacks")
     }
 
-    get parent(): FeedbackObj {
+    get parent(): ParentObj {
         return super.get("parent")
     }
 

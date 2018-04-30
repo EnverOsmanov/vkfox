@@ -14,7 +14,7 @@ interface BuddiesSearchMenuProps {
     handleFilter(filterName: string, filterValue: boolean): void
 }
 
-class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, undefined> {
+class BuddiesSearchMenu extends React.Component<BuddiesSearchMenuProps, object> {
     render() {
         const {male, female, offline, faves} = this.props.filters;
 

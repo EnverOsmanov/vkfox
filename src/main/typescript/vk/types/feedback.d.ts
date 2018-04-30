@@ -32,7 +32,10 @@ export interface CommentFromNews extends Comment, WithLikes {
     from_id : number
 }
 
-interface FeedbackComment extends Comment, CommentReply {}
+interface FeedbackComment extends Comment, CommentReply {
+    // в доке нету, а прислывают
+    from_id: number
+}
 
 export interface ParentComment extends Comment, CommentReply {
     owner_id: number
@@ -55,17 +58,32 @@ interface PorFPostItem extends PostItem {
 }
 
 type NotificationType =
-    "reply_comment" |
-    "mention" |
-    "friend_accepted" |
-    "wall_publish" | "follow"
+    "reply_comment"
+    | "mention"
+    | "friend_accepted"
+    | "wall_publish"
+    | "follow"
+    | "mention_comments"
+    | "reply_comment_photo"
+    | "reply_comment_video"
+    | "reply_topic"
 
+    | "like_comment"
+    | "like_comment_photo"
+    | "like_comment_video"
+    | "like_comment_topic"
+
+    | "comment_photo"
+    | "mention_comment_photo"
+
+    | "comment_video"
+    | "mention_comment_video"
 
 
 type FeedbackTypes =
     PorFPostItem |
     FeedbackComment |
-    UserProfile[] | CopyItem[]
+    GenericRS<UserProfile> | GenericRS<CopyItem>
 
 type ParentTypes =
     PorFPostItem |
@@ -76,8 +94,12 @@ type ParentTypes =
 
 //// Feedbacks
 
+interface WithFromId {
+    from_id: number
+}
+
 interface WithUsersF {
-    feedback: UserProfile[]
+    feedback: GenericRS<WithFromId>
 }
 
 interface WithPostF {
@@ -90,7 +112,7 @@ interface WithCommentF {
 
 
 interface WithCopiesF {
-    feedback: CopyItem[]
+    feedback: GenericRS<CopyItem>
 }
 
 
@@ -184,7 +206,7 @@ export interface FeedbackRS {
 export type CommentsNewsType = "post" | "photo" | "topic"
 
 export interface CommentsNewsItem {
-    type        : CommentsNewsType
+    type        : CommentsNewsType // в фидбеке коммента к посту может нету
     date        : number
     text        : string
     comments    : CNewsCommentContainer

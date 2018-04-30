@@ -21,7 +21,9 @@ export interface PostItem extends ItemObj, WithLikes {
     copy_history: PostItem[]
 }
 
-export interface PhotoItem extends ItemObj {}
+export interface PhotoItem extends ItemObj {
+    owner_id: number // added for notifications.get (parent)
+}
 
 export interface PhotoTagItem extends ItemObj {
     photo_tags: GenericRS<AttachmentPhoto>
@@ -49,6 +51,8 @@ export interface VideoItem extends ItemObj {
     // type = "video";
 
     video: GenericRS<VideoVideo>
+
+    owner_id: number // added for notifications.get (parent)
 }
 
 

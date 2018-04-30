@@ -8,7 +8,7 @@ import InstallState from "../InstallState";
 import {InstallButtons, stepsInfo} from "../StepInfo";
 
 
-class App extends React.Component<undefined, InstallState> {
+class App extends React.Component<object, InstallState> {
 
     constructor(props) {
         super(props);

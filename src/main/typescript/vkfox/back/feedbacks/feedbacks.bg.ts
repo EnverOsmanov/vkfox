@@ -1,31 +1,31 @@
 "use strict";
-import Request from '../request/request.bg'
+import Request from '../../request/request.bg'
 import * as _ from "underscore"
-import User from "../back/users/users.bg"
-import Mediator from "../mediator/mediator.bg"
-import Router from "../back/router/router.bg"
-import Browser from "../browser/browser.bg"
-import I18N from "../i18n/i18n"
-import PersistentModel from "../persistent-model/persistent-model"
-import Notifications from "../notifications/notifications.bg"
-import {Profiles, ProfilesCmpn} from "../profiles-collection/profiles-collection.bg";
-import {Item, ItemColl} from "./collections/ItemColl";
-import {NotifType} from "../notifications/Notification";
-import {FeedbacksCollection} from "./collections/FeedBacksCollection";
-import Msg from "../mediator/messages";
-import {LikesChanged} from "../newsfeed/types";
-import {AccessTokenError} from "../request/models";
-import {AuthModelI} from "../back/auth/types";
+import User from "../users/users.bg"
+import Mediator from "../../mediator/mediator.bg"
+import Router from "../router/router.bg"
+import Browser from "../../browser/browser.bg"
+import I18N from "../../i18n/i18n"
+import PersistentModel from "../../persistent-model/persistent-model"
+import Notifications from "../../notifications/notifications.bg"
+import {Profiles, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
+import {Item, ItemColl} from "../../feedbacks/collections/ItemColl";
+import {NotifType} from "../../notifications/Notification";
+import {FeedbacksCollection} from "../../feedbacks/collections/FeedBacksCollection";
+import Msg from "../../mediator/messages";
+import {LikesChanged} from "../../newsfeed/types";
+import {AccessTokenError} from "../../request/models";
+import {AuthModelI} from "../auth/types";
 import {
     FeedbackObj,
-    FeedbackObjShort,
-    FoxCommentsNewsItem,
-    ParentWithOwnerId, PostParent,
+    FeedbackObjShort, FeedbackWithOwnerId,
+    FoxCommentsNewsItem, ParentObj, ParentObjPost,
+    ParentWithOwnerId,
     ReplyFeedback, TopicFeedback,
     WallMentionFeedback
-} from "./types";
-import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../vk/types";
-import {FeedbackUnsubOptions} from "../popup/news/types";
+} from "../../feedbacks/types";
+import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../../vk/types";
+import {FeedbackUnsubOptions} from "../../popup/news/types";
 import {
     CommentsNews,
     CommentsNewsItem,
@@ -34,13 +34,21 @@ import {
     FollowNoti,
     FriendAcceptedNoti,
     LikePostNoti,
+    LikeCommentNoti,
     MentionNoti,
     NotificationObj,
     ParentTypes,
     PhotoCommentN,
     PostCommentN,
-    WallPublishNoti, WithLikes
-} from "../../vk/types/feedback";
+    WallPublishNoti,
+    WithLikes,
+    ParentComment,
+    PorFPostItem,
+    LikeCommentPhotoNoti,
+    LikeCommentVideoNoti,
+    LikeCommentTopicNoti, CommentPhotoNoti, MentionCommentPhotoNoti, WithFromId, CommentVideoNoti, FeedbackComment
+} from "../../../vk/types/feedback";
+import {PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
 
 /**
  * Responsible for "News -> My" page
@@ -130,7 +138,7 @@ function onLikesChanged(params: LikesChanged) {
         changedModel          = itemsColl.get(changedItemUniqueId);
 
     if (changedModel) {
-        (changedModel.parent as PostParent | TopicFeedback).likes = params.likes;
+        (changedModel.parent as ParentObjPost | TopicFeedback).likes = params.likes;
         itemsColl.trigger('change');
     }
 }
@@ -179,9 +187,6 @@ function updateLatestFeedbackId() {
  * @return {String}
  */
 function generateItemID(type: string, parent): string {
-    if (type == "photo") {
-        debugger;
-    }
 
     if (parent.owner_id) {
 
@@ -192,7 +197,7 @@ function generateItemID(type: string, parent): string {
             :type;
 
         const s = ("id" in parent)
-            ? (parent as PhotoCommentN).id
+            ? (parent as ParentComment).id
             : parent.post_id;
 
         return `${f}:${s}:user:${parent.owner_id}`;
@@ -200,8 +205,25 @@ function generateItemID(type: string, parent): string {
     else return _.uniqueId(type);
 }
 
+function generateFeedbackID(type: string, p: PhotoItem | VideoItem | ParentComment, feedback: FeedbackWithOwnerId): string {
 
-function getOrCreateFeedbackItem(parentType: string, parent: FeedbackObj | FoxCommentsNewsItem): Item {
+    if (feedback.owner_id) {
+
+        // replace wall with post,
+        // to make correct merging items from 'notifications.get' and 'newsfeed.getComments'
+        const f = type === 'wall'
+            ? 'post'
+            :type;
+
+        const s = p.id;
+
+        return `${f}:${s}:user:${feedback.owner_id}`;
+    }
+    else return _.uniqueId(type);
+}
+
+
+function getOrCreateFeedbackItem(parentType: string, parent: FoxCommentsNewsItem): Item {
     const itemID = generateItemID(parentType, parent);
     const itemModel = itemsColl.get(itemID);
 
@@ -222,10 +244,11 @@ function getOrCreateFeedbackItem(parentType: string, parent: FeedbackObj | FoxCo
  *
  * @return {Object}
  */
-function createItemModel(type: string, parent: FeedbackObj, itemID?: string): Item {
+function createItemModel(type: string, parent: ParentWithOwnerId, itemID?: string): Item {
     const id = itemID ? itemID : generateItemID(type, parent);
+    const feedbacks = new FeedbacksCollection();
 
-    return new Item({parent, type, id});
+    return new Item({parent, type, id, feedbacks});
 }
 
 /**
@@ -242,7 +265,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
     function comment2Feedback(comment: any) {
         const feedback: FeedbackObjShort = {
             ...comment,
-            owner_id: comment.from_id
+            owner_id: Number(comment.from_id)
         };
 
         return {
@@ -286,22 +309,46 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
     }
 }
 
-/**
- * Returns true for supported feedback types
- * @param {String} type
- *
- * @returns {Boolean}
- */
-function isSupportedType(type: string): boolean {
-    const forbidden = [
-      'mention_comments',
-      'reply_comment',
-      'reply_comment_photo',
-      'reply_comment_video',
-      'reply_topic'
-    ];
 
-    return forbidden.indexOf(type) === -1;
+function createItemModelIfNotExist(parentType, p): Item {
+    const itemID = generateItemID(parentType, p);
+
+    let itemModel: Item;
+
+    if (!(itemModel = itemsColl.get(itemID))) {
+        itemModel = createItemModel(parentType, p, itemID);
+        itemsColl.add(itemModel, ItemColl.addOptions);
+    }
+
+    return itemModel
+}
+
+function createFeedbackWithFromId(type: string, date: number, f: FeedbackComment | WithFromId, p: PhotoItem | VideoItem | ParentComment) {
+    const fWithOwnerId = {
+        ...f,
+        owner_id: f.from_id
+    };
+
+    const id = generateFeedbackID(type, p, fWithOwnerId);
+
+    return {
+        id,
+        type,
+        feedback: fWithOwnerId,
+        date
+    };
+}
+
+function createItemWithOwnerId(type: string, date: number, f: PorFPostItem | WithFromId): Item {
+    const fWithOwnerId = {
+        ...f,
+        owner_id: f.from_id
+    };
+
+    const itemModel = createItemModel(type, fWithOwnerId);
+    itemModel.date = date;
+
+    return itemModel;
 }
 
 /**
@@ -312,102 +359,99 @@ function isSupportedType(type: string): boolean {
  *
  * @param {Object} item
  */
-function addRawNotificationsItem(item: NotificationObj): void {
+function addRawNotificationsItemV2(item: NotificationObj): void {
+    switch (item.type) {
+        case "mention_comments":
+        case "reply_comment":
+        case "reply_comment_photo":
+        case "reply_comment_video":
+        case "reply_topic":
+            return;
 
-    let parentType: string,
-        feedbackType: string,
-        parent: ParentTypes;
+        case "follow":
+        case "friend_accepted":
+            const noti = item as FollowNoti | FriendAcceptedNoti;
 
-    if (!isSupportedType(item.type)) return;
+            noti.feedback.items.forEach( f => {
 
-    if (item.type === "friend_accepted") {
-        parentType = item.type;
-    }
-    else if (item.type.indexOf("_") !== -1) {
-        const typeTokens = item.type.split("_");
+                const itemModel = createItemWithOwnerId(item.type, item.date, f);
 
-        feedbackType = typeTokens[0];
-        parentType   = typeTokens[1];
-    }
+                itemsColl.add(itemModel, ItemColl.addOptions)
+            });
+            break;
 
-    if (item.type === "mention" || item.type == "wall_publish") {
-        feedbackType = item.type;
-        parentType   = item.type;
-        parent       = (item as MentionNoti | WallPublishNoti).feedback;
-    }
-    else {
-        if ("parent" in item) {
-            debugger;
-            parent = (item as LikePostNoti).parent;
-        }
-        parentType = item.type;
-    }
+        case "mention": {
+            const mN = item as MentionNoti;
 
-    if (feedbackType) {
-        let parentWithOwnerId: ParentWithOwnerId;
-        if ("from_id" in parent) {
-            parentWithOwnerId = {
-                ...parent,
-                owner_id: parent.from_id
-            }
-        }
-        else parentWithOwnerId = parent as ParentWithOwnerId;
+            const itemModel = createItemWithOwnerId(item.type, item.date, mN.feedback);
 
-        const itemID = generateItemID(parentType, parentWithOwnerId);
-
-        let itemModel: Item;
-
-        if (!(itemModel = itemsColl.get(itemID))) {
-            itemModel = createItemModel(parentType, (parentWithOwnerId as FeedbackObj), itemID);
             itemsColl.add(itemModel, ItemColl.addOptions);
+            break;
         }
 
-        if (!itemModel.has('feedbacks')) itemModel.feedbacks = new FeedbacksCollection();
+        case "like_comment":
+        case "like_comment_photo":
+        case "like_comment_video":
+        case "like_comment_topic": {
+            const lcN = item as LikeCommentNoti | LikeCommentPhotoNoti | LikeCommentVideoNoti | LikeCommentTopicNoti;
 
-        const feedback: FeedbackTypes
-            = (item as MentionNoti | WallPublishNoti).feedback;
+            const typeTokens = item.type.split("_");
 
-        const feedbacks: FeedbackObj[] = [].concat(feedback).map( (feedback: FeedbackObj) => {
-            let id: string;
+            const feedbackType = typeTokens[0];
+            const parentType = typeTokens[1];
+            const p = lcN.parent;
 
-            feedback.owner_id = Number(feedback.from_id || feedback.owner_id);
+            const itemModel = createItemModelIfNotExist(parentType, p);
 
-            if (feedbackType === 'like' || feedbackType === 'copy') {
-                // 'like' and 'post', so we need to pass 'parent'
-                // to make difference for two likes from the same user to different objects
-                id = generateItemID(feedbackType, parent);
-            }
-            else id = generateItemID(feedbackType, feedback);
+            const feedbacks = lcN.feedback.items
+                .map(f => createFeedbackWithFromId(feedbackType, item.date, f, p));
 
-            return {
-                id,
-                type    : feedbackType,
-                feedback: feedback,
-                date    : item.date
-            };
-        });
+            itemModel.feedbacks
+                .add(feedbacks);
 
-        itemModel.feedbacks
-            .add(feedbacks);
+            if (!itemModel.has('date') || itemModel.date < item.date) itemModel.date = item.date;
 
-        if (!itemModel.has('date') || itemModel.date < item.date) itemModel.date = item.date;
+            itemModel.trigger('change');
+            return;
+        }
 
-        itemModel.trigger('change');
-    }
-    else {
-        //follows and friend_accepter types are array
-        const arrayItem = (item as FriendAcceptedNoti | FollowNoti);
-        [].concat(arrayItem.feedback).forEach( (feedback: FeedbackObj) => {
+        case "comment_photo":
+        case "mention_comment_photo":
+        case "comment_video":
+        case "mention_comment_video": {
+            const noti = item as
+                CommentPhotoNoti | MentionCommentPhotoNoti
+                | CommentVideoNoti | MentionCommentPhotoNoti;
 
-            feedback.owner_id = Number(feedback.owner_id || feedback.from_id);
+            const typeTokens = item.type
+                .replace("mention_", "")
+                .split("_");
 
-            const itemModel = createItemModel(parentType, feedback);
+            const feedbackType = typeTokens[0];
+            const parentType = typeTokens[1];
+            const p = noti.parent;
 
-            itemModel.date = item.date;
-            itemsColl.add(itemModel, ItemColl.addOptions);
-        });
+            const itemModel = createItemModelIfNotExist(parentType, p);
+
+            const f = noti.feedback;
+
+            const feedbacks = createFeedbackWithFromId(feedbackType, item.date, f, p);
+
+            itemModel.feedbacks
+                .add(feedbacks);
+
+            if (!itemModel.has('date') || itemModel.date < item.date) itemModel.date = item.date;
+
+            itemModel.trigger('change');
+
+            break;
+        }
+
+        default:
+            console.warn("Unknown notification type", item.type)
     }
 }
+
 
 function fetchFeedbacks(): Promise<void> {
     const code = [
@@ -437,7 +481,7 @@ function fetchFeedbacks(): Promise<void> {
             profilesColl.add(notifications.profiles, ProfilesCmpn.addOptions);
             profilesColl.add(notifications.groups, ProfilesCmpn.addOptions);
 
-            notifications.items.forEach(addRawNotificationsItem);
+            notifications.items.forEach(addRawNotificationsItemV2);
             newsAboutComments.items.forEach(addRawCommentsItem);
             itemsColl.sort();
         }
@@ -461,7 +505,7 @@ function fetchFeedbacks(): Promise<void> {
 function tryNotification() {
     const itemModel = itemsColl.first();
 
-    let notificationItem: FeedbackObj,
+    let notificationItem: ParentObj | FeedbackObjShort,
         type: string,
         parentType: string;
 

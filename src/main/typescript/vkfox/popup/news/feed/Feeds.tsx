@@ -6,7 +6,7 @@ interface FeedsProps {
     data: NewsfeedData
 }
 
-class Feeds extends React.Component<FeedsProps, undefined> {
+class Feeds extends React.Component<FeedsProps, object> {
 
     render() {
 

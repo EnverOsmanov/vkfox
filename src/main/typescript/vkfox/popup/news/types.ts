@@ -1,7 +1,7 @@
-import {FeedbackObj} from "../../feedbacks/types";
+import {FeedbackObj, ParentObj} from "../../feedbacks/types";
 
 export interface FeedbackItemObj {
-    parent: FeedbackObj
+    parent: ParentObj
     type  : string
     id    : string
     date  : number

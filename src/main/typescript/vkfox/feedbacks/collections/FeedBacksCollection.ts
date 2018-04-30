@@ -1,5 +1,5 @@
 import {Collection, Model} from "backbone";
-import {FeedbackObj} from "../types";
+import {FeedbackObj, FeedbackObjShort} from "../types";
 
 class Feedback extends Model {
 
@@ -11,7 +11,7 @@ class Feedback extends Model {
         return super.get("type")
     }
 
-    get feedback(): FeedbackObj {
+    get feedback(): FeedbackObjShort {
         return super.get("feedback")
     }
 

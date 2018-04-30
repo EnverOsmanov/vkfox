@@ -15,7 +15,7 @@ interface BuddiesState {
     data        : FoxUserProfileI[]
 }
 
-class BuddiesPage extends React.Component<undefined, BuddiesState> {
+class BuddiesPage extends React.Component<object, BuddiesState> {
 
     static filtersModel = initBuddiesFilter();
 

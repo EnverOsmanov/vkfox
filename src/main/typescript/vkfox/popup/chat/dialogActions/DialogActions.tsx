@@ -24,7 +24,7 @@ interface DialogActionsProps {
     addToMessages(dialogId: string, messages: Message[]): void
 }
 
-class DialogActions extends React.Component<DialogActionsProps, undefined> {
+class DialogActions extends React.Component<DialogActionsProps, object> {
 
     showHistory = (dialog: DialogI) => {
 

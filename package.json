@@ -1,6 +1,6 @@
 {
   "name": "vkfox",
-  "version": "5.5.2",
+  "version": "5.5.3",
   "license": "WTFPL",
   "repository": {
     "type": "git",
@@ -9,11 +9,11 @@
   "scripts": {
     "bundle": "gulp",
     "bundleProd": "gulp production",
-    "ffox": "web-ext run -s target/firefox/ --firefox=firefox-developer --firefox-profile=dev-edition-default",
-    "ffoxMac": "web-ext run -s target/firefox/ --firefox=firefoxdeveloperedition --firefox-profile=dev-edition-default",
+    "ffox": "web-ext run -s target/firefox/ --firefox-profile=default",
+    "ffoxMac": "web-ext run -s target/firefox/ --firefox-profile=dev-edition-default",
     "sign": "web-ext sign -s target/firefox/ --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET --id='{d5c559a3-a91c-4e87-bb58-014081aa47aa}'",
     "signProd": "web-ext sign -s target/firefox/ --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET --id='{41977694-5aed-4e30-8390-77a62a771360}'",
-    "testProd": "web-ext run -s target/firefox/ --firefox=firefox-developer",
+    "testProd": "web-ext run -s target/firefox/",
     "zip": "web-ext build -s target/firefox/"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "css-loader": "^0.28.11",
     "emoji": "^0.3.2",
     "font-awesome": "^4.7.0",
+    "gulplog": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
     "jquery": "^3.3.1",
     "less-loader": "^4.1.0",
@@ -40,12 +41,12 @@
     "@types/backbone": "^1.3.42",
     "@types/bootstrap": "^3.3.39",
     "@types/gulp": "^4.0.5",
-    "@types/node": "^8.10.9",
-    "@types/react": "^16.3.12",
+    "@types/node": "^8.10.10",
+    "@types/react": "^16.3.13",
     "@types/react-dom": "^16.0.5",
     "@types/react-router-dom": "^4.2.6",
     "@types/sanitize-html": "^1.14.0",
-    "@types/webpack": "^4.1.3",
+    "@types/webpack": "^4.1.4",
     "del": "^3.0.0",
     "eslint": "^4.19.1",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",

@@ -7,7 +7,7 @@ interface InstallStepsProps {
 }
 
 
-export default class InstallSteps extends React.Component<InstallStepsProps, undefined> {
+export default class InstallSteps extends React.Component<InstallStepsProps, object> {
 
     private style(): CSSProperties {
         return {

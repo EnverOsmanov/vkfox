@@ -6,10 +6,10 @@ import MyFeedbackPost from "./MyFeedbackPost";
 import MyFeedbackActions from "./MyFeedbackActions";
 import FeedbackOfFeedback from "./FeedbackOfFeedback";
 import {SendMessageI} from "../../itemActions/types";
-import NewsFeedItem from "../feed/NewsFeedItem";
-import {FeedbackObj, WallMentionFeedback} from "../../../feedbacks/types";
+import {CommentsNewsItemWithId, FeedbackObj, ParentObjComment, ParentObjPost} from "../../../feedbacks/types";
 import {GroupProfile, UserProfile} from "../../../back/users/types";
 import {FeedbackItemObj} from "../types";
+import {onReply} from "../news.pu";
 
 
 interface FeedbackItemProps {
@@ -68,20 +68,44 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         this.showOrHideReply();
 
         const item = this.props.item;
-        if (item.parent.type == "post") {
-            const parent = item.parent as WallMentionFeedback;
+        switch (item.type) {
+            case "comment": {
 
-            const scope: SendMessageI = {
-                type    : item.type,
-                id      : parent.post_id,
-                ownerId : parent.owner_id
-            };
+                const parent = (item.parent as ParentObjComment);
+                const parentPost = parent.post as CommentsNewsItemWithId;
 
-            return NewsFeedItem.onReply(scope, this.state.message)
-                .then(() => this.handleMessageChange(""))
-                .catch(err => console.error("Couldn't send message", err));
+                const scope: SendMessageI = {
+                    type    : item.type,
+                    id      : parentPost.id,
+                    ownerId : parentPost.from_id,
+                    replyTo : parent.id
+                };
+
+                return onReply(scope, this.state.message)
+                    .then(() => this.handleMessageChange(""))
+                    .catch(err => console.error("Couldn't send message", err));
+            }
+
+            case "topic":
+            case "post": {
+
+                const parent = item.parent as ParentObjPost;
+
+                const scope: SendMessageI = {
+                    type    : item.type,
+                    id      : parent.post_id,
+                    ownerId : parent.owner_id
+                };
+
+                return onReply(scope, this.state.message)
+                    .then(() => this.handleMessageChange(""))
+                    .catch(err => console.error("Couldn't send message", err));
+            }
+
+            default:
+                console.warn("This feedback is not post, but you was able to send message", item);
+                return Promise.resolve();
         }
-        else console.warn("This feedback is not post, but you was able to send message", item)
     };
 
     changeShowAllFeedback = () => {
@@ -113,13 +137,9 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         const singleFeedback = (feedback: FeedbackObj) => {
             const owner = this.props.profiles.find(profile => profile.id === Math.abs(feedback.feedback.owner_id));
 
-            if (!owner) {
-                debugger;
-            }
-
             return (
                 <FeedbackOfFeedback
-                    key={feedback.date}
+                    key={feedback.feedback.owner_id}
                     owner={owner}
                     feedback={feedback}
                 />

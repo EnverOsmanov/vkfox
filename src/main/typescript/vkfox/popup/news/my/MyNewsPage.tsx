@@ -9,9 +9,7 @@ import {FeedbackItemObj} from "../types";
 
 interface MyNewsProps extends RouteComponentProps<any> {}
 
-interface MyNewsState extends FeedbacksData {}
-
-class MyNewsPage extends React.Component<MyNewsProps, MyNewsState> {
+class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
 
     constructor(props) {
         super(props);

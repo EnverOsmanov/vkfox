@@ -18,6 +18,7 @@ import {
     PostItem,
     WallPhotoItem
 } from "../../../vk/types/newsfeed";
+import {FoxUserProfileI} from "../../chat/types";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -171,12 +172,12 @@ function freeSpace() {
                 .map( model => (model.friends || []) )
         ).chain()
             .flatten()
-            .map(f => f.id)
+            .map((f: FoxUserProfileI) => f.id)
             .value();
 
         // gather required profiles from source_ids
         required_uids = _(required_uids.concat(
-            groupItemsColl.map(gi => gi.source_id),
+            groupItemsColl.map(gi => Math.abs(gi.source_id)),
             friendItemsColl.map(fi => fi.source_id)
         )).uniq();
 
@@ -186,7 +187,7 @@ function freeSpace() {
     }
 }
 
-function fetchNewsfeed() {
+function fetchNewsfeed(): Promise<number | void> {
     const code = "return {" +
         `newsfeed: API.newsfeed.get(${ JSON.stringify(autoUpdateParams) }),` +
         "time: API.utils.getServerTime() };";

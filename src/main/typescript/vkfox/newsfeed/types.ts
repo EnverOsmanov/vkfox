@@ -8,11 +8,6 @@ import {LikesObj} from "../../vk/types/objects";
 
 
 class ItemDupl extends Model {
-    parse(item) {
-        console.debug("Item Dupl", item);
-        item.id = item.pid || item.nid || item.pid;
-        return item;
-    }
 }
 
 export class ItemDulpColl extends Collection<ItemDupl> {
@@ -40,7 +35,7 @@ export interface LikesChanged {
 
 export class Item extends Model {
 
-    get friends(): (number | FoxUserProfileI)[] {
+    get friends(): FoxUserProfileI[] {
         return super.get("friends")
     }
 

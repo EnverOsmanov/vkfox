@@ -15,7 +15,7 @@ interface SettingsState {
 }
 
 
-class SettingsPage extends React.Component<undefined, SettingsState> {
+class SettingsPage extends React.Component<object, SettingsState> {
 
 
     constructor(props) {
