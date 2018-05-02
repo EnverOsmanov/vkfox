@@ -51,7 +51,12 @@ export interface MentionOrWallPublish extends FeedbackComment, WithLikes {
 
 
 // Todo check for topic event
-interface TopicItem {}
+interface TopicItem {
+    id: number
+    owner_id: number
+    title: string
+    created: number
+}
 interface CopyItem {}
 interface PorFPostItem extends PostItem {
     from_id: number
@@ -78,6 +83,8 @@ type NotificationType =
 
     | "comment_video"
     | "mention_comment_video"
+
+    | "like_post"
 
 
 type FeedbackTypes =

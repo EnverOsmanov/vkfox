@@ -7,7 +7,7 @@ import {
     ParentObjPost,
     PhotoFeedback,
     ParentObjComment,
-    TopicFeedback,
+    TopicFeedbackFromComm,
     VideoFeedback,
     WallMentionFeedback, CommentsNewsItemWithId
 } from "../../feedbacks/types";
@@ -78,12 +78,12 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefine
                 return a;
             }
         case "topic":
-            const topicParent = parent as TopicFeedback;
-            return {
+            const topicParent = parent as TopicFeedbackFromComm;
+            return /*{
                 ownerId: topicParent.owner_id,
-                id     : topicParent.post_id,
+                id     : 1,
                 type   : "topic"
-            };
+            };*/
         case 'photo':
             const phParent = <PhotoFeedback>parent;
             return {
@@ -98,9 +98,12 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefine
                 id     : viParent.id,
                 type   : 'video'
             };
+        case "friend_accepted": {
+            return;
+        }
 
-            default:
-                console.warn("Unknown feedback type", item.type)
+        default:
+            console.warn("Unknown feedback type", item.type)
     }
 }
 

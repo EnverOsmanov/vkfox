@@ -4,7 +4,7 @@ import * as React from "react"
 import AttachmentC from "../../attachment/AttachmentC";
 import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
-import {ParentObjPost, TopicFeedback, WallMentionFeedback} from "../../../feedbacks/types";
+import {ParentObjPost, TopicFeedbackFromComm, WallMentionFeedback} from "../../../feedbacks/types";
 import {FeedbackItemObj} from "../types";
 
 
@@ -49,7 +49,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
                 return <AttachmentC type={item.type} data={item.parent}/>;
 
             case "topic":
-                const topicParent = item.parent as TopicFeedback;
+                const topicParent = item.parent as TopicFeedbackFromComm;
                 return <RectifyPu text={topicParent.text} hasEmoji={false}/>;
 
             case "mention":

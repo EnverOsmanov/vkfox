@@ -11,7 +11,6 @@ interface ItemActionProps {
     itemId  : number
     likes   : LikesObj
     type   ?: string
-    hidden ?: boolean
 }
 
 class ItemActionLike extends React.Component<ItemActionProps> {
@@ -33,7 +32,7 @@ class ItemActionLike extends React.Component<ItemActionProps> {
         const show = likes.can_like || likes.user_likes || (likes && likes.can_like === undefined);
         const myClassName = likes.user_likes ? "item__action-like_liked" : "";
 
-        if (!this.props.hidden && show)
+        if (show)
             return (
                 <i
                     className={`item__action fa fa-heart ${myClassName}`}

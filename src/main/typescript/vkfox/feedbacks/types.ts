@@ -1,11 +1,12 @@
 import {AttachmentContainer, CanPostable, PhotoItem, VideoItem} from "../../vk/types/newsfeed";
 import {LikesObj} from "../../vk/types/objects";
 import {
+    CommentFromNews,
     CommentsNewsItem,
     CopyItem,
     FeedbackComment,
     ParentComment,
-    PorFPostItem,
+    PorFPostItem, TopicCommentN,
     TopicItem,
     WithFromId
 } from "../../vk/types/feedback";
@@ -19,7 +20,6 @@ export interface NewsLikesObj extends LikesObj {
 export interface ParentObj {
     // TODO inherit for different parents
     owner_id    : number
-    date: number
 }
 
 export interface ParentObjPost extends ParentObj, PorFPostItem {
@@ -27,17 +27,17 @@ export interface ParentObjPost extends ParentObj, PorFPostItem {
 }
 
 export interface FeedbackObj {
+    id: string
 
     from_id ?: number
     date     : number
 
     type: string
 
-    // added by VKfox ?
-    feedback?: FeedbackObjShort;
+    feedback: FeedbackObjShort;
 }
 
-export interface WallMentionFeedback extends FeedbackObj {
+export interface WallMentionFeedback extends FeedbackObjShort {
     comments    : CanPostable
     source_id?  : number
     post_id     : number
@@ -47,7 +47,7 @@ export interface WallMentionFeedback extends FeedbackObj {
 }
 
 
-export interface ReplyFeedback extends FeedbackObj {
+export interface ReplyFeedback extends FeedbackObjShort {
     text      : string
 
     // added by VKfox ?
@@ -70,10 +70,15 @@ export interface ParentObjComment extends ParentObj {
     topic?: TopicObj
 }
 
-export interface TopicFeedback extends ParentObj {
-    source_id: number
-    post_id : number
-    text    : string
+export interface TopicFeedbackFromComm extends ParentObj, TopicCommentN {}
+
+export interface TopicFeedbackFromNoti extends ParentObj {
+    id          : number
+    title       : string
+    comments    : number
+
+    created     : number
+    updated     : number
     likes       : LikesObj
 }
 
@@ -86,12 +91,17 @@ export interface VideoFeedback extends ParentObj {
 }
 
 export interface FeedbackObjShort {
-    owner_id?: number
+    owner_id: number
 
 
     // added by VKfox ?
     attachments ?: AttachmentContainer[]
 }
+
+export interface FeedbackObjShortComment extends FeedbackObjShort, CommentFromNews {
+
+}
+
 
 
 export interface FoxCommentsNewsItem extends CommentsNewsItem {

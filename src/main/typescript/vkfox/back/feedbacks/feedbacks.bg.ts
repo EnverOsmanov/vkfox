@@ -18,14 +18,14 @@ import {AccessTokenError} from "../../request/models";
 import {AuthModelI} from "../auth/types";
 import {
     FeedbackObj,
-    FeedbackObjShort, FeedbackWithOwnerId,
+    FeedbackObjShort, FeedbackObjShortComment, FeedbackWithOwnerId,
     FoxCommentsNewsItem, ParentObj, ParentObjPost,
     ParentWithOwnerId,
-    ReplyFeedback, TopicFeedback,
+    ReplyFeedback, TopicFeedbackFromComm,
     WallMentionFeedback
 } from "../../feedbacks/types";
 import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../../vk/types";
-import {FeedbackUnsubOptions} from "../../popup/news/types";
+import {FeedbackItemObj, FeedbackUnsubOptions} from "../../popup/news/types";
 import {
     CommentsNews,
     CommentsNewsItem,
@@ -46,7 +46,13 @@ import {
     PorFPostItem,
     LikeCommentPhotoNoti,
     LikeCommentVideoNoti,
-    LikeCommentTopicNoti, CommentPhotoNoti, MentionCommentPhotoNoti, WithFromId, CommentVideoNoti, FeedbackComment
+    LikeCommentTopicNoti,
+    CommentPhotoNoti,
+    MentionCommentPhotoNoti,
+    WithFromId,
+    CommentVideoNoti,
+    FeedbackComment,
+    CommentFromNews
 } from "../../../vk/types/feedback";
 import {PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
 
@@ -138,7 +144,7 @@ function onLikesChanged(params: LikesChanged) {
         changedModel          = itemsColl.get(changedItemUniqueId);
 
     if (changedModel) {
-        (changedModel.parent as ParentObjPost | TopicFeedback).likes = params.likes;
+        (changedModel.parent as ParentObjPost | TopicFeedbackFromComm).likes = params.likes;
         itemsColl.trigger('change');
     }
 }
@@ -244,11 +250,13 @@ function getOrCreateFeedbackItem(parentType: string, parent: FoxCommentsNewsItem
  *
  * @return {Object}
  */
-function createItemModel(type: string, parent: ParentWithOwnerId, itemID?: string): Item {
+function createItemModel(type: string, parent: ParentObj, itemID?: string): Item {
     const id = itemID ? itemID : generateItemID(type, parent);
-    const feedbacks = new FeedbacksCollection();
+    const feedbacks: any = new FeedbacksCollection();
 
-    return new Item({parent, type, id, feedbacks});
+    const item: FeedbackItemObj = {parent, type, id, feedbacks};
+
+    return new Item(item);
 }
 
 /**
@@ -262,17 +270,17 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
 
     let lastCommentDate: number;
 
-    function comment2Feedback(comment: any) {
-        const feedback: FeedbackObjShort = {
+    function comment2Feedback(comment: CommentFromNews): FeedbackObj {
+        const feedback: FeedbackObjShortComment = {
             ...comment,
-            owner_id: Number(comment.from_id)
+            owner_id: comment.from_id
         };
 
         return {
             id      : generateItemID("comment", feedback),
             type    : "comment",
-            feedback: feedback,
-            date    : comment.date
+            date    : comment.date,
+            feedback
         };
     }
 
@@ -288,10 +296,6 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
         };
 
         const fbItemModel = getOrCreateFeedbackItem(parentType, parent);
-
-        if (!fbItemModel.has('feedbacks')) {
-            fbItemModel.feedbacks = new FeedbacksCollection();
-        }
 
         fbItemModel.feedbacks
             .add(
@@ -310,7 +314,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
 }
 
 
-function createItemModelIfNotExist(parentType, p): Item {
+function createItemModelIfNotExist(parentType, p: ParentWithOwnerId): Item {
     const itemID = generateItemID(parentType, p);
 
     let itemModel: Item;
@@ -446,6 +450,11 @@ function addRawNotificationsItemV2(item: NotificationObj): void {
 
             break;
         }
+
+/*        case "like_post": {
+
+            break;
+        }*/
 
         default:
             console.warn("Unknown notification type", item.type)

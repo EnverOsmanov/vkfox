@@ -13,18 +13,21 @@ function likesChange(params: LikesChanged) {
 
     delete params.action;
 
+    function handleResponse(response: LikesGenereicResponse) {
+
+        Mediator.pub(Msg.LikesChanged, _.extend(params, {
+            likes: {
+                count     : response.likes,
+                user_likes: action === 'delete' ? 0:1,
+                can_like  : action === 'delete' ? 1:0
+            }
+        }));
+    }
+
     Request
         .api<LikesGenereicResponse>({code: 'return API.likes.' + action + '(' + JSON.stringify(params) + ');'})
-        .then( (response) => {
-
-            Mediator.pub(Msg.LikesChanged, _.extend(params, {
-                likes: {
-                    count     : response.likes,
-                    user_likes: action === 'delete' ? 0:1,
-                    can_like  : action === 'delete' ? 1:0
-                }
-            }));
-    });
+        .then(handleResponse)
+        .catch(e => console.error("Like failed", e));
 
 }
 

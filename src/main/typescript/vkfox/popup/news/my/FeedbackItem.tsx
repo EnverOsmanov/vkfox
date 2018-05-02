@@ -119,7 +119,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         })
     };
 
-    showAll = (item: FeedbackItemObj) => {
+    showAllSwithcher = (item: FeedbackItemObj) => {
         const text = this.state.showAllFeedbacks ? "hide" : "show all";
 
         if (item.feedbacks && item.feedbacks.length > 3) return (
@@ -139,14 +139,14 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
 
             return (
                 <FeedbackOfFeedback
-                    key={feedback.feedback.owner_id}
+                    key={feedback.id}
                     owner={owner}
                     feedback={feedback}
                 />
             )
         };
 
-        return item.feedbacks && item.feedbacks.slice(sliceI).map(singleFeedback)
+        return item.feedbacks.slice(sliceI).map(singleFeedback)
     };
 
 
@@ -167,7 +167,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
                     showOrHideReply={this.showOrHideReply}
                 />
 
-                {this.showAll(item)}
+                {this.showAllSwithcher(item)}
 
                 {this.feedbacks(item)}
 

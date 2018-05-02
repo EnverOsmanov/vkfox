@@ -6,7 +6,7 @@ import I18N from "../../../i18n/i18n";
 import ItemAction from "../../itemActions/ItemAction";
 import ItemActionComment from "../../itemActions/ItemActionComment";
 import ItemActionLike from "../../itemActions/ItemActionLike";
-import {ParentObj, ParentObjPost, TopicFeedback} from "../../../feedbacks/types";
+import {ParentObj, ParentObjPost, TopicFeedbackFromComm} from "../../../feedbacks/types";
 import {FeedbackItemObj} from "../types";
 
 
@@ -34,16 +34,20 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, object> 
     };
 
     actionLike = (comment: CommentsDataI, parent: ParentObj) => {
-        if ("likes" in parent)
+        if ("likes" in parent) {
+            const type = comment.type === "topic"
+                ? "topic_comment"
+                : comment.type;
+
             return (
                 <ItemActionLike
-                    hidden={!comment}
-                    type={comment.type}
+                    type={type}
                     ownerId={comment.ownerId}
                     itemId={comment.id}
-                    likes={(parent as ParentObjPost | TopicFeedback).likes}
+                    likes={(parent as ParentObjPost | TopicFeedbackFromComm).likes}
                 />
             )
+        }
     };
 
     actionOpenLink = () => {
