@@ -120,7 +120,7 @@ class ChatPage extends React.Component<object, ChatState> {
 
         return dialogs.map( dialog =>
             <DialogItem
-                key={dialog.uid}
+                key={dialog.id}
                 dialog={dialog}
                 profilesColl={profilesColl}
                 addToProfilesColl={this.addToProfilesColl}

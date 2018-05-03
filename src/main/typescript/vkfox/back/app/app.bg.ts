@@ -26,4 +26,5 @@ ForceOnlineBg();
 LongpollBg();
 
 InstallPageOrLogin();
+// Browser.createTab("/pages/popup.html")
 

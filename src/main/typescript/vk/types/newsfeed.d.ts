@@ -18,7 +18,7 @@ export interface PostItem extends ItemObj, WithLikes {
     post_id     : number
     post_type   : string
     post_source : UserMeta
-    copy_history: PostItem[]
+    copy_history?: PostItem[]
 }
 
 export interface PhotoItem extends ItemObj {

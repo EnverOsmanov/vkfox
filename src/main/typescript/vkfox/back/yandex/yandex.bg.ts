@@ -23,5 +23,4 @@ export default function init() {
     else {
         return Auth.login();
     }
-    // Browser.createTab("/pages/popup.html");
 }

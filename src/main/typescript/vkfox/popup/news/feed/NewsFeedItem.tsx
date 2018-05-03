@@ -160,6 +160,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 <div>
                     <i className="fa fa-bullhorn"/>
                     {itemPost.copy_history[0].text}
+                    {this.postAttachmentElms(itemPost.copy_history[0])}
                 </div>
             )
         }
@@ -211,7 +212,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         switch (item.type) {
             case "post":
                 const itemPost = item as PostItem;
-                return itemPost.text || itemPost.attachments
+                return itemPost.text || itemPost.attachments || itemPost.copy_history
                     ? this.postElm(itemPost)
                     : null;
 

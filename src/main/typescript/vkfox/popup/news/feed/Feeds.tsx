@@ -14,17 +14,22 @@ class Feeds extends React.Component<FeedsProps, object> {
 
         const singleFeedItem = (item: ItemObj) => {
 
-            const owners = profiles.find(profile => profile.id === Math.abs(item.source_id));
+            const owner = profiles.find(profile => profile.id === Math.abs(item.source_id));
 
-            return owners
-                ?
-                <NewsFeedItem
-                    key={item.id}
-                    item={item}
-                    owner={owners}
-                    profiles={profiles}
-                />
-                : null
+            if (owner) {
+                return (
+                    <NewsFeedItem
+                        key={item.id}
+                        item={item}
+                        owner={owner}
+                        profiles={profiles}
+                    />
+                )
+            }
+            else {
+                console.warn("Owner not found for feed", item);
+                return null
+            }
         };
 
         return (
