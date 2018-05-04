@@ -155,11 +155,18 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
 
     repostedText = (itemPost: PostItem) => {
-        if (itemPost.copy_history && itemPost.copy_history[0] && itemPost.copy_history[0].text) {
+        const originP = (itemPost.copy_history && itemPost.copy_history[0])
+            ? itemPost.copy_history[0]
+            : undefined;
+
+        if (originP && (originP.text || originP.attachments)) {
             return (
                 <div>
-                    <i className="fa fa-bullhorn"/>
-                    {itemPost.copy_history[0].text}
+                    <div className="news__item-text">
+                        <i className="news__post_repost fa fa-bullhorn"/>
+                        {itemPost.copy_history[0].text}
+                    </div>
+
                     {this.postAttachmentElms(itemPost.copy_history[0])}
                 </div>
             )

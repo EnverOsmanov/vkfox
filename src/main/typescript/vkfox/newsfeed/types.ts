@@ -1,6 +1,6 @@
 import {Collection, Model} from "backbone";
 import {FoxUserProfileI} from "../chat/types";
-import {ItemObj} from "../../vk/types/newsfeed";
+import {ItemObj, UserId} from "../../vk/types/newsfeed";
 import {idMaker} from "../back/newsfeed/newsfeed.bg";
 import {LikesObj} from "../../vk/types/objects";
 
@@ -35,7 +35,7 @@ export interface LikesChanged {
 
 export class Item extends Model {
 
-    get friends(): FoxUserProfileI[] {
+    get friends(): UserId[] {
         return super.get("friends")
     }
 

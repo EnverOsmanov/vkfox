@@ -4,21 +4,19 @@ import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import Msg from "../../mediator/messages"
 import {Profiles, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
-import {
-    ItemDulpColl,
-    ItemsColl,
-    LikesChanged,
-} from "../../newsfeed/types";
+import {ItemDulpColl, ItemsColl, LikesChanged,} from "../../newsfeed/types";
 import {AccessTokenError} from "../../request/models";
 import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
 import {
     AttachmentPhoto,
     AttachmentPhotoContainer,
-    ItemObj, NewsfeedRequestParams, NewsfeedResp,
+    ItemObj,
+    NewsfeedRequestParams,
+    NewsfeedResp,
     PostItem,
+    UserId,
     WallPhotoItem
 } from "../../../vk/types/newsfeed";
-import {FoxUserProfileI} from "../../chat/types";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -172,7 +170,7 @@ function freeSpace() {
                 .map( model => (model.friends || []) )
         ).chain()
             .flatten()
-            .map((f: FoxUserProfileI) => f.id)
+            .map((f: UserId) => f.user_id)
             .value();
 
         // gather required profiles from source_ids
