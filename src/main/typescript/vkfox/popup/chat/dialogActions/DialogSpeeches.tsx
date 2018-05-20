@@ -21,7 +21,7 @@ interface DialogSpeechesProps {
 
 class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
-    getActionText(messageItem: Message, speech: Speech): string | undefined {
+    getActionText(messageItem: Message, speech: Speech): React.ReactNode | undefined {
         if ("action" in messageItem) {
             const messageWithAction = messageItem as MessageWithAction;
 
@@ -44,7 +44,10 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     const i18nAction = I18N.getWithGender(rawM, profile.sex);
 
                     const targetName = profile2Name(profile);
-                    return `${targetName} ${i18nAction}`;
+                    const finalText = `${targetName} ${i18nAction}`;
+                    return (
+                        <small><i>{finalText}</i></small>
+                    )
                 }
                 default:
                     console.warn("Unknown message action", messageWithAction.action);
@@ -131,16 +134,14 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
         return (
             <div key={messageItem.id}>
-                <span>
-                    <RectifyPu
-                        text={messageItem.body}
-                        hasEmoji={false}
-                    />
-                </span>
+                <RectifyPu
+                    text={messageItem.body}
+                    hasEmoji={false}
+                />
 
                 {this.forwardedMessages(messageItem)}
 
-                <small><i>{userJoinedOrKickedInfo}</i></small>
+                {userJoinedOrKickedInfo}
 
                 <br hidden={!(messageItem.attachments && messageItem.body)}/>
 

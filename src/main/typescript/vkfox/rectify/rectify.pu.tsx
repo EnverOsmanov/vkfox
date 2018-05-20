@@ -123,9 +123,10 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
             }
             else return <div dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}/>;
         }
-        else {
+        else if (text) {
             return <div dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}/>;
         }
+        else return null;
 
     };
 }

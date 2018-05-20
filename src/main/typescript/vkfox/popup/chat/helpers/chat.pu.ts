@@ -62,9 +62,6 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: Collecti
         const lastItem = speeches[speeches.length - 1];
 
         function getProfile(): UserProfile {
-            if (!profilesColl.get(message.user_id)) {
-                debugger;
-            }
 
             return profilesColl.get(message.user_id)
                 .toJSON()

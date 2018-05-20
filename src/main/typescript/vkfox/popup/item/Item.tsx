@@ -25,7 +25,7 @@ class Item extends React.Component<ItemProps> {
 
         const ownerClass = itemClass == "chat"
             ? "item__avatar"
-            : "item_img";
+            : "item__img";
 
         const divForArray = (
             <div className={ownerClass}>
