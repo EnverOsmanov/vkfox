@@ -108,7 +108,7 @@ export interface AttachmentPhoto extends Attachment {
 }
 
 export interface AttachmentPhotoContainer extends AttachmentContainer {
-    type : string
+    // type : string = "photo"
     photo: AttachmentPhoto
 }
 
@@ -118,7 +118,7 @@ export interface AttachmentAudio extends Attachment {
 }
 
 export interface AttachmentAudioContainer extends AttachmentContainer {
-    type : string
+    // type : string = "audio"
     audio: AttachmentAudio
 }
 

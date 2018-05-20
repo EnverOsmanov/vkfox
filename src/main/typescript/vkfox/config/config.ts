@@ -1,6 +1,10 @@
 "use strict";
 
-export const APP_ID = 4791855;
+const isDev = process.env.NODE_ENV === "development";
+
+export const APP_ID = isDev
+    ? 6449063
+    : 4791855;
 
 export const TRACKER_ID = 'UA-9568575-4';
 

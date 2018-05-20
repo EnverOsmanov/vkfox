@@ -164,7 +164,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 <div>
                     <div className="news__item-text">
                         <i className="news__post_repost fa fa-bullhorn"/>
-                        {itemPost.copy_history[0].text}
+                        <RectifyPu text={itemPost.copy_history[0].text} hasEmoji={false}/>
                     </div>
 
                     {this.postAttachmentElms(itemPost.copy_history[0])}

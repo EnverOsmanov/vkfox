@@ -29,11 +29,6 @@ module.exports = {
   plugins: [
       extractLess,
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
-      new webpack.DefinePlugin({
-          "process.env": {
-              "NODE_ENV": JSON.stringify(process.env.NODE_ENV)
-          }
-      }),
       new HtmlWebpackPlugin({
           chunks: ["photo"],
           filename: "photo.html",

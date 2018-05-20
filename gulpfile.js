@@ -7,7 +7,6 @@ const gulp                 = require("gulp"),
     preprocess             = require("gulp-preprocess"),
     rename                 = require("gulp-rename"),
     del                    = require("del"),
-    runSequence            = require("run-sequence"),
     notifier               = require("node-notifier"),
     messageFormat          = require("gulp-messageformat"),
     webpack                = require("webpack");
@@ -18,22 +17,25 @@ const __resources = "./src/main/resources";
 
 const APP_VERSION = process.env.npm_package_version;
 
-gulp.task("env:firefox",  () => {
+gulp.task("env:firefox",  done => {
     env({
         vars: {
         TARGET: "FIREFOX"
-    }})
+    }});
+    done()
 });
 
-gulp.task("env:development", () => {
+gulp.task("env:development", done => {
     env({
         vars: {
         NODE_ENV: "development"
-    }})
+    }});
+    done()
 });
 
-gulp.task("env:version",  () => {
-    env({ vars: { APP_VERSION }})
+gulp.task("env:version",  done => {
+    env({ vars: { APP_VERSION }});
+    done()
 });
 
 gulp.task("less", () => {
@@ -128,24 +130,21 @@ Locales.forEach(i18n);
 ////
 // Tasks for public use
 
-gulp.task("production", (cb) => {
-        runSequence(
-            ["env:version", "env:firefox", "clean:firefox"],
-            ["less", "assets", "fonts", "preprocess:manifest"]
-                .concat(Locales.map( locale => `i18n-${locale}`)),
-            [ "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
-            () => cb()
+gulp.task("production",
+        gulp.series(
+            gulp.parallel("env:version", "env:firefox", "clean:firefox"),
+            gulp.parallel(["less", "assets", "fonts", "preprocess:manifest"]
+                .concat(Locales.map( locale => `i18n-${locale}`))),
+            gulp.parallel( "webpack", "copy:firefoxSrc", "copy:firefoxResources")
         )
-    }
 );
 
-gulp.task("default", (cb) => {
-        runSequence(
-            ["env:version", "env:firefox", "env:development", "clean:firefox"],
-            ["less", "assets", "fonts", "preprocess:manifest"]
-                .concat(Locales.map( locale => `i18n-${locale}`)),
-            [ "webpack", "copy:firefoxSrc", "copy:firefoxResources"],
-             () => cb()
+gulp.task("default",
+        gulp.series(
+            gulp.parallel("env:version", "env:firefox", "env:development", "clean:firefox"),
+            gulp.parallel(["less", "assets", "fonts", "preprocess:manifest"]
+                .concat(Locales.map( locale => `i18n-${locale}`))),
+            gulp.parallel("webpack", "copy:firefoxSrc", "copy:firefoxResources")
+
         )
-    }
 );

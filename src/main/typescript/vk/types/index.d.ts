@@ -185,6 +185,29 @@ export interface Message {
     chat_active ?: number[];
     random_id   ?: number
     chat_id     ?: number
+
+    fwd_messages?: FwdMessage[]
+}
+
+interface FwdMessage {
+    user_id : number
+    date    : number
+    body    : string
+
+    attachments?: AttachmentContainer[]
+}
+
+type MessageActionT =
+    "chat_kick_user" |
+    "chat_invite_user" |
+    "chat_create"
+
+export interface MessageWithAction extends Message {
+    action: MessageActionT
+
+    action_mid  : number
+    action_email: string
+    action_text : string
 }
 
 export interface VkDialog {

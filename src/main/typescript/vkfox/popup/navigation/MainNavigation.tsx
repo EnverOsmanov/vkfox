@@ -2,7 +2,7 @@
 import {BrowserRouter as Router, Link, NavLink, Route, Switch} from 'react-router-dom'
 import {Redirect, withRouter} from "react-router"
 import * as React from "react"
-import ChatPage from "../chat/Chat";
+import ChatPage from "../chat/ChatPage";
 import BuddiesPage from "../buddy/Buddies";
 import {addVKBase} from "../filters/filters.pu";
 import SettingsPage from "../settings/SettingsPage";

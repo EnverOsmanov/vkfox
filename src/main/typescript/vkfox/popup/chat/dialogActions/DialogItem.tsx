@@ -3,17 +3,15 @@ import {SendMessageParams} from "../../../chat/collections/DialogColl";
 import Item from "../../item/Item";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
-import {foldMessagesByAuthor} from "../chat.pu";
+import {foldMessagesByAuthor} from "../helpers/chat.pu";
 import Request from "../../../request/request.pu"
-import {profile2Name, timeAgo} from "../../filters/filters.pu";
-import AttachmentC from "../../attachment/AttachmentC";
+import {timeAgo} from "../../filters/filters.pu";
 import {PuChatUserProfile} from "../../../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
-import {ReplyI} from "../types";
-import RectifyPu from "../../../rectify/rectify.pu";
-import {DialogI, Speech} from "../types";
+import {DialogI, ReplyI} from "../types";
 import {UserProfile} from "../../../back/users/types";
 import {Message} from "../../../../vk/types";
+import DialogSpeeches from "./DialogSpeeches";
 
 interface DialogItemProps {
     dialog      : DialogI
@@ -108,77 +106,14 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
     };
 
-    singleMessage = (messageItem: Message) => {
-
-        const attachments = !messageItem.attachments
-            ? ""
-            : messageItem.attachments.map((attachment, i) =>
-
-                <AttachmentC
-                    key={i}
-                    data={attachment[attachment.type]}
-                    type={attachment.type}
-                />
-            );
-
-        return (
-            <div key={messageItem.id}>
-                <span>
-                    <RectifyPu
-                        text={messageItem.body}
-                        hasEmoji={false}
-                    />
-                </span>
-
-                <br hidden={!(messageItem.attachments && messageItem.body)}/>
-                {attachments}
-            </div>
-        )
-    };
-
-    messages = (messageItems: Message[]) => messageItems.map(this.singleMessage);
-
-
-    blockquotes = (foldedMessages: Speech[], owners: UserProfile | UserProfile[]) => {
-
-
-        return foldedMessages.map((foldedMessage, i) => {
-
-                const isOutClassName = foldedMessage.out
-                    ? "chat__messages_out"
-                    : "";
-
-                const messageAuthor = foldedMessage.author.id !== (owners as UserProfile).id
-                    ?
-                    <small className="chat__author">
-                        {profile2Name(foldedMessage.author)}
-                    </small>
-                    : null;
-
-                return (
-                    <blockquote
-                        key={i}
-                        className="chat__item-content">
-
-                        <div className={isOutClassName}>
-                            {this.messages(foldedMessage.items)}
-
-                            {messageAuthor}
-                        </div>
-
-                    </blockquote>
-                )
-            }
-        )
-    };
-
 
     render(): React.ReactNode {
         const {dialog, profilesColl} = this.props;
 
         const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
         const out = _(foldedMessages).last().author.isSelf;
-        const datetime = timeAgo(dialog.messages.slice(-1)[0].date * 1000);
+        const lastMessage = dialog.messages.slice(-1)[0];
+        const datetime = timeAgo(lastMessage.date * 1000);
 
         const owners = this.getOwners(dialog);
 
@@ -190,11 +125,15 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                 itemClass="chat"
                 reply={this.state.reply}
                 message={this.state.message}
-                title={dialog.messages.slice(-1)[0].title}
+                title={lastMessage.title}
                 sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
                 handleMessageChange={this.handleMessageChange}>
 
-                {this.blockquotes(foldedMessages, owners)}
+                <DialogSpeeches
+                    speeches={foldedMessages}
+                    owners={owners}
+                    profilesColl={profilesColl}
+                />
 
                 <DialogActions
                     dialog={dialog}

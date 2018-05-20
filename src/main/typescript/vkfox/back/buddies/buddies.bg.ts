@@ -45,11 +45,12 @@ export default function initialize() {
             if (profile.isWatched && model.changed.hasOwnProperty("online")) {
 
                 model.set({ "lastActivityTime": Date.now() }, ProfilesCmpn.beSilentOptions);
-                const gender = profile.sex === 1 ? "female":"male";
+
+                const rawText = profile.online ? "is online":"went offline";
 
                 const title = [
                     Users.getName(profile),
-                    I18N.get(profile.online ? "is online":"went offline", { GENDER: gender })
+                    I18N.getWithGender(rawText, profile.sex)
                 ].join(" ");
 
                 Notifications.notify({

@@ -21,9 +21,14 @@ interface ItemProps {
 class Item extends React.Component<ItemProps> {
 
     ownerDiv = () => {
-        const {owners} = this.props;
+        const {owners, itemClass} = this.props;
+
+        const ownerClass = itemClass == "chat"
+            ? "item__avatar"
+            : "item_img";
+
         const divForArray = (
-            <div className="item__img">
+            <div className={ownerClass}>
                 <i className="fa fa-user"/>{(owners as ProfileI[]).length}
             </div>
         );
@@ -45,7 +50,7 @@ class Item extends React.Component<ItemProps> {
                 <div
                     style={cssProps}
                     data-anchor={addVKBase(anchor)}
-                    className="item__img media-object">
+                    className={ownerClass}>
                 </div>
             );
         };

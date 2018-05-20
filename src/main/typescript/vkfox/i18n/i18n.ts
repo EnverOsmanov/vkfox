@@ -1,4 +1,6 @@
 "use strict";
+import {Sex} from "../back/users/types";
+
 const DEFAULT_LANGUAGE = 'en';
 
 const i18n: any = {
@@ -43,5 +45,13 @@ export default class I18N {
      */
     static get(key: string, ...args): string {
         return messages[key].apply(messages, args);
+    }
+
+    static getWithGender(key: string, sex: Sex): string {
+        const gender = sex === 1
+            ? "female"
+            : "male";
+
+        return I18N.get(key, {GENDER: gender})
     }
 };

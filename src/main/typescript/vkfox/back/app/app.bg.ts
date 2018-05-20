@@ -26,5 +26,7 @@ ForceOnlineBg();
 LongpollBg();
 
 InstallPageOrLogin();
-// Browser.createTab("/pages/popup.html")
+
+if (process.env.NODE_ENV === "development")
+ Browser.createTab("/pages/popup.html");
 

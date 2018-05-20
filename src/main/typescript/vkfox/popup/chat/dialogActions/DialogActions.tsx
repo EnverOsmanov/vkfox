@@ -1,10 +1,10 @@
 import * as React from "react"
-import ChatPage from "../Chat";
+import ChatPage from "../ChatPage";
 import ItemAction from "../../itemActions/ItemAction";
 import I18N from "../../../i18n/i18n";
 import ItemActions from "../../itemActions/ItemActions";
 
-import {getHistory, markAsRead} from "../chat.pu";
+import {getHistory, markAsRead} from "../helpers/chat.pu";
 import * as _ from "underscore"
 import * as $ from "jquery"
 import {DialogI, MessageHistoryI, Speech} from "../types";

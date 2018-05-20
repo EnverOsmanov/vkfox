@@ -40,37 +40,38 @@ class ChatPage extends React.Component<object, ChatState> {
 
     private onChatData = ({dialogs, profiles}: ChatDataI) => {
 
-        const profilesColl: Collection<PuChatUserProfile> =
-            new Collection(profiles, {model: PuChatUserProfile});
-
         this.setState(prevState => {
 
-            function mergeDialogs(bgDialog: DialogI): DialogI {
-                const maybeUiDialog = prevState.dialogs.find( d => d.id === bgDialog.id);
+                function mergeDialogs(bgDialog: DialogI): DialogI {
+                    const maybeUiDialog = prevState.dialogs.find(d => d.id === bgDialog.id);
 
-                function mergeMessages() {
-                    const onlyNewUimessages =
-                        maybeUiDialog.messages
-                            .filter(ui => !bgDialog.messages.some(bg => bg.id === ui.id));
+                    function mergeMessages() {
+                        const onlyNewUimessages =
+                            maybeUiDialog.messages
+                                .filter(ui => !bgDialog.messages.some(bg => bg.id === ui.id));
 
-                    bgDialog.messages =
-                        bgDialog.messages
-                            .concat(onlyNewUimessages)
-                            .sort((a, b) => a.date - b.date);
+                        bgDialog.messages =
+                            bgDialog.messages
+                                .concat(onlyNewUimessages)
+                                .sort((a, b) => a.date - b.date);
 
 
-                    return bgDialog
+                        return bgDialog
+                    }
+
+                    return maybeUiDialog
+                        ? mergeMessages()
+                        : bgDialog;
                 }
 
-                return maybeUiDialog
-                    ? mergeMessages()
-                    : bgDialog;
-            }
+                const mergedDialogs = dialogs.map(mergeDialogs);
 
-            const mergedDialogs = dialogs.map(mergeDialogs);
+                const mergedProfiles: PuChatUserProfile[] = prevState.profilesColl.toArray().concat(profiles);
+
+                const profilesColl: Collection<PuChatUserProfile> =
+                    new Collection(mergedProfiles, {model: PuChatUserProfile});
 
                 return {
-                    ...prevState,
                     profilesColl,
                     dialogs: mergedDialogs
                 }
