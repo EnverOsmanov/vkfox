@@ -74,7 +74,9 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                 'return API.messages.markAsRead({message_ids: API.messages.getHistory({user_id:'
                 + params.user_id + '})@.mid});';
 
-            Request.api({code}).catch(console.error);
+            Request
+                .api({code})
+                .catch(console.error);
         }
     };
 

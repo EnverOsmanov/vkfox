@@ -67,7 +67,7 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, object> 
     render() {
         const {item} = this.props;
         const comment = getCommentsData(item);
-        const parent = item.parent;
+        const {parent} = item;
 
         if (comment) {
 

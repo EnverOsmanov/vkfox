@@ -1,0 +1,9 @@
+
+
+@import "~bootstrap/scss/functions", "~bootstrap/scss/variables"; // Modify this for custom colors, font-sizes, etc
+@import "~bootstrap/scss/mixins";
+
+@import "scss/variables";
+@import "scss/mixins";
+@import "anchor/anchor";
+@import "app/app.install";

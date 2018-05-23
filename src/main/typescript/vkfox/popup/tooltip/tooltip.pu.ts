@@ -1,30 +1,15 @@
 "use strict";
 import * as $ from "jquery"
 (<any>window).jQuery = $;
-import "bootstrap/js/tooltip.js";
+import "bootstrap/js/dist/tooltip.js";
+import {TooltipOption, Delay, Placement} from "bootstrap"
 
 export default function init() {
-    const options: TooltipOptions = {
-        selector: '[title]',
-        delay: {show: 1000, hide: false},
-        placement: function (tooltip) {
-            setTimeout(() => {
-                const $tooltip = $(tooltip),
-                    $inner = $('.tooltip-inner', tooltip);
 
-                //if no item, then will return outerWidth of root
-                const offset = $tooltip.parents('.item').add((<any>window)).width()
-                    - $tooltip.offset().left - $tooltip.width();
-
-                if (offset < 0) {
-                    $inner.css({
-                        'position': 'relative',
-                        'left': offset + 'px'
-                    });
-                }
-            });
-            return 'bottom';
-        }
+    const options: TooltipOption = {
+        delay,
+        placement,
+        selector: '[title]'
     };
 
     $(() =>
@@ -38,3 +23,28 @@ export default function init() {
         });
     });
 }
+
+function placement(tooltip): Placement {
+    setTimeout(() => {
+        const $tooltip = $(tooltip),
+            $inner = $('.tooltip-inner', tooltip);
+
+        //if no item, then will return outerWidth of root
+        const offset = $tooltip.parents('.item').add((<any>window)).width()
+            - $tooltip.offset().left - $tooltip.width();
+
+        if (offset < 0) {
+            $inner.css({
+                'position': 'relative',
+                'left': offset + 'px'
+            });
+        }
+    });
+
+    return 'bottom';
+}
+
+const delay: Delay = {
+    show: 1000,
+    hide: 0
+};

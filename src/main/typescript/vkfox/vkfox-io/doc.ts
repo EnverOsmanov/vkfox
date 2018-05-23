@@ -1,6 +1,6 @@
 "use strict";
 
-import "../../../less/vkfox/vkfox-io/index.less"
+import "../../../sass/vkfox/vkfox-io/index.scss"
 
 
 const GOOGLE_VIEWER_URL = "http://docs.google.com/viewer?embedded=true&url=";

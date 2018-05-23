@@ -1,0 +1,12 @@
+[data-anchor] {
+    cursor: pointer;
+}
+
+a:not([href]):not([tabindex]) {
+    color: $link-color;
+
+    @include hover-focus {
+        color: $link-hover-color;
+        text-decoration: $link-hover-decoration;
+    }
+}

@@ -1,0 +1,5 @@
+.item__action-like_liked.item__action
+{
+    opacity: 1;
+    @include color-with-hover(#ee5f5b);
+}
