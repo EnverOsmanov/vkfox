@@ -105,7 +105,7 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
      * @returns {String} html-string
      */
     render() {
-        let text = this.props.text;
+        const text = this.props.text;
         const hasEmoji = this.props.hasEmoji;
 
         if (text.length > MAX_TEXT_LENGTH) {
@@ -116,15 +116,24 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
 
                 return (
                     <div>
-                        <div dangerouslySetInnerHTML={{__html: firstPartOfText}}/>
+                        <div
+                            className="news__item-text"
+                            dangerouslySetInnerHTML={{__html: firstPartOfText}}
+                        />
                         {this.buttonOrFullText(text, spaceIndex, hasEmoji)}
                     </div>
                 );
             }
-            else return <div dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}/>;
+            else return <div
+                className="news__item-text"
+                dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}
+            />;
         }
         else if (text) {
-            return <div dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}/>;
+            return <div
+                className="news__item-text"
+                dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}
+            />;
         }
         else return null;
 

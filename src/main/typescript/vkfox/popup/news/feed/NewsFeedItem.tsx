@@ -26,6 +26,7 @@ import {
 } from "../../../../vk/types/newsfeed";
 import {GenericRS} from "../../../../vk/types";
 import {onReply} from "../news.pu";
+import ReplyMessage from "../../reply/ReplyMessage";
 
 
 interface NewsFeedItemProps {
@@ -162,10 +163,9 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
         if (originP && (originP.text || originP.attachments)) {
             return (
                 <div>
-                    <div className="news__item-text">
-                        <i className="news__post_repost fa fa-bullhorn"/>
-                        <RectifyPu text={itemPost.copy_history[0].text} hasEmoji={false}/>
-                    </div>
+                    <i className="news__post_repost fa fa-bullhorn"/>
+
+                    <RectifyPu text={itemPost.copy_history[0].text} hasEmoji={false}/>
 
                     {this.postAttachmentElms(itemPost.copy_history[0])}
                 </div>
@@ -178,8 +178,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
         return (
             <div>
-                <div
-                    className="news__item-text">
+                <div>
                     <RectifyPu text={itemPost.text} hasEmoji={false}/>
                     {this.repostedText(itemPost)}
                 </div>
@@ -290,11 +289,18 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
         return (
             <Item
-                owners={owner}
-                reply={this.state.reply}
-                sendMessage={() => this.sendMessage()}
-                handleMessageChange={this.handleMessageChange}>
-                {this.feedItemElm(item)}
+                owners={owner}>
+
+                <div className="item__body clearfix">
+                    {this.feedItemElm(item)}
+                </div>
+
+                <ReplyMessage
+                    reply={this.state.reply}
+                    message={this.state.message}
+                    sendMessage={() => this.sendMessage()}
+                    handleMessageChange={this.handleMessageChange}
+                />
             </Item>
         )
     }

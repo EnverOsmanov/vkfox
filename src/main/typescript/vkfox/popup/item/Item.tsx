@@ -1,26 +1,21 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import {ReplyI} from "../chat/types";
 import {addVKBase, profile2Name} from "../filters/filters.pu";
 import {GroupProfile, ProfileI, UserProfile} from "../../back/users/types";
 import {profilePhotoPath} from "./item.pu";
 
 interface ItemProps {
     owners      : UserProfile | UserProfile[] | GroupProfile | GroupProfile[],
-    reply       : ReplyI
     itemClass  ?: string
-    message    ?: string
     description?: string
     title      ?: string
 
-    sendMessage         ?: () => void
-    handleMessageChange ?: (event) => void
 }
 
 
 class Item extends React.Component<ItemProps> {
 
-    ownerDiv = () => {
+    heroIcon = () => {
         const {owners, itemClass} = this.props;
 
         const ownerClass = itemClass == "chat"
@@ -61,7 +56,7 @@ class Item extends React.Component<ItemProps> {
             : divForNotArray()
     };
 
-    itemName = () => {
+    heroName = () => {
         const {owners, title} = this.props;
 
         return Array.isArray(owners)
@@ -69,10 +64,6 @@ class Item extends React.Component<ItemProps> {
             : profile2Name(owners)
     };
 
-    handleMessageChange = (event) => {
-        const message = event.target.value;
-        this.props.handleMessageChange(message)
-    };
 
     isOnlineClassName = () => {
         const {owners} = this.props;
@@ -82,28 +73,7 @@ class Item extends React.Component<ItemProps> {
             : "";
     };
 
-    handleKeyPress = (event: React.KeyboardEvent<any>) => {
-        if (event.key == "Enter") this.props.sendMessage()
-    };
-
-
-    replyElm = () => {
-        const {reply, message} = this.props;
-
-        return reply.visible
-            ?
-            <div className="item__reply">
-                <textarea
-                    autoFocus={true}
-                    onKeyPress={this.handleKeyPress}
-                    value={message}
-                    onChange={this.handleMessageChange}
-                />
-            </div>
-            : null
-    };
-
-    descriptionElm = () => {
+    heroSmallDescription = () => {
         const {description} = this.props;
 
         return description
@@ -123,23 +93,18 @@ class Item extends React.Component<ItemProps> {
 
                 <div className="item__header">
                     <div className="pull-left">
-                        {this.ownerDiv()}
+                        {this.heroIcon()}
                     </div>
                     <span className={`item__title ${this.isOnlineClassName()}`}>
                         <span className="item__author">
-                            {this.itemName()}
+                            {this.heroName()}
                         </span>
 
-                        {this.descriptionElm()}
+                        {this.heroSmallDescription()}
                     </span>
                 </div>
 
-                <div className="item__body clearfix">
-                    {this.props.children}
-                </div>
-
-
-                {this.replyElm()}
+                {this.props.children}
             </div>
         )
     }

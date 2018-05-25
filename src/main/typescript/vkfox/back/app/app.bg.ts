@@ -1,5 +1,4 @@
 "use strict";
-console.debug("HELLO")
 import Browser from "../../browser/browser.bg";
 import Buddies from "../buddies/buddies.bg";
 import ChatBg from "../chat/chat.bg";
@@ -30,5 +29,4 @@ InstallPageOrLogin();
 
 if (process.env.NODE_ENV === "development")
  Browser.createTab("/pages/popup.html");
-console.debug("END")
 

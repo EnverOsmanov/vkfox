@@ -12,6 +12,7 @@ import {DialogI, ReplyI} from "../types";
 import {UserProfile} from "../../../back/users/types";
 import {Message} from "../../../../vk/types";
 import DialogSpeeches from "./DialogSpeeches";
+import ReplyMessage from "../../reply/ReplyMessage";
 
 interface DialogItemProps {
     dialog      : DialogI
@@ -125,25 +126,30 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                 description={datetime}
                 owners={owners}
                 itemClass="chat"
-                reply={this.state.reply}
-                message={this.state.message}
-                title={lastMessage.title}
-                sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
-                handleMessageChange={this.handleMessageChange}>
+                title={lastMessage.title}>
 
-                <DialogSpeeches
-                    speeches={foldedMessages}
-                    owners={owners}
-                    profilesColl={profilesColl}
-                />
+                <div className="item__body clearfix">
+                    <DialogSpeeches
+                        speeches={foldedMessages}
+                        owners={owners}
+                        profilesColl={profilesColl}
+                    />
 
-                <DialogActions
-                    dialog={dialog}
-                    foldedMessages={foldedMessages}
-                    out={out}
-                    showReply={this.showOrHideReply}
-                    addToProfilesColl={this.props.addToProfilesColl}
-                    addToMessages={this.props.addToMessages}
+                    <DialogActions
+                        dialog={dialog}
+                        foldedMessages={foldedMessages}
+                        out={out}
+                        showReply={this.showOrHideReply}
+                        addToProfilesColl={this.props.addToProfilesColl}
+                        addToMessages={this.props.addToMessages}
+                    />
+                </div>
+
+                <ReplyMessage
+                    reply={this.state.reply}
+                    message={this.state.message}
+                    sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
+                    handleMessageChange={this.handleMessageChange}
                 />
 
             </Item>

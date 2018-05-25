@@ -100,9 +100,11 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
 
         return (
             <Item
-                owners={owner}
-                reply={this.state.reply}>
-                {this.feedbackElm(feedback)}
+                owners={owner}>
+                <div className="item__body clearfix">
+                    {this.feedbackElm(feedback)}
+
+                </div>
             </Item>
         )
     }
