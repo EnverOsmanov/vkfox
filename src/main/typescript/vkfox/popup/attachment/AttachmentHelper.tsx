@@ -2,7 +2,7 @@ import * as React from "react"
 import {CSSProperties} from "react"
 import Browser from "../../browser/browser.pu"
 import Request from "../../request/request.pu"
-import {docViewPath, imageViewPath, stickerImageUrl, stickerViewPath} from "../item/item.pu";
+import {docViewPath, imageViewPath, imageViewPathByUrl, stickerImageUrl, stickerViewPath} from "../item/item.pu";
 import {duration} from "../filters/filters.pu";
 import {VideoGetUserVideosResponse} from "../../../vk/types";
 import {
@@ -27,13 +27,13 @@ function imageProperties(src: string): CSSProperties {
     }
 }
 
-function onVideoClick(dataVideo: AttachmentVideo) {
+function onVideoClick(dataVideo: AttachmentVideo): Promise<void> {
     const videos = `${dataVideo.owner_id}_${dataVideo.id}_${dataVideo.access_key}`;
 
     const params = {videos};
     const code = `return API.video.get(${ JSON.stringify(params) });`;
 
-    Request
+    return Request
         .api<VideoGetUserVideosResponse>({code})
         .then((data) => {
             return data && data.items[0]
@@ -42,7 +42,43 @@ function onVideoClick(dataVideo: AttachmentVideo) {
         });
 }
 
-export function attachmentDiv(type: string, data: Attachment) {
+
+function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
+    switch (dataDoc.type) {
+        case 3: {
+            const previewUrl = dataDoc.preview.photo.sizes.sort( (a, b) => b.width - a.width)
+                .find(p => p.width <= 604)
+                .src;
+
+            return (
+                <div className={`item__attachment item__attachment_type_photo`}>
+                    <div
+                        className={`item__picture`}
+                        style={imageProperties(previewUrl)}
+                        data-anchor={imageViewPathByUrl(dataDoc.url)}>
+
+                        <div className="item__video-desc">
+                            <div className="item__video-title">{"GIF"}</div>
+                        </div>
+
+                    </div>
+                </div>
+            )
+        }
+
+        default: {
+            return (
+                <a className="item__link" data-anchor={docViewPath(dataDoc)}>
+                    <i className="fa fa-file"/>
+                    {dataDoc.title}
+                </a>
+            );
+        }
+    }
+
+}
+
+export function attachmentDiv(type: string, data: Attachment): JSX.Element | null {
     switch (type) {
         /*            case "app":
                         return <img src={data as Att.src}/>;*/
@@ -65,13 +101,7 @@ export function attachmentDiv(type: string, data: Attachment) {
             );
 
         case "doc":
-            const dataDoc = data as AttachmentDoc;
-            return (
-                <a className="item__link" data-anchor={docViewPath(dataDoc)}>
-                    <i className="fa fa-file"/>
-                    {dataDoc.title}
-                </a>
-            );
+            return documentDiv(data as AttachmentDoc);
 
         case "poll":
             const dataPoll = data as AttachmentPoll;
@@ -98,26 +128,31 @@ export function attachmentDiv(type: string, data: Attachment) {
             const dataGraffiti = data as AttachmentPhoto;
 
             return (
-                <div
-                    className="item__picture"
-                    style={imageProperties(dataGraffiti.photo_604)}
-                    data-anchor={imageViewPath(dataGraffiti)}>
+                <div className={`item__attachment item__attachment_type_${type}`}>
+                    <div
+                        className="item__picture"
+                        style={imageProperties(dataGraffiti.photo_604)}
+                        data-anchor={imageViewPath(dataGraffiti)}>
+                    </div>
                 </div>
             );
 
         case "video":
             const dataVideo = data as AttachmentVideo;
             return (
-                <div
-                    className="item__video"
-                    style={imageProperties(dataVideo.photo_320)}
-                    onClick={() => onVideoClick(dataVideo)}>
+                <div className={`item__attachment item__attachment_type_${type}`}>
+                    <div
+                        className="item__video"
+                        style={imageProperties(dataVideo.photo_320)}
+                        onClick={() => onVideoClick(dataVideo)}
+                        >
 
-                    <div className="item__video-desc">
-                        <div className="item__video-title">{dataVideo.title}</div>
-                        <div className="item__video-duration">{duration(dataVideo.duration)}</div>
+                        <div className="item__video-desc">
+                            <div className="item__video-title">{dataVideo.title}</div>
+                            <div className="item__video-duration">{duration(dataVideo.duration)}</div>
+                        </div>
+
                     </div>
-
                 </div>
             );
         case "sticker":
@@ -141,6 +176,6 @@ export function attachmentDiv(type: string, data: Attachment) {
             );
         default:
             console.warn("Unknown attachment", type, data);
-            return <div/>;
+            return null;
     }
 }

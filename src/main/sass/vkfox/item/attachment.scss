@@ -33,8 +33,7 @@
     max-width: 100%;
 }
 .item__picture {
-    width: 100%;
-    display: inline-block;
+    display: flex;
     vertical-align: top;
     background-size: cover;
     background-position: center;
@@ -58,15 +57,11 @@
     background-size: cover;
     background-position: center;
     position: relative;
-    opacity: 0.9;
 
     &:after {
         content: '';
         display: block;
         margin-top: 110%;
-    }
-    &:hover {
-        opacity: 1;
     }
 }
 .item__video {
@@ -75,19 +70,19 @@
     cursor: pointer;
 }
 .item__video-desc {
-    display: block;
-    bottom: 0;
-    right: 0;
+    display: flex;
     color: white;
-    position: absolute;
+    position: relative;
     opacity: 0.75;
     background-color: #000;
     font-size: calc(1rem - 1px);
     font-weight: bold;
     width: 100%;
+    height: 100%;
     padding: calc(1rem / 3);
     box-sizing: border-box;
     overflow: hidden;
+    align-self: flex-end;
 }
 .item__video-title {
     max-width: 75%;

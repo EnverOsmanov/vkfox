@@ -133,9 +133,27 @@ export interface AttachmentNoteContainer extends AttachmentContainer {
     note: AttachmentNote
 }
 
+type AttachmentDocType =
+    1 | // text document
+    2 | // archive
+    3 | // gif
+    4 | // image
+    5 | // audio
+    6 | // video
+    7 | // e-book
+    8   // unknown
+
+
 export interface AttachmentDoc extends Attachment {
+    id: number
+    owner_id: number
+    size: number
+    date: number
     url     : string
     title   : string
+    type    : AttachmentDocType
+    ext     : string
+    preview : AttachPreviewI
 }
 
 export interface AttachmentDocContainer extends AttachmentContainer {
@@ -247,4 +265,42 @@ export interface NewsfeedResp {
     newsfeed: Newsfeed
 
     time    : number
+}
+
+interface PhotoSizeI {
+    src     : string
+    type    : string
+    width   : number
+    height  : number
+}
+
+interface PreviewPhoto {
+    sizes: PhotoSizeI[]
+}
+
+interface PreviewVideo {
+    src         : string
+    file_size   : number
+    height      : number
+    width       : number
+}
+
+interface PreviewGraffiti {
+    src     : string
+    width   : number
+    height  : number
+}
+
+interface PreviewAudioMsg {
+    duration: number
+    waveform: number[]
+    link_ogg: string
+    link_mp3: string
+}
+
+interface AttachPreviewI {
+    video       ?: PreviewVideo
+    photo       ?: PreviewPhoto
+    graffiti    ?: PreviewGraffiti
+    audio_msg   ?: PreviewAudioMsg
 }

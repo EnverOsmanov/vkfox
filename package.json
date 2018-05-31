@@ -72,7 +72,7 @@
     "ts-loader": "^4.3.0",
     "tslint": "^5.10.0",
     "tslint-loader": "^3.6.0",
-    "typescript": "^2.8.3",
+    "typescript": "^2.8.4",
     "vinyl-named": "^1.1.0",
     "vinyl-source-stream": "^2.0.0",
     "web-ext": "^2.7.0",

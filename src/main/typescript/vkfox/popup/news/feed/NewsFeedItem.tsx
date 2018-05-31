@@ -158,16 +158,16 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     repostedText = (itemPost: PostItem) => {
         const originP = (itemPost.copy_history && itemPost.copy_history[0])
             ? itemPost.copy_history[0]
-            : undefined;
+            : null;
 
         if (originP && (originP.text || originP.attachments)) {
             return (
                 <div>
                     <i className="news__post_repost fa fa-bullhorn"/>
 
-                    <RectifyPu text={itemPost.copy_history[0].text} hasEmoji={false}/>
+                    <RectifyPu text={originP.text} hasEmoji={false}/>
 
-                    {this.postAttachmentElms(itemPost.copy_history[0])}
+                    {this.postAttachmentElms(originP)}
                 </div>
             )
         }
@@ -178,10 +178,9 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
         return (
             <div>
-                <div>
-                    <RectifyPu text={itemPost.text} hasEmoji={false}/>
-                    {this.repostedText(itemPost)}
-                </div>
+                <RectifyPu text={itemPost.text} hasEmoji={false}/>
+
+                {this.repostedText(itemPost)}
 
                 {this.postAttachmentElms(itemPost)}
 

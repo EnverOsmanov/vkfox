@@ -8,13 +8,13 @@ html {
     position: absolute;
     width: 0;
     height: 0;
-    border-bottom: $size solid fade($peterRiver, 25%);
+    border-bottom: $size solid transparentize($peterRiver, 0.75);
     border-right: $size solid transparent;
     left: 0;
     bottom: 0;
 
     &__active {
-        user-select: none;
+        @include user-select(none);
         cursor: move;
     }
 
