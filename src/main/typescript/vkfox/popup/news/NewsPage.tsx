@@ -1,7 +1,7 @@
 import * as React from "react"
 import {Redirect, Route, RouteComponentProps, Switch} from "react-router"
 import I18N from "../../i18n/i18n";
-import {ForceOnlineSettingsI, NotificationsSettingsI} from "../../notifications/Notification";
+import {ForceOnlineSettingsI, NotificationsSettingsI} from "../../notifications/types";
 import {NavLink} from "react-router-dom";
 import MyNewsPage from "./my/MyNewsPage";
 import FriendNewsPage from "./feed/FriendNewsPage";

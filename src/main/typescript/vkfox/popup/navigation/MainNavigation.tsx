@@ -13,7 +13,7 @@ import Mediator from '../../mediator/mediator.pu'
 import Msg from "../../mediator/messages";
 import {AuthState} from "../../back/auth/models";
 import Browser from '../../browser/browser.pu'
-import {VKNotificationI} from "../../notifications/Notification";
+import {VKNotificationI} from "../../notifications/types";
 import Resizer from "../resize/Resizer";
 
 

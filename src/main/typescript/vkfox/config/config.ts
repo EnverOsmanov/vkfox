@@ -2,6 +2,8 @@
 
 const isDev = process.env.NODE_ENV === "development";
 
+export const SPEECH_KEY = atob("NDk5ODEwNjUtNmY1Ny00NmFmLTgyZTktZjg0Nzk5OGY1MzQ0");
+
 export const APP_ID = isDev
     ? 6449063
     : 4791855;

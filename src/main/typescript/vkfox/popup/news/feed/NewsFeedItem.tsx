@@ -103,22 +103,26 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     };
 
     postAttachmentElms = (itemPost: PostItem) => {
-        const counted: _.Dictionary<number> = _.countBy(itemPost.attachments, it => it.type);
+        function postAttachments(attachments: AttachmentContainer[]) {
+            const counted: _.Dictionary<number> = _.countBy(attachments, it => it.type);
 
-        function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
+            function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
 
-            return (
-                <AttachmentC
-                    key={i}
-                    type={attachment.type}
-                    data={attachment[attachment.type]}
-                    showFullWidth={counted[attachment.type] === 1}
-                />
-            );
+                return (
+                    <AttachmentC
+                        key={i}
+                        type={attachment.type}
+                        data={attachment[attachment.type]}
+                        showFullWidth={counted[attachment.type] === 1}
+                    />
+                );
+            }
+
+            return attachments.map(singleAttachment)
         }
 
         return itemPost.attachments
-            ? itemPost.attachments.map(singleAttachment)
+            ? postAttachments(itemPost.attachments)
             : null
     };
 

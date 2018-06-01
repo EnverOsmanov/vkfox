@@ -3,7 +3,7 @@ import Request from '../../request/request.bg';
 import Mediator from "../../mediator/mediator.bg"
 import PersistentModel from "../../persistent-model/persistent-model"
 import Msg from "../../mediator/messages";
-import {ForceOnlineSettingsI} from "../../notifications/Notification";
+import {ForceOnlineSettingsI} from "../../notifications/types";
 
 
 const MARK_PERIOD   = 30 * 1000; //5 min

@@ -57,7 +57,8 @@ export default function initialize() {
                     title,
                     image  : model.photo,
                     type   : NotifType.BUDDIES,
-                    noBadge: true
+                    noBadge: true,
+                    sex    : profile.sex
                 });
 
                 buddiesColl.sort();

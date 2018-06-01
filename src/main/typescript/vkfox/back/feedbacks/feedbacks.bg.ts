@@ -592,7 +592,8 @@ function tryNotification() {
                         message: message,
                         image  : profile.photo,
                         noBadge: feedbacksActive,
-                        noPopup: feedbacksActive
+                        noPopup: feedbacksActive,
+                        sex    : profile.sex
                     });
                 }
             });

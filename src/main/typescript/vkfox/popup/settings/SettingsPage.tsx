@@ -1,12 +1,18 @@
 import * as React from "react"
+import iassign from "immutable-assign";
 import Mediator from "../../mediator/mediator.pu"
 import Msg from "../../mediator/messages"
-import I18N from "../../i18n/i18n";
-import Settings from "../../notifications/settings"
-import {ForceOnlineSettingsI, NotificationsSettingsI, SoundSetting} from "../../notifications/Notification";
-import Checkbox from "../checkbox/Checkbox";
+import {ForceOnlineSettingsI, NotificationsSettingsI} from "../../notifications/types";
 import VKfoxAudio from "../../notifications/VKfoxAudio";
-
+import ForceOnlineSetting from "./components/ForceOnlineSetting";
+import NotificationsSetting from "./components/NotificationsSetting";
+import NotificationsSoundSetting from "./components/NotificationsSoundSetting";
+import NotificationsSignalSetting from "./components/NotificationsSignalSetting";
+import NotificationsVolumeSetting from "./components/NotificationsVolumeSetting";
+import NotificationsPopupsSetting from "./components/NotificationsPopupsSetting";
+import NotificationsTextSetting from "./components/NotificationsTextSetting";
+import {defaultState} from "./helper/SettingsPageHelper";
+import NotificationsSpeechSetting from "./components/NotificationsSpeechSetting";
 
 
 interface SettingsState {
@@ -21,31 +27,7 @@ class SettingsPage extends React.Component<object, SettingsState> {
     constructor(props) {
         super(props);
 
-        const popupSettings = {
-            enabled: true,
-            showText: true
-        };
-
-        const soundSettings = {
-            enabled : true,
-            volume  : 0.5,
-            signal  : Settings.standart
-        };
-
-        const notifications: NotificationsSettingsI = {
-            enabled : true,
-            popups   : popupSettings,
-            sound   : soundSettings
-        };
-
-        const forceOnline = {
-            enabled: true
-        };
-
-        this.state = {
-            notifications,
-            forceOnline
-        };
+        this.state = defaultState;
     }
 
     componentWillMount() {
@@ -61,12 +43,12 @@ class SettingsPage extends React.Component<object, SettingsState> {
         Mediator.unsub(Msg.NotificationsSettings);
     }
 
-    onForceOnlineSettings = (settings: ForceOnlineSettingsI) => {
+    onForceOnlineSettings = (forceOnline: ForceOnlineSettingsI) => {
         this.setState(prevState => {
 
             return {
                 ...prevState,
-                forceOnline: settings
+                forceOnline
             }
         })
     };
@@ -87,18 +69,14 @@ class SettingsPage extends React.Component<object, SettingsState> {
     onForceOnlineToggle = (filterName: string, filterValue: boolean) => {
         this.setState(prevState => {
 
-            const forceOnline = {
-                ...prevState.forceOnline
-            };
-            forceOnline[filterName] = filterValue;
+            const newState: SettingsState = iassign(prevState,
+                s => s.forceOnline[filterName],
+                () => filterValue
+            );
 
+            Mediator.pub(Msg.ForceOnlineSettingsPut, newState.forceOnline);
 
-            Mediator.pub(Msg.ForceOnlineSettingsPut, forceOnline);
-
-            return {
-                ...prevState,
-                forceOnline
-            }
+            return newState;
         })
     };
 
@@ -106,96 +84,61 @@ class SettingsPage extends React.Component<object, SettingsState> {
 
         this.setState(prevState => {
 
-            const notifications = {
-                ...prevState.notifications
-            };
-            notifications[filterName] = filterValue;
+            const newState: SettingsState = iassign(prevState,
+                s => s.notifications[filterName],
+                () => filterValue
+            );
 
+            Mediator.pub(Msg.NotificationsSettingsPut, newState.notifications);
 
-            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
-
-            return {
-                ...prevState,
-                notifications
-            }
+            return newState
         })
     };
 
     onNotificationsSoundToggle = (filterName: string, filterValue: boolean) => {
         this.setState(prevState => {
 
+            const newState: SettingsState = iassign(prevState,
+                s => s.notifications.sound[filterName],
+                () => filterValue
+            );
 
-            const sound = {
-                ...prevState.notifications.sound
-            };
-            sound[filterName] = filterValue;
+            Mediator.pub(Msg.NotificationsSettingsPut, newState.notifications);
 
-            const notifications = {
-                ...prevState.notifications,
-                sound
-            };
-            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
-
-            return {
-                ...prevState,
-                notifications
-            }
+            return newState
         })
     };
 
     onNotificationsPopupToggle = (filterName: string, filterValue: boolean) => {
         this.setState(prevState => {
+            const newState: SettingsState = iassign(prevState,
+                s => s.notifications.popups[filterName],
+                () => filterValue
+            );
 
+            Mediator.pub(Msg.NotificationsSettingsPut, newState.notifications);
 
-            const popups = {
-                ...prevState.notifications.popups
-            };
-            popups[filterName] = filterValue;
-
-            const notifications = {
-                ...prevState.notifications,
-                popups
-            };
-            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
-
-            return {
-                ...prevState,
-                notifications
-            }
+            return newState
         })
     };
 
-    signalOptions = () => {
-        return Object.keys(Settings).map( signal => {
-            return (
-                <option key={signal} value={signal}>{signal}</option>
-            )
-        })
-    };
 
-    onSoundChange = (event) => {
+
+    onSoundChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 
         const signal = event.target.value;
-        this.setState(prevState => {
+        this.setState((prevState: SettingsState) => {
 
-            const sound: SoundSetting = {
-                ...prevState.notifications.sound,
-                signal
-            };
+            const newState = iassign(prevState,
+                s => s.notifications.sound.signal,
+                () => signal
+            );
 
-            const notifications: NotificationsSettingsI = {
-                ...prevState.notifications,
-                sound
-            };
+            VKfoxAudio.play(newState.notifications.sound);
 
-            VKfoxAudio.play(sound);
+            Mediator.pub(Msg.NotificationsSettingsPut, newState.notifications);
 
-            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
-
-            return {
-                ...prevState,
-                notifications
-            }
+            return newState
         })
     };
 
@@ -204,140 +147,68 @@ class SettingsPage extends React.Component<object, SettingsState> {
         const volume = event.target.value;
         this.setState(prevState => {
 
-            const sound: SoundSetting = {
-                ...prevState.notifications.sound,
-                volume
-            };
+            const newState = iassign(prevState,
+                s => s.notifications.sound.volume,
+                () => volume
+            );
 
-            const notifications: NotificationsSettingsI = {
-                ...prevState.notifications,
-                sound
-            };
+            VKfoxAudio.play(newState.notifications.sound);
+            Mediator.pub(Msg.NotificationsSettingsPut, newState.notifications);
 
-
-            VKfoxAudio.play(sound);
-            Mediator.pub(Msg.NotificationsSettingsPut, notifications);
-
-            return {
-                ...prevState,
-                notifications
-            }
+            return newState
         })
     };
 
 
     render() {
-        const notifications = this.state.notifications;
+        const {notifications} = this.state;
 
         return (
-            <form
-                hidden={!notifications}
-                className="settings">
+            <form className="settings">
 
-                <div className="settings__row">
-                    <i className="fa fa-eye settings__icon" />
+                <ForceOnlineSetting
+                    forceOnline={this.state.forceOnline}
+                    onForceOnlineToggle={this.onForceOnlineToggle}
+                />
 
-                    <label className="settings__label">
-                        {I18N.get("force online")}
-                    </label>
+                <div className="settings__separator"/>
 
-                    <Checkbox
-                        className="settings__checkbox"
-                        isChecked={this.state.forceOnline.enabled}
-                        filterName="enabled"
-                        onToggle={this.onForceOnlineToggle}
-                    />
-                </div>
-
-                <div className="settings__row settings__separator">
-                    <i className="fa fa-bullhorn settings__icon" />
-
-                    <label className="settings__label">
-                        {I18N.get("notifications")}
-                    </label>
-
-                    <Checkbox
-                        className="settings__checkbox"
-                        isChecked={notifications.enabled}
-                        filterName="enabled"
-                        onToggle={this.onNotificationsToggle}
-                    />
-                </div>
-
-                <div className="settings__row settings__row_sub">
-                    <i className="fa fa-volume-up settings__icon" />
-
-                    <label className="settings__label">
-                        {I18N.get("sound")}
-                    </label>
-
-                    <Checkbox
-                        className="settings__checkbox"
-                        isChecked={notifications.sound.enabled}
-                        filterName="enabled"
-                        onToggle={this.onNotificationsSoundToggle}
-                    />
-                </div>
-
-                <div className="settings__row settings__row_sub">
-                    <label className="settings__label">
-                        {I18N.get("signal")}
-                    </label>
-
-                    <select
-                        className="settings__checkbox"
-                        disabled={!(notifications.enabled || notifications.sound.enabled)}
-                        value={notifications.sound.signal}
-                        onChange={this.onSoundChange}>
-                        {this.signalOptions()}
-                    </select>
-                </div>
-
-                <div className="settings__row settings__row_sub">
-                    <label className="settings__label">
-                        {I18N.get("volume")}
-                    </label>
-
-                    <input
-                        className="settings__input"
-                        step="0.1"
-                        min="0"
-                        max="1"
-                        type="range"
-                        value={notifications.sound.volume}
-                        onChange={this.onVolumeChange}
-                    />
-                </div>
-
-                <div className="settings__row settings__row_sub">
-                    <i className="settings__icon fa fa-bell" />
-
-                    <label className="settings__label">
-                        {I18N.get("popups")}
-                    </label>
-
-                    <Checkbox
-                        className="settings__checkbox"
-                        isDisabled={!notifications.enabled}
-                        isChecked={notifications.popups.enabled}
-                        filterName="enabled"
-                        onToggle={this.onNotificationsPopupToggle}
-                    />
-                </div>
+                <NotificationsSetting
+                    notifications={notifications}
+                    onNotificationsToggle={this.onNotificationsToggle}
+                />
 
 
-                <div className="settings__row settings__row_sub">
-                    <label className="settings__label">
-                        {I18N.get("show text")}
-                        </label>
-                    <Checkbox
-                        className="settings__checkbox"
-                        isDisabled={!notifications.enabled || !notifications.popups.enabled}
-                        isChecked={notifications.popups.showText}
-                        filterName="showText"
-                        onToggle={this.onNotificationsPopupToggle}
-                    />
-                </div>
+                <NotificationsSoundSetting
+                    notifications={notifications}
+                    onNotificationsSoundToggle={this.onNotificationsSoundToggle}
+                />
+
+                <NotificationsSignalSetting
+                    notifications={notifications}
+                    onSoundChange={this.onSoundChange}
+                />
+
+                <NotificationsVolumeSetting
+                    notifications={notifications}
+                    onVolumeChange={this.onVolumeChange}
+                />
+
+                <NotificationsSpeechSetting
+                    notifications={notifications}
+                    onNotificationsSoundToggle={this.onNotificationsSoundToggle}
+                />
+
+
+                <NotificationsPopupsSetting
+                    notifications={notifications}
+                    onNotificationsPopupToggle={this.onNotificationsPopupToggle}
+                />
+
+                <NotificationsTextSetting
+                    notifications={notifications}
+                    onNotificationsPopupToggle={this.onNotificationsPopupToggle}
+                />
 
             </form>
         );

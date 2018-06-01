@@ -374,7 +374,8 @@ function onLatestMessageIdChange() {
             message: lastMessage.body,
             image  : profile.photo,
             noBadge: chatActive,
-            noPopup: chatActive
+            noPopup: chatActive,
+            sex    : profile.sex
         });
     }
 
