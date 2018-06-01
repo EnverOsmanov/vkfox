@@ -38,7 +38,7 @@ export interface WallPhotoItem extends ItemObj {
 export interface FriendItem extends ItemObj {
     // type = "friend"
 
-    friends: GenericRS<UserId>
+    friends?: GenericRS<UserId>
 }
 
 export interface AudioItem extends ItemObj {
