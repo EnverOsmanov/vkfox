@@ -92,7 +92,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                         <div
                             style={cssProps}
                             data-anchor={addVKBase(anchor)}
-                            className="item__img media-object pull-left"
+                            className="item__img media-object float-left"
                         />
 
                             <span className="item__author">{profile2Name(owner)}</span>

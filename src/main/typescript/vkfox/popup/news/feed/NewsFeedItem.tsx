@@ -244,12 +244,20 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 return JSON.stringify(item);
 
             case "friend":
-                return (
-                    <div>
-                        <div className="news__list_title">{I18N.get("New friends:")}</div>
-                        {this.friendsElms((item as FriendItem).friends)}
-                    </div>
-                );
+                const friendItem = item as FriendItem;
+
+                if ("friends" in friendItem) {
+                    return (
+                        <div>
+                            <div className="news__list_title">{I18N.get("New friends:")}</div>
+                            {this.friendsElms(friendItem.friends)}
+                        </div>
+                    );
+                }
+                else {
+                    console.warn("Newsfeed with type 'friend' has no 'friends' field");
+                    return null;
+                }
 
             case "audio":
                 const audioItem = item as AudioItem;

@@ -92,9 +92,7 @@ class Item extends React.Component<ItemProps> {
             <div className={`item ${itemClass}`}>
 
                 <div className="item__header">
-                    <div className="pull-left">
-                        {this.heroIcon()}
-                    </div>
+                    {this.heroIcon()}
                     <span className={`item__title ${this.isOnlineClassName()}`}>
                         <span className="item__author">
                             {this.heroName()}
