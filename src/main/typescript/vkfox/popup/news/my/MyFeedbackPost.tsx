@@ -23,6 +23,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
                             key={i}
                             type={attachment.type}
                             data={attachment[attachment.type]}
+                            showFullWidth={postParent.attachments.length === 1}
                         />
                     )
                 }
@@ -46,7 +47,13 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
         switch (item.type) {
             case "photo":
             case "video":
-                return <AttachmentC type={item.type} data={item.parent}/>;
+                return (
+                    <AttachmentC
+                        type={item.type}
+                        data={item.parent}
+                        showFullWidth={true}
+                    />
+                );
 
             case "topic":
                 const topicParent = item.parent as TopicFeedbackFromComm;

@@ -1,7 +1,7 @@
 import * as React from "react"
 import Item from "../../item/Item";
 import {ReplyI} from "../../chat/types";
-
+import * as _ from "underscore"
 import I18N from "../../../i18n/i18n";
 import ItemActionLike from "../../itemActions/ItemActionLike";
 import ItemActionComment from "../../itemActions/ItemActionComment";
@@ -103,13 +103,19 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     };
 
     postAttachmentElms = (itemPost: PostItem) => {
-        const singleAttachment = (attachment: AttachmentContainer, i: number) => (
-            <AttachmentC
-                key={i}
-                type={attachment.type}
-                data={attachment[attachment.type]}
-            />
-        );
+        const counted: _.Dictionary<number> = _.countBy(itemPost.attachments, it => it.type);
+
+        function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
+
+            return (
+                <AttachmentC
+                    key={i}
+                    type={attachment.type}
+                    data={attachment[attachment.type]}
+                    showFullWidth={counted[attachment.type] === 1}
+                />
+            );
+        }
 
         return itemPost.attachments
             ? itemPost.attachments.map(singleAttachment)
@@ -122,6 +128,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 key={i}
                 type="photo"
                 data={photo}
+                showFullWidth={photos.length === 1}
             />
         );
 
@@ -155,7 +162,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     };
 
 
-    repostedText = (itemPost: PostItem) => {
+    repostElm = (itemPost: PostItem) => {
         const originP = (itemPost.copy_history && itemPost.copy_history[0])
             ? itemPost.copy_history[0]
             : null;
@@ -180,7 +187,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             <div>
                 <RectifyPu text={itemPost.text} hasEmoji={false}/>
 
-                {this.repostedText(itemPost)}
+                {this.repostElm(itemPost)}
 
                 {this.postAttachmentElms(itemPost)}
 
