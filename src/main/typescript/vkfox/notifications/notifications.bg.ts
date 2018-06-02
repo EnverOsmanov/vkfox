@@ -1,12 +1,13 @@
 "use strict";
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
-import {NotificationQueue, notificationsSettings} from "./Notification";
+import {NotificationQueue, notificationsSettings, NotifType} from "./Notification";
 import {VKNotificationI} from "./types";
 import VKfoxAudio from "./VKfoxAudio";
 import NotificationOptions = browser.notifications.NotificationOptions;
 import {html2text} from "../rectify/helpers";
 import {Sex} from "../back/users/types";
+import {NotificationType} from "../../vk/types/feedback";
 
 
 const notificationQueue = new NotificationQueue();
@@ -37,6 +38,10 @@ function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: a
     };
     xhr.onerror = onError;
     xhr.send();
+}
+
+function isChat(noti: VKNotificationI): boolean {
+    return noti.type === NotifType.CHAT
 }
 
 export default class Notifications {
@@ -73,12 +78,12 @@ export default class Notifications {
 
     }
 
-    static playSound(message: string, sex: Sex): void {
+    static playSound(noti: VKNotificationI): void {
 
         const sound = notificationsSettings.sound;
 
         if (notificationsSettings.enabled && sound.enabled) {
-            if (sound.text2Speech) VKfoxAudio.readTextInVoice(message, sex);
+            if (isChat(noti) && sound.text2Speech) VKfoxAudio.readTextInVoice(noti.message, noti.sex);
             else VKfoxAudio.play(sound);
         }
     }

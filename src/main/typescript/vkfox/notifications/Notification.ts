@@ -103,7 +103,7 @@ export class NotificationQueue extends Collection<VKNotification> {
             .on('add', (model: VKNotification) => {
                 if (!model.get('noPopup')) Notifications.createPopup(model.toJSON());
 
-                if (!model.get('noSound')) Notifications.playSound(model.message, model.sex);
+                if (!model.get('noSound')) Notifications.playSound(model.toJSON());
             });
 
         Mediator.sub(Msg.AuthUser, () => self.reset());
