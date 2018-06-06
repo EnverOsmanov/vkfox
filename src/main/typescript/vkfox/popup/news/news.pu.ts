@@ -4,17 +4,19 @@ import Mediator from '../../mediator/mediator.pu'
 import Msg from "../../mediator/messages"
 
 import {
+    CommentsNewsItemWithId,
+    ParentObj,
+    ParentObjComment,
     ParentObjPost,
     PhotoFeedback,
-    ParentObjComment,
     TopicFeedbackFromComm,
     VideoFeedback,
-    WallMentionFeedback, CommentsNewsItemWithId
+    WallMentionFeedback
 } from "../../feedbacks/types";
-import {FeedbackItemObj} from "./types";
 import Request from "../../request/request.pu";
 import {BoardCreateComment, PhotosCreateComment, VideoCreateComment, WallCreateComment} from "../../../vk/types";
 import {SendMessageI} from "../itemActions/types";
+import {ParentComment} from "../../../vk/types/feedback";
 
 export interface CommentsDataI {
     ownerId : number,
@@ -34,10 +36,9 @@ export function unsubscribe(type, ownerId, itemId) {
     Mediator.pub(Msg.FeedbacksUnsubscribe, options);
 }
 
-export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefined {
-    const { parent } = item;
+export function getCommentsData(type: string, parent: ParentObj): CommentsDataI | undefined {
 
-    switch (item.type) {
+    switch (type) {
         case 'wall':
         case 'post':
         case 'mention':
@@ -63,27 +64,22 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefine
                 };
             }
             else if (cmmntParent.topic && !cmmntParent.topic.is_closed) {
-                return this.getCommentsData({
-                    type: 'topic',
-                    parent: cmmntParent.topic
-                });
+                return getCommentsData("topic", cmmntParent.topic as any);
             }
             else {
-                const a = ['photo', 'video']
+                return ['photo', 'video']
                     .filter(Object.hasOwnProperty, parent)
-                    .map(function (type) {
-                        return this.getSourceLink({type: type, parent: parent[type]});
-                    }, this)[0];
-
-                return a;
+                    .map( (commentType) => getCommentsData(commentType, parent[type]) )[0];
             }
+
         case "topic":
             const topicParent = parent as TopicFeedbackFromComm;
-            return /*{
+            return {
                 ownerId: topicParent.owner_id,
                 id     : 1,
                 type   : "topic"
-            };*/
+            };
+
         case 'photo':
             const phParent = <PhotoFeedback>parent;
             return {
@@ -91,6 +87,7 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefine
                 id     : phParent.id,
                 type   : 'photo'
             };
+
         case 'video':
             const viParent = <VideoFeedback>parent;
             return {
@@ -98,44 +95,69 @@ export function getCommentsData(item: FeedbackItemObj): CommentsDataI | undefine
                 id     : viParent.id,
                 type   : 'video'
             };
+
+        case "follow":
         case "friend_accepted": {
-            return;
+            return null;
         }
 
         default:
-            console.warn("Unknown feedback type", item.type)
+            console.warn("Unknown feedback type", type);
+            return null;
     }
 }
 
-export function getSourceLink(item): string {
-    const parent = item.parent;
+export function getSourceLink(type: string, parent: ParentObj): string {
 
-    switch (item.type) {
+    switch (type) {
+        // case 'mention':
         case 'wall':
-        case 'post':
-            // case 'mention':
-            return Config.VK_BASE + 'wall'
-                + (parent.to_id || parent.source_id) + '_'
-                + (parent.post_id || parent.id) + '?offset=last&scroll=1';
-        case 'comment':
+        case 'post': {
+            const wpmParent = (parent as WallMentionFeedback | ParentObjPost);
+
+            const ownerPart = "to_id" in wpmParent
+                ? wpmParent.to_id
+                : wpmParent.source_id;
+
+            const ownedPart = "post_id" in wpmParent
+                ? wpmParent.post_id
+                : (wpmParent as any).id;
+
+            return `${Config.VK_BASE}wall${ownerPart}_${ownedPart}?offset=last&scroll=1`;
+        }
+
+        case 'comment': {
+            const commentP = parent as ParentComment;
             // generate link to parent item
             return ['post', 'topic', 'photo', 'video']
-                .filter(Object.hasOwnProperty, parent)
-                .map(function (type) {
-                    const parentLink = getSourceLink({type: type, parent: parent[type]});
+                .filter(Object.hasOwnProperty, commentP)
+                .map((commentType) => {
+
+                    const parentLink = getSourceLink(commentType, commentP[commentType]);
                     // replace query params
-                    return parentLink.replace(/\?[^?]+$/, '?reply=' + item.parent.id);
-                }, this)[0];
-        case 'topic':
-            return Config.VK_BASE + 'topic' + parent.owner_id
-                + '_' + (parent.id || parent.post_id || parent.tid)
-                + '?offset=last&scroll=1';
-        case 'photo':
-            return Config.VK_BASE + 'photo' + parent.owner_id
-                + '_' + (parent.id || parent.pid);
-        case 'video':
-            return Config.VK_BASE + 'video' + parent.owner_id
-                + '_' + (parent.id || parent.vid);
+                    return parentLink.replace(/\?[^?]+$/, '?reply=' + commentP.id);
+                })[0];
+        }
+
+        case 'topic': {
+            const topicP = parent as TopicFeedbackFromComm;
+
+            const ownedPart = topicP.post_id || (topicP as any).id || (topicP as any).tid;
+
+            return `${Config.VK_BASE}topic${parent.owner_id}_${ownedPart}?offset=last&scroll=1`;
+        }
+
+        case 'photo': {
+            const ownedPart = (parent as any).id || (parent as any).pid;
+
+            return `${Config.VK_BASE}photo${parent.owner_id}_${ownedPart}`;
+        }
+
+        case 'video': {
+            const ownedPart = (parent as any).id || (parent as any).vid;
+
+            return `${Config.VK_BASE}video${parent.owner_id}_${ownedPart}`;
+        }
     }
 }
 

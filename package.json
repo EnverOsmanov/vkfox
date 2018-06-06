@@ -9,7 +9,7 @@
   "scripts": {
     "bundle": "gulp",
     "bundleProd": "gulp production",
-    "ffox": "web-ext run -s target/firefox/ --firefox-profile=firefox-developer",
+    "ffox": "web-ext run -s target/firefox/ --firefox-profile=default",
     "ffoxMac": "web-ext run -s target/firefox/ --firefox-profile=dev-edition-default",
     "sign": "web-ext sign -s target/firefox/ --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET --id='{d5c559a3-a91c-4e87-bb58-014081aa47aa}'",
     "signProd": "web-ext sign -s target/firefox/ --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET --id='{41977694-5aed-4e30-8390-77a62a771360}'",

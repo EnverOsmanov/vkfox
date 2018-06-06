@@ -59,7 +59,8 @@ interface TopicItem {
 }
 interface CopyItem {}
 interface PorFPostItem extends PostItem {
-    from_id: number
+    from_id : number
+    to_id   : number
 }
 
 type NotificationType =
@@ -234,7 +235,7 @@ export interface PostCommentN extends CommentsNewsItem {
     // type = "post"
 
     from_id: number
-    attachments: Attachment[]
+    attachments?: Attachment[]
 }
 
 

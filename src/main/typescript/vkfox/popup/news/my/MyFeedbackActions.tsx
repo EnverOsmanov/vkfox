@@ -51,8 +51,8 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, object> 
     };
 
     actionOpenLink = () => {
-        const item = this.props.item;
-        const link = getSourceLink(item);
+        const {item} = this.props;
+        const link = getSourceLink(item.type, item.parent);
 
         return link
             ?
@@ -66,28 +66,33 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, object> 
 
     render() {
         const {item} = this.props;
-        const comment = getCommentsData(item);
-        const {parent} = item;
+        try {
+            const comment = getCommentsData(item.type, item.parent);
 
-        if (comment) {
+            if (comment) {
 
-            return (
-                <ItemActions>
+                return (
+                    <ItemActions>
 
-                    <i
-                        onClick={() => unsubscribe(comment.type, comment.ownerId, comment.id)}
-                        title={Capitalize(I18N.get("unsubscribe"))}
-                        className="item__action fa fa-ban"
-                    />
+                        <i
+                            onClick={() => unsubscribe(comment.type, comment.ownerId, comment.id)}
+                            title={Capitalize(I18N.get("unsubscribe"))}
+                            className="item__action fa fa-ban"
+                        />
 
-                    {this.actionOpenLink()}
-                    {this.actionComment(comment)}
-                    {this.actionLike(comment, parent)}
+                        {this.actionOpenLink()}
+                        {this.actionComment(comment)}
+                        {this.actionLike(comment, item.parent)}
 
-                </ItemActions>
-            )
+                    </ItemActions>
+                )
+            }
+            else return null;
         }
-        else return null;
+        catch (e) {
+            console.warn("Trouble in MyFeedbackActions for item", item, e);
+            return null;
+        }
     }
 }
 
