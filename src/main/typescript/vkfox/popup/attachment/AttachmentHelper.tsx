@@ -78,7 +78,31 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
 
 }
 
-export function attachmentDiv(type: string, data: Attachment): JSX.Element | null {
+function imageDiv(type: string, dataGraffiti: AttachmentPhoto, showFullWidth: boolean) {
+
+    if (showFullWidth) {
+        return (
+            <img
+                className={"item__hero-picture"}
+                src={dataGraffiti.photo_604}
+                data-anchor={imageViewPath(dataGraffiti)}
+            />
+        )
+    }
+    else {
+        return (
+            <div className={`item__attachment item__attachment_type_${type}`}>
+                <img
+                    className={"item__picture"}
+                    src={dataGraffiti.photo_604}
+                    data-anchor={imageViewPath(dataGraffiti)}
+                />
+            </div>
+        );
+    }
+}
+
+export function attachmentDiv(type: string, data: Attachment, showFullWidth: boolean): JSX.Element | null {
     switch (type) {
         /*            case "app":
                         return <img src={data as Att.src}/>;*/
@@ -125,17 +149,7 @@ export function attachmentDiv(type: string, data: Attachment): JSX.Element | nul
         case "graffiti":
         case "photo":
         case "posted_photo":
-            const dataGraffiti = data as AttachmentPhoto;
-
-            return (
-                <div className={`item__attachment item__attachment_type_${type}`}>
-                    <div
-                        className="item__picture"
-                        style={imageProperties(dataGraffiti.photo_604)}
-                        data-anchor={imageViewPath(dataGraffiti)}>
-                    </div>
-                </div>
-            );
+            return imageDiv(type, data as AttachmentPhoto, showFullWidth);
 
         case "video":
             const dataVideo = data as AttachmentVideo;

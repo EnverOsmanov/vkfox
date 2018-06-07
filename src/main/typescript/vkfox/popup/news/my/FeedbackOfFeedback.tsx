@@ -41,6 +41,7 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
                         key={i}
                         type={attachment.type}
                         data={attachment[attachment.type]}
+                        showFullWidth={commentFeedback.attachments.length === 1}
                     />
                 )
             }) : null;

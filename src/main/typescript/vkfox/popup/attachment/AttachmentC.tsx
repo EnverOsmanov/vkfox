@@ -5,15 +5,16 @@ import {Attachment} from "../../../vk/types/newsfeed";
 interface AttachmentProps<A extends Attachment> {
     type: string
     data: A
+
+    showFullWidth: boolean
 }
 
 class AttachmentC extends React.Component<AttachmentProps<Attachment>> {
 
     render() {
-        const type = this.props.type;
-        const data = this.props.data;
+        const {type, data, showFullWidth} = this.props;
 
-        return attachmentDiv(type, data);
+        return attachmentDiv(type, data, showFullWidth);
     }
 }
 

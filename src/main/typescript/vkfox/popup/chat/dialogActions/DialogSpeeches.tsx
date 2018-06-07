@@ -121,6 +121,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     key={i}
                     data={attachment[attachment.type]}
                     type={attachment.type}
+                    showFullWidth={false}
                 />
             )
         }
