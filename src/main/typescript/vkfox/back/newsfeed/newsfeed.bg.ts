@@ -167,7 +167,7 @@ function freeSpace() {
             friendItemsColl
                 .where({ type: "friend" })
                 // first element contains quantity
-                .map( model => (model.friends || []) )
+                .map( model => (model.friends.items || []) )
         ).chain()
             .flatten()
             .map((f: UserId) => f.user_id)

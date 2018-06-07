@@ -1,10 +1,8 @@
 import {Collection, Model} from "backbone";
-import {FoxUserProfileI} from "../chat/types";
 import {ItemObj, UserId} from "../../vk/types/newsfeed";
 import {idMaker} from "../back/newsfeed/newsfeed.bg";
 import {LikesObj} from "../../vk/types/objects";
-
-
+import {GenericRS} from "../../vk/types";
 
 
 class ItemDupl extends Model {
@@ -35,7 +33,7 @@ export interface LikesChanged {
 
 export class Item extends Model {
 
-    get friends(): UserId[] {
+    get friends(): GenericRS<UserId> {
         return super.get("friends")
     }
 

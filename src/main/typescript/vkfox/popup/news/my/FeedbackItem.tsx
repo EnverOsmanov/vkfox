@@ -10,6 +10,7 @@ import {CommentsNewsItemWithId, FeedbackObj, ParentObjComment, ParentObjPost} fr
 import {GroupProfile, UserProfile} from "../../../back/users/types";
 import {FeedbackItemObj} from "../types";
 import {onReply} from "../news.pu";
+import ReplyMessage from "../../reply/ReplyMessage";
 
 
 interface FeedbackItemProps {
@@ -155,21 +156,28 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
 
         return (
             <Item
-                owners={itemProfile}
-                reply={this.state.reply}
-                sendMessage={() => this.sendMessage()}
-                handleMessageChange={this.handleMessageChange}>
+                owners={itemProfile}>
 
-                <MyFeedbackPost item={item}/>
+                <div className="item__body clearfix">
 
-                <MyFeedbackActions
-                    item={item}
-                    showOrHideReply={this.showOrHideReply}
+                    <MyFeedbackPost item={item}/>
+
+                    <MyFeedbackActions
+                        item={item}
+                        showOrHideReply={this.showOrHideReply}
+                    />
+
+                    {this.showAllSwithcher(item)}
+
+                    {this.feedbacks(item)}
+                </div>
+
+                <ReplyMessage
+                    reply={this.state.reply}
+                    message={this.state.message}
+                    sendMessage={() => this.sendMessage()}
+                    handleMessageChange={this.handleMessageChange}
                 />
-
-                {this.showAllSwithcher(item)}
-
-                {this.feedbacks(item)}
 
             </Item>
         )

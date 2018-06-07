@@ -7,6 +7,7 @@ import {ReplyI} from "../chat/types";
 import Request from "../../request/request.pu"
 import {SendMessageParams} from "../../chat/collections/DialogColl";
 import {FoxUserProfileI} from "../../chat/types";
+import ReplyMessage from "../reply/ReplyMessage";
 
 interface BuddyItemProps {
     buddie  : FoxUserProfileI
@@ -105,28 +106,34 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
                 key={buddie.id}
                 itemClass={`buddies__item ${buddie.isFave && "buddies__item_is-fave"}`}
                 description={buddie.description}
-                owners={buddie}
-                message={this.state.message}
-                sendMessage={() => this.onSendMessage(null, buddie.id)}
-                handleMessageChange={this.handleMessageChange}
-                reply={this.state.reply}>
+                owners={buddie}>
 
-                {this.bookmarkedElm()}
+                <div className="item__body clearfix">
+                    {this.bookmarkedElm()}
 
-                <ItemActions>
+                    <ItemActions>
 
-                    <ItemAction
-                        className="fa fa-envelope"
-                        title={I18N.get("Private message")}
-                        onClick={_ => this.showOrHideReply()}
-                    />
+                        <ItemAction
+                            className="fa fa-envelope"
+                            title={I18N.get("Private message")}
+                            onClick={_ => this.showOrHideReply()}
+                        />
 
-                    <ItemAction
-                        className={`fa fa-bell ${buddie.isWatched && "buddies__item-action_active"}`}
-                        title={I18N.get("Monitor online status")}
-                        onClick={() => this.props.toggleFriendWatching()}
-                    />
-                </ItemActions>
+                        <ItemAction
+                            className={`fa fa-bell ${buddie.isWatched && "buddies__item-action_active"}`}
+                            title={I18N.get("Monitor online status")}
+                            onClick={() => this.props.toggleFriendWatching()}
+                        />
+                    </ItemActions>
+
+                </div>
+
+                <ReplyMessage
+                    reply={this.state.reply}
+                    message={this.state.message}
+                    sendMessage={() => this.onSendMessage(null, buddie.id)}
+                    handleMessageChange={this.handleMessageChange}
+                />
 
             </Item>
         )
