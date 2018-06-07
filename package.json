@@ -1,6 +1,6 @@
 {
   "name": "vkfox",
-  "version": "5.5.9",
+  "version": "5.6.0a",
   "license": "WTFPL",
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "bootstrap": "^4.1.1",
     "emoji": "^0.3.2",
     "font-awesome": "^4.7.0",
+    "immutable-assign": "^2.0.6",
     "jquery": "^3.3.1",
     "linkifyjs": "^2.1.6",
     "moment": "^2.22.1",

@@ -1,10 +1,12 @@
 "use strict";
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
-import {NotificationQueue, notificationsSettings, VKNotificationI} from "./Notification";
+import {NotificationQueue, notificationsSettings} from "./Notification";
+import {VKNotificationI} from "./types";
 import VKfoxAudio from "./VKfoxAudio";
 import NotificationOptions = browser.notifications.NotificationOptions;
 import {html2text} from "../rectify/helpers";
+import {Sex} from "../back/users/types";
 
 
 const notificationQueue = new NotificationQueue();
@@ -71,12 +73,13 @@ export default class Notifications {
 
     }
 
-    static playSound(): void {
+    static playSound(message: string, sex: Sex): void {
 
         const sound = notificationsSettings.sound;
 
         if (notificationsSettings.enabled && sound.enabled) {
-            VKfoxAudio.play(sound);
+            if (sound.text2Speech) VKfoxAudio.readTextInVoice(message, sex);
+            else VKfoxAudio.play(sound);
         }
     }
 

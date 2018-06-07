@@ -220,6 +220,11 @@ class Request {
         }
     }
 
+    static customGet(url: string, params: object): Promise<Response> {
+        const urlSearchParams = querystring(params);
+        return fetch(url + urlSearchParams);
+    }
+
 }
 
 ProxyMethods.connect('../request/request.bg.ts', Request);

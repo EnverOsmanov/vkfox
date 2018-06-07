@@ -5,27 +5,8 @@ import Msg from "../mediator/messages"
 import Settings from "./settings"
 import PersistentModel from "../persistent-model/persistent-model";
 import {Message} from "../../vk/types";
-
-interface PopupSetting {
-    enabled : boolean;
-    showText: boolean
-}
-
-export interface SoundSetting {
-    enabled: boolean;
-    volume : number;
-    signal : string
-}
-
-export interface ForceOnlineSettingsI {
-    enabled: boolean
-}
-
-export interface NotificationsSettingsI {
-    enabled : boolean
-    popups  : PopupSetting
-    sound   : SoundSetting
-}
+import {NotificationsSettingsI, PopupSetting, SoundSetting} from "./types";
+import {Sex} from "../back/users/types";
 
 
 export class NotificationsSettings extends PersistentModel {
@@ -51,7 +32,7 @@ export class NotificationsSettings extends PersistentModel {
 
         Mediator.sub(Msg.NotificationsSettingsGet, () => Mediator.pub(Msg.NotificationsSettings, self.toJSON()) );
 
-        Mediator.sub(Msg.NotificationsSettingsPut, settings => {
+        Mediator.sub(Msg.NotificationsSettingsPut, (settings: NotificationsSettingsI) => {
             self.set(settings)
         } );
 
@@ -74,36 +55,37 @@ export class NotifType {
     static NEWS = "news"
 }
 
-export interface VKNotificationI {
-    type    : NotifType;
-    title   : string;
-    image   : string;
-    noBadge : boolean;
-    message?: string;
-    noPopup?: boolean
-}
-
 class VKNotification extends Model {
 
     get noBadge(): boolean {
         return super.get("noBadge")
     }
+
+    get message(): string {
+        return super.get("message");
+    }
+
+    get sex(): Sex {
+        return super.get("sex");
+    }
 }
 
-
-
-export const notificationsSettings = new NotificationsSettings({
+const defaultSettingsState: NotificationsSettingsI = {
     enabled: true,
     sound: {
         enabled: true,
         volume: 0.5,
-        signal: Settings.standart
+        signal: Settings.standart,
+        text2Speech: false
     },
     popups: {
         enabled: true,
         showText: true
     }
-}, {name: 'notificationsSettings'});
+};
+
+
+export const notificationsSettings = new NotificationsSettings(defaultSettingsState, {name: 'notificationsSettings'});
 
 
 export class NotificationQueue extends Collection<VKNotification> {
@@ -121,7 +103,7 @@ export class NotificationQueue extends Collection<VKNotification> {
             .on('add', (model: VKNotification) => {
                 if (!model.get('noPopup')) Notifications.createPopup(model.toJSON());
 
-                if (!model.get('noSound')) Notifications.playSound();
+                if (!model.get('noSound')) Notifications.playSound(model.message, model.sex);
             });
 
         Mediator.sub(Msg.AuthUser, () => self.reset());
