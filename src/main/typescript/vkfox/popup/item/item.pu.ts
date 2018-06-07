@@ -22,6 +22,11 @@ export function docViewPath(data: AttachmentDoc): string {
     }
 }
 
+export function imageViewPathByUrl(url: string): string {
+
+    return `${IMAGE_VIEW_URL}#${btoa(url)}`;
+}
+
 export function imageViewPath(photo: AttachmentPhoto): string | void {
     const sizes = [
         "photo_807",

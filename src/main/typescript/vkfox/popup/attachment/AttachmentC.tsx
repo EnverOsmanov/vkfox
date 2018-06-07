@@ -13,11 +13,7 @@ class AttachmentC extends React.Component<AttachmentProps<Attachment>> {
         const type = this.props.type;
         const data = this.props.data;
 
-        return (
-            <div className={`item__attachment item__attachment_type_${type}`}>
-                {attachmentDiv(type, data)}
-            </div>
-        )
+        return attachmentDiv(type, data);
     }
 }
 

@@ -97,7 +97,7 @@ a:hover {
     padding: 2 * $baseDistance 4 * $baseDistance;
     text-decoration: none;
     border-radius: $baseDistance;
-    user-select: none;
+    @include user-select(none);
     border-bottom: $baseDistance / 2 solid darken($clouds, 15%);
     cursor: pointer;
     z-index: 1;

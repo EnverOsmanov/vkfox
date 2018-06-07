@@ -5,7 +5,7 @@
     border-radius: 3px;
     border-bottom: 2px solid darken($clouds, 15%);
     padding: 0.5rem 0.75rem;
-    user-select: none;
+    @include user-select(none);
     font-size: calc(1rem + 2px);
     line-height: $baseLineHeight;
     text-align: center;

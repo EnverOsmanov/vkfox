@@ -10,7 +10,7 @@
 .item_fixed_window,
 .item_fixed_bottom {
     &  .item__header {
-        @include gradient-y(white, fade(white, 70%));
+        @include gradient-y(white, transparentize(white, 0.3));
     }
     &  .item__header,
     &  .item__actions {
