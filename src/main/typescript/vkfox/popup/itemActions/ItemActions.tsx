@@ -1,18 +1,11 @@
 import * as React from "react"
 
-interface ItemActionsProps {
-
-}
-
-class ItemActions extends React.Component<ItemActionsProps> {
-
-    render() {
+const ItemActions: React.SFC = props => {
         return (
             <div className="item__actions">
-                {this.props.children}
+                {props.children}
             </div>
         )
-    }
-}
+};
 
 export default ItemActions

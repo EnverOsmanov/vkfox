@@ -105,7 +105,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                         {divForNotArray()}
                         <span>{fwdMessage.body}</span>
 
-                        {this.attachmentsDiv(fwdMessage.attachments)}
+                        {fwdMessage.attachments && this.attachmentsDiv(fwdMessage.attachments)}
                     </div>
                 )
             })
@@ -145,7 +145,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
                 <br hidden={!(messageItem.attachments && messageItem.body)}/>
 
-                {this.attachmentsDiv(messageItem.attachments)}
+                {messageItem.attachments && this.attachmentsDiv(messageItem.attachments)}
             </div>
         )
     };

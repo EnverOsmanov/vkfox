@@ -6,7 +6,7 @@ import {BuddiesFilters} from "./types";
 
 
 (window as any).jQuery = $;
-require('bootstrap/js/dropdown.js');
+import "bootstrap/js/src/dropdown.js";
 
 interface BuddiesSearchMenuProps {
     filters: BuddiesFilters

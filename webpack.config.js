@@ -43,6 +43,21 @@ module.exports = {
           chunks: ["doc"],
           filename: "doc.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/vkfox-io/doc.html"
+      }),
+      new HtmlWebpackPlugin({
+          chunks: ["vendors~app.bg~app.install~app.pu", "vendors~app.install~app.pu", "app.install"],
+          filename: "install.html",
+          template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/install.html"
+      }),
+      new HtmlWebpackPlugin({
+          chunks: ["vendors~app.bg~app.install~app.pu", "vendors~app.bg~app.pu", "app.pu"],
+          filename: "popup.html",
+          template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/popup.html"
+      }),
+      new HtmlWebpackPlugin({
+          chunks: ["vendors~app.bg~app.install~app.pu", "vendors~app.bg~app.pu", "app.bg"],
+          filename: "background.html",
+          template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/background.html"
       })
   ],
   resolve: {
@@ -56,17 +71,25 @@ module.exports = {
         // All output ".js" files will have any sourcemaps re-processed by "source-map-loader".
         { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
         {
-            test: /\.(less|css)$/,
+            test: /\.(css|scss|sass)$/,
             use: extractLess.extract(
                 {
-                    use:[
-                        { loader: "css-loader" },
-                        { loader: "less-loader" },
-                        { loader: "resolve-url-loader" }
+                    use:[{
+                        loader: "css-loader",
+                        options: {sourceMap: isDev}
+                    }, {
+                        loader: "sass-loader",
+                        options: {sourceMap: isDev}
+                    },
+                        {loader: "resolve-url-loader"}
                     ],
                     fallback: "style-loader"
                 })
         },
+        {
+            test: /\.(ttf|eot|woff|woff2|svg|otf|gif|png)$/,
+            loader: "file-loader"
+        }
     ]
   },
     optimization: {

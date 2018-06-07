@@ -1,0 +1,44 @@
+.item-list {
+    position: relative;
+}
+.item-list__content {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.item_fixed_window,
+.item_fixed_bottom {
+    &  .item__header {
+        @include gradient-y(white, fade(white, 70%));
+    }
+    &  .item__header,
+    &  .item__actions {
+        z-index: 999;
+        // trigger a compozite layer for a fixed elements
+        transform: translate3d(0, 0, 0);
+    }
+    & .item .item__actions {
+        background: transparent;
+    }
+    & .item .item__header,
+    & .item .item__actions {
+        z-index: auto;
+    }
+}
+.item_fixed_window {
+    position: static !important;
+}
+.item_fixed_bottom {
+    .item__header,
+    .item__actions {
+        bottom: 0;
+        top: auto;
+    }
+    .item .item__header,
+    .item .item__actions {
+        bottom: auto;
+        top: 0;
+    }
+}
+

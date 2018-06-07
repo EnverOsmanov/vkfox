@@ -3,7 +3,6 @@
 const gulp                 = require("gulp"),
     gulplog                = require("gulplog"),
     env                    = require("gulp-env"),
-    less                   = require("gulp-less"),
     preprocess             = require("gulp-preprocess"),
     rename                 = require("gulp-rename"),
     del                    = require("del"),
@@ -38,12 +37,6 @@ gulp.task("env:version",  done => {
     done()
 });
 
-gulp.task("less", () => {
-    return gulp.src("./pages/*.less", {cwd: __resources})
-        .pipe(less())
-        .pipe(gulp.dest("./target/firefox/assets"))
-});
-
 
 gulp.task("preprocess:manifest", () => {
     return gulp.src(__resources + "/manifest.raw.json")
@@ -57,7 +50,6 @@ gulp.task("clean:firefox", () => del("./target/firefox/**"));
 gulp.task("copy:firefoxResources", () => {
     return gulp.src([
         __resources + "/_locales/**",
-        __resources + "/pages/*.html"
     ], {base: __resources })
       .pipe(gulp.dest("./target/firefox"))
 });
@@ -69,14 +61,6 @@ gulp.task("copy:firefoxSrc", () => {
         .pipe(gulp.dest("./target/firefox"))
 });
 
-gulp.task("fonts", () => {
-    return gulp.src([
-        "./node_modules/font-awesome/fonts/fontawesome-webfont.ttf",
-        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff",
-        "./node_modules/font-awesome/fonts/fontawesome-webfont.woff2",
-    ], {base: "./node_modules/font-awesome/"})
-      .pipe(gulp.dest("./target/firefox/assets"))
-});
 
 gulp.task("assets", () => {
     return gulp.src([
@@ -133,7 +117,7 @@ Locales.forEach(i18n);
 gulp.task("production",
         gulp.series(
             gulp.parallel("env:version", "env:firefox", "clean:firefox"),
-            gulp.parallel(["less", "assets", "fonts", "preprocess:manifest"]
+            gulp.parallel(["assets", "preprocess:manifest"]
                 .concat(Locales.map( locale => `i18n-${locale}`))),
             gulp.parallel( "webpack", "copy:firefoxSrc", "copy:firefoxResources")
         )
@@ -142,7 +126,7 @@ gulp.task("production",
 gulp.task("default",
         gulp.series(
             gulp.parallel("env:version", "env:firefox", "env:development", "clean:firefox"),
-            gulp.parallel(["less", "assets", "fonts", "preprocess:manifest"]
+            gulp.parallel(["assets", "preprocess:manifest"]
                 .concat(Locales.map( locale => `i18n-${locale}`))),
             gulp.parallel("webpack", "copy:firefoxSrc", "copy:firefoxResources")
 

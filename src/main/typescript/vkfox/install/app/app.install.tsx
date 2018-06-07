@@ -7,6 +7,7 @@ import InstallControls from "../InstallControls"
 import InstallState from "../InstallState";
 import {InstallButtons, stepsInfo} from "../StepInfo";
 
+import "../../../../sass/vkfox/install.scss"
 
 class App extends React.Component<object, InstallState> {
 

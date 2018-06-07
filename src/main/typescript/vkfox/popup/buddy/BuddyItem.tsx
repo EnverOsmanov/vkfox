@@ -97,7 +97,7 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
     };
 
 
-    render(): JSX.Element | any | any {
+    render(): React.ReactNode {
         const buddie = this.props.buddie;
 
         return (

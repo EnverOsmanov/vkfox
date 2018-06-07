@@ -1,6 +1,6 @@
 "use strict";
 
-import "../../../less/vkfox/vkfox-io/index.less"
+import "../../../sass/vkfox/vkfox-io/index.scss"
 
 
 const LARGE_PLAYER = "large-player";
