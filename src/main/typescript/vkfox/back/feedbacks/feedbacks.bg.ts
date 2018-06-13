@@ -18,41 +18,40 @@ import {AccessTokenError} from "../../request/models";
 import {AuthModelI} from "../auth/types";
 import {
     FeedbackObj,
-    FeedbackObjShort, FeedbackObjShortComment, FeedbackWithOwnerId,
-    FoxCommentsNewsItem, ParentObj, ParentObjPost,
+    FeedbackObjShort,
+    FeedbackObjShortComment,
+    FeedbackWithOwnerId,
+    FoxCommentsNewsItem,
+    ParentObj,
+    ParentObjPost,
     ParentWithOwnerId,
-    ReplyFeedback, TopicFeedbackFromComm,
+    ReplyFeedback,
+    TopicFeedbackFromComm,
     WallMentionFeedback
 } from "../../feedbacks/types";
 import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../../vk/types";
 import {FeedbackItemObj, FeedbackUnsubOptions} from "../../popup/news/types";
 import {
+    CommentFromNews,
+    CommentPhotoNoti,
     CommentsNews,
     CommentsNewsItem,
-    FeedbackRS,
-    FeedbackTypes,
-    FollowNoti,
-    FriendAcceptedNoti,
-    LikePostNoti,
-    LikeCommentNoti,
-    MentionNoti,
-    NotificationObj,
-    ParentTypes,
-    PhotoCommentN,
-    PostCommentN,
-    WallPublishNoti,
-    WithLikes,
-    ParentComment,
-    PorFPostItem,
-    LikeCommentPhotoNoti,
-    LikeCommentVideoNoti,
-    LikeCommentTopicNoti,
-    CommentPhotoNoti,
-    MentionCommentPhotoNoti,
-    WithFromId,
     CommentVideoNoti,
     FeedbackComment,
-    CommentFromNews
+    FeedbackRS,
+    FollowNoti,
+    FriendAcceptedNoti,
+    LikeCommentNoti,
+    LikeCommentPhotoNoti,
+    LikeCommentTopicNoti,
+    LikeCommentVideoNoti,
+    MentionCommentPhotoNoti,
+    MentionNoti,
+    NotificationObj,
+    ParentComment,
+    PorFPostItem,
+    PostCommentN,
+    WithFromId
 } from "../../../vk/types/feedback";
 import {PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
 
@@ -149,20 +148,31 @@ function onLikesChanged(params: LikesChanged) {
     }
 }
 
+function handleError(e: Error) {
+    console.warn("Couldn't unsubscribe", e)
+}
 
-function onFeedbackUnsubcribe(params: FeedbackUnsubOptions) {
+
+function onFeedbackUnsubcribe(params: FeedbackUnsubOptions): void {
     const unsubscribeFromId = [
-        params.type, params.item_id,
-        'user', params.owner_id
+        params.type,
+        params.item_id,
+        "user",
+        params.owner_id
     ].join(':');
 
-    Request.api<number>({
-        code: `return API.newsfeed.unsubscribe(${JSON.stringify(params)});`
-    }).then( (response) => {
+    const code = `return API.newsfeed.unsubscribe(${JSON.stringify(params)});`;
+
+    function handleResponse(response) {
         if (response) {
             itemsColl.remove(itemsColl.get(unsubscribeFromId));
         }
-    });
+    }
+
+    Request
+        .api<number>({ code })
+        .then(handleResponse)
+        .catch(handleError);
 }
 
 

@@ -33,9 +33,12 @@ export default Resizer
 
 const body = document.querySelector("body");
 
-let startX, startY, startWidth, startHeight;
+let startX: number,
+    startY: number,
+    startWidth: number,
+    startHeight: number;
 
-function initDrag(e) {
+function initDrag(e: React.MouseEvent<any>) {
     startX = e.screenX;
     startY = e.screenY;
     startWidth = parseInt(document.defaultView.getComputedStyle(body).width, 10);
@@ -44,7 +47,7 @@ function initDrag(e) {
     document.documentElement.addEventListener('mouseup', stopDrag, false);
 }
 
-function doDrag(e) {
+function doDrag(e: MouseEvent) {
     body.style.width = (startWidth - (e.screenX - startX)) + 'px';
     body.style.height = (startHeight + (e.screenY - startY)) + 'px';
 }

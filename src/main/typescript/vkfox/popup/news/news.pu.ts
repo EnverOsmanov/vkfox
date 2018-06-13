@@ -26,9 +26,9 @@ export interface CommentsDataI {
     replyTo?: number
 }
 
-export function unsubscribe(type, ownerId, itemId) {
+export function unsubscribe(type: string, ownerId: number, itemId: number) {
     const options = {
-        type    : type,
+        type,
         owner_id: ownerId,
         item_id : itemId
     };
@@ -76,7 +76,7 @@ export function getCommentsData(type: string, parent: ParentObj): CommentsDataI 
             const topicParent = parent as TopicFeedbackFromComm;
             return {
                 ownerId: topicParent.owner_id,
-                id     : 1,
+                id     : topicParent.post_id,
                 type   : "topic"
             };
 
