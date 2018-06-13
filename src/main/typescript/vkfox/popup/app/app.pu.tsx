@@ -7,8 +7,17 @@ import MainNavigation from "../navigation/MainNavigation";
 
 import "../../../../sass/vkfox/popup.scss"
 import "emoji/lib/emoji.css"
+import Resizer from "../resize/Resizer";
 
+const Popup: React.StatelessComponent = () => {
+    return (
+        <div className="fullpage">
+            <MainNavigation/>
+            <Resizer/>
+        </div>
+    )
+};
 
 dimensions();
-ReactDOM.render(<MainNavigation/>, document.getElementById("app"));
+ReactDOM.render(<Popup/>, document.getElementById("app"));
 anchor();

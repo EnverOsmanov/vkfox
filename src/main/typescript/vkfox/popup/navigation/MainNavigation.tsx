@@ -51,7 +51,7 @@ class MainNavigation extends React.Component {
 
         return (
             <Router>
-                <div>
+                <div className="fullpage">
                     <NotificationRouter />
                     <div className="navigation navbar navbar_style_main">
                         {this.tabLinks}
@@ -75,7 +75,6 @@ class MainNavigation extends React.Component {
                         <Route path="/settings" component={SettingsPage}/>
                         <Redirect from="/" to={lastPath}/>
                     </Switch>
-                    <Resizer/>
                 </div>
             </Router>
         )

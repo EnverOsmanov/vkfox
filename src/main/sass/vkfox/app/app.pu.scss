@@ -7,10 +7,9 @@ html {
     height: 100%;
     margin: 0;
     overflow: hidden;
-    font-size: calc(1rem + 2px);
 }
 
-#app, #app > div, .fullpage {
+#app, .fullpage {
     height: 100%;
 }
 

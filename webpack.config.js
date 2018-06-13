@@ -15,6 +15,7 @@ module.exports = {
   entry: {
     "app.install"   : "./vkfox/install/app/app.install.tsx",
     "app.pu"        : "./vkfox/popup/app/app.pu.tsx",
+    "app.sidebar"   : "./vkfox/sidebar/app/app.sidebar.tsx",
     "app.bg"        : "./vkfox/back/app/app.bg.ts",
     "photo"         : "./vkfox/vkfox-io/photo.ts",
     "video"         : "./vkfox/vkfox-io/video.ts",
@@ -30,32 +31,37 @@ module.exports = {
       extractLess,
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
       new HtmlWebpackPlugin({
-          chunks: ["photo"],
+          chunks: ["doc~photo~video", "photo"],
           filename: "photo.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/vkfox-io/photo.html"
       }),
       new HtmlWebpackPlugin({
-          chunks: ["video"],
+          chunks: ["doc~photo~video", "video"],
           filename: "video.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/vkfox-io/video.html"
       }),
       new HtmlWebpackPlugin({
-          chunks: ["doc"],
+          chunks: ["doc~photo~video", "doc"],
           filename: "doc.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/vkfox-io/doc.html"
       }),
       new HtmlWebpackPlugin({
-          chunks: ["vendors~app.bg~app.install~app.pu", "vendors~app.install~app.pu", "app.install"],
+          chunks: ["vendors~app.bg~app.install~app.pu~app.sidebar", "vendors~app.install~app.pu~app.sidebar", "app.install"],
           filename: "install.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/install.html"
       }),
       new HtmlWebpackPlugin({
-          chunks: ["vendors~app.bg~app.install~app.pu", "vendors~app.bg~app.pu", "app.pu"],
+          chunks: ["vendors~app.bg~app.install~app.pu~app.sidebar", "vendors~app.bg~app.pu~app.sidebar", "app.pu"],
           filename: "popup.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/popup.html"
       }),
       new HtmlWebpackPlugin({
-          chunks: ["vendors~app.bg~app.install~app.pu", "vendors~app.bg~app.pu", "app.bg"],
+          chunks: ["vendors~app.bg~app.install~app.pu~app.sidebar", "vendors~app.bg~app.pu~app.sidebar", "app.sidebar"],
+          filename: "sidebar.html",
+          template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/popup.html"
+      }),
+      new HtmlWebpackPlugin({
+          chunks: ["vendors~app.bg~app.install~app.pu~app.sidebar", "vendors~app.bg~app.pu~app.sidebar", "app.bg"],
           filename: "background.html",
           template: "!!html-webpack-plugin/lib/loader.js!./src/main/resources/pages/background.html"
       })

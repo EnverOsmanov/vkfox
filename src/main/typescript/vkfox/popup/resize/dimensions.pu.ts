@@ -24,8 +24,7 @@ export default function init() {
     else {
         css = {
             width: 320,
-            height: 480,
-            fontSize: 12
+            height: 480
         };
     }
     for (const property in css) {

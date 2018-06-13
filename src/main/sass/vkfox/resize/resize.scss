@@ -1,5 +1,6 @@
-html {
-    position: relative;
+html, body {
+    height: 100%;
+    width: 100%;
 }
 .resize {
     $size: 2rem + $baseLineHeight;
