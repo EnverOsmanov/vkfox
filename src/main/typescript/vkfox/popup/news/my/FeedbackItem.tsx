@@ -156,6 +156,8 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
 
         return (
             <Item
+                itemClass="card-1 scrollable-card"
+                ownerClass="item__img"
                 owners={itemProfile}>
 
                 <div className="item__body clearfix">

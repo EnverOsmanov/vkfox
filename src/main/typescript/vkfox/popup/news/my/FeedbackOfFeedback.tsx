@@ -6,6 +6,7 @@ import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
 import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/types";
 import {GroupProfile, UserProfile} from "../../../back/users/types";
+import ItemActionLike from "../../itemActions/ItemActionLike";
 
 
 interface FeedbackItemProps {
@@ -48,11 +49,11 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
 
         return (
             <div>
-
-                <span>
-                    <RectifyPu text={commentFeedback.text} hasEmoji={false}/>
-                </span>
+                <RectifyPu text={commentFeedback.text} hasEmoji={false}/>
                 {attachments}
+
+                {/*<div className="subfeedback__actions">
+                </div>*/}
             </div>
         );
     };
@@ -101,6 +102,8 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
 
         return (
             <Item
+                itemClass="subfeedback"
+                ownerClass="item__img"
                 owners={owner}>
                 <div className="item__body clearfix">
                     {this.feedbackElm(feedback)}

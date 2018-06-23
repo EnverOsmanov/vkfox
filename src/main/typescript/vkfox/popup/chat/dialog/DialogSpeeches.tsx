@@ -4,13 +4,13 @@ import {addVKBase, profile2Name} from "../../filters/filters.pu";
 import {Speech} from "../types";
 import {GroupProfile, UserProfile} from "../../../back/users/types";
 import {Message, MessageWithAction} from "../../../../vk/types";
-import AttachmentC from "../../attachment/AttachmentC";
 import RectifyPu from "../../../rectify/rectify.pu";
 import I18N from "../../../i18n/i18n";
 import {PuChatUserProfile} from "../../../chat/collections/ProfilesColl";
 import {Collection} from "backbone";
-import {AttachmentContainer} from "../../../../vk/types/newsfeed";
 import {profilePhotoPath} from "../../item/item.pu";
+import {attachmentsDivM} from "./helpers/dialog.pu";
+
 
 interface DialogSpeechesProps {
     speeches    : Speech[],
@@ -101,11 +101,11 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                 }
 
                 return (
-                    <div key={i} className="chat__fwd-message">
+                    <div key={i} className="chat__fwd">
                         {divForNotArray()}
                         <span>{fwdMessage.body}</span>
 
-                        {fwdMessage.attachments && this.attachmentsDiv(fwdMessage.attachments)}
+                        {fwdMessage.attachments && attachmentsDivM(fwdMessage.attachments)}
                     </div>
                 )
             })
@@ -113,20 +113,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
         else return []
     };
 
-    attachmentsDiv = (attachments?: AttachmentContainer[]) => {
-        if (attachments) {
-            return attachments.map((attachment, i) =>
 
-                <AttachmentC
-                    key={i}
-                    data={attachment[attachment.type]}
-                    type={attachment.type}
-                    showFullWidth={false}
-                />
-            )
-        }
-        else return []
-    };
 
 
     singleMessageDiv = (messageItem: Message, speech: Speech) => {
@@ -146,7 +133,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
                 <br hidden={!(messageItem.attachments && messageItem.body)}/>
 
-                {messageItem.attachments && this.attachmentsDiv(messageItem.attachments)}
+                {messageItem.attachments && attachmentsDivM(messageItem.attachments)}
             </div>
         )
     };
@@ -163,7 +150,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
                 const isOutClassName = speech.out
                     ? "chat__messages_out"
-                    : "";
+                    : "chat__messages_in";
 
                 const messageAuthor = speech.author.id !== (owners as UserProfile).id
                     ?

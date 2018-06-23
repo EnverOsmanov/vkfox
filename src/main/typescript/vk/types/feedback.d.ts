@@ -1,6 +1,6 @@
 import {GroupProfile, UserProfile} from "../../vkfox/back/users/types";
 import {Attachment, AttachmentPhoto, PhotoItem, PostItem, VideoItem} from "./newsfeed";
-import {LikesObj} from "./objects";
+import {LikesObj, UserLikesObj} from "./objects";
 import {GenericRS} from "./index";
 import {NewsLikesObj} from "../../vkfox/feedbacks/types";
 
@@ -28,7 +28,11 @@ interface WithLikes {
     likes   : LikesObj
 }
 
-export interface CommentFromNews extends Comment, WithLikes {
+interface WithUserLikes {
+    likes   : UserLikesObj
+}
+
+export interface CommentFromNews extends Comment, WithUserLikes {
     from_id : number
 }
 
@@ -44,7 +48,7 @@ export interface ParentComment extends Comment, CommentReply {
 
 // Todo I didn't see real example of this type:
 /*
-export interface MentionOrWallPublish extends FeedbackComment, WithLikes {
+export interface MentionOrWallPublish extends FeedbackComment, WithUserLikes {
     owner_id: number
 }
 */

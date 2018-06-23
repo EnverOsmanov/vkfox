@@ -13,6 +13,7 @@ import {UserProfile} from "../../../back/users/types";
 import {Message} from "../../../../vk/types";
 import DialogSpeeches from "./DialogSpeeches";
 import ReplyMessage from "../../reply/ReplyMessage";
+import {Description} from "../../item/ItemDescription";
 
 interface DialogItemProps {
     dialog      : DialogI
@@ -109,6 +110,12 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
     };
 
+    heroSmallDescription = (lastMessage: Message) => {
+        const datetime = timeAgo(lastMessage.date * 1000);
+
+        return <Description description={datetime}/>
+    };
+
 
     render(): React.ReactNode {
         const {dialog, profilesColl} = this.props;
@@ -116,16 +123,16 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
         const out = _(foldedMessages).last().author.isSelf;
         const lastMessage = dialog.messages.slice(-1)[0];
-        const datetime = timeAgo(lastMessage.date * 1000);
 
         const owners = this.getOwners(dialog);
 
 
         return (
             <Item
-                description={datetime}
+                description={this.heroSmallDescription(lastMessage)}
                 owners={owners}
-                itemClass="chat"
+                ownerClass="item__avatar"
+                itemClass="chat card-1 scrollable-card"
                 title={lastMessage.title}>
 
                 <div className="item__body clearfix">

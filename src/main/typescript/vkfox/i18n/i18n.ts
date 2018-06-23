@@ -44,7 +44,11 @@ export default class I18N {
      * @returns {String}
      */
     static get(key: string, ...args): string {
-        return messages[key].apply(messages, args);
+        const message = messages[key];
+
+        return message
+            ? message.apply(messages, args)
+            : key;
     }
 
     static getWithGender(key: string, sex: Sex): string {

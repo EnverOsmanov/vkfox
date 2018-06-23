@@ -3,14 +3,15 @@ import I18N from "../../i18n/i18n";
 import Msg from "../../mediator/messages";
 import Mediator from "../../mediator/mediator.pu"
 import {NewsLikesObj} from "../../feedbacks/types";
-import {LikesObj} from "../../../vk/types/objects";
+import {UserLikesObj} from "../../../vk/types/objects";
 
 
 interface ItemActionProps {
     ownerId : number
     itemId  : number
-    likes   : LikesObj
+    likes   : UserLikesObj
     type   ?: string
+    classPrefix: string
 }
 
 class ItemActionLike extends React.Component<ItemActionProps> {
@@ -31,11 +32,12 @@ class ItemActionLike extends React.Component<ItemActionProps> {
         const likes = this.props.likes as NewsLikesObj;
         const show = likes.can_like || likes.user_likes || (likes && likes.can_like === undefined);
         const myClassName = likes.user_likes ? "item__action-like_liked" : "";
+        const {classPrefix} = this.props;
 
         if (show)
             return (
                 <i
-                    className={`item__action fa fa-heart ${myClassName}`}
+                    className={`${classPrefix}__action fa fa-heart ${myClassName}`}
                     title={I18N.get("Like")}
                     onClick={this.handleLikeClick}
                 />

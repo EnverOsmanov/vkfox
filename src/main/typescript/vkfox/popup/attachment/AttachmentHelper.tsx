@@ -2,7 +2,14 @@ import * as React from "react"
 import {CSSProperties} from "react"
 import Browser from "../../browser/browser.pu"
 import Request from "../../request/request.pu"
-import {docViewPath, imageViewPath, imageViewPathByUrl, stickerImageUrl, stickerViewPath} from "../item/item.pu";
+import {
+    docViewPath,
+    imageViewPath,
+    imageViewPathByUrl,
+    stickerImageUrl,
+    stickerViewPath,
+    videoViewPathByUrl
+} from "../item/item.pu";
 import {duration} from "../filters/filters.pu";
 import {VideoGetUserVideosResponse} from "../../../vk/types";
 import {
@@ -17,9 +24,8 @@ import {
     AttachmentVideo,
     AttachmentWall
 } from "../../../vk/types/newsfeed";
+import {attachmentsDivM} from "../chat/dialog/helpers/dialog.pu";
 
-
-const VIDEO_VIEW_URL = "/pages/video.html";
 
 function imageProperties(src: string): CSSProperties {
     return {
@@ -37,7 +43,7 @@ function onVideoClick(dataVideo: AttachmentVideo): Promise<void> {
         .api<VideoGetUserVideosResponse>({code})
         .then((data) => {
             return data && data.items[0]
-                ? Browser.createTab(VIDEO_VIEW_URL + "#" + btoa(data.items[0].player)).then(_ => {})
+                ? Browser.createTab(videoViewPathByUrl(data.items[0].player)).then(_ => {})
                 : Promise.resolve()
         });
 }
@@ -66,9 +72,24 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
             )
         }
 
+        case 5: {
+            const {audio_msg} = dataDoc.preview;
+
+            return (
+                <a
+                    className={`item__link`}
+                    data-anchor={videoViewPathByUrl(audio_msg.link_ogg)}>
+                    <i className="fa fa-music"/>
+                    {duration(audio_msg.duration)}
+                </a>
+            )
+        }
+
         default: {
             return (
-                <a className="item__link" data-anchor={docViewPath(dataDoc)}>
+                <a
+                    className="item__link"
+                    data-anchor={docViewPath(dataDoc)}>
                     <i className="fa fa-file"/>
                     {dataDoc.title}
                 </a>
@@ -182,10 +203,11 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
         case "wall":
             const wall = data as AttachmentWall;
             return (
-                <div className="item__attachment">
+                <div className="item__attachment chat__fwd card-1">
                     <i className="fa fa-bullhorn"/>
 
                     { wall.text}
+                    { attachmentsDivM(wall.attachments)}
                 </div>
             );
         default:

@@ -35,19 +35,22 @@ class MyFeedbackActions extends React.Component<MyFeedbackActionsProps, object> 
 
     actionLike = (comment: CommentsDataI, parent: ParentObj) => {
         if ("likes" in parent) {
-            const type = comment.type === "topic"
-                ? "topic_comment"
-                : comment.type;
 
-            return (
-                <ItemActionLike
-                    type={type}
-                    ownerId={comment.ownerId}
-                    itemId={comment.id}
-                    likes={(parent as ParentObjPost | TopicFeedbackFromComm).likes}
-                />
-            )
+            if (comment.type !== "topic") {
+
+                return (
+                    <ItemActionLike
+                        type={comment.type}
+                        ownerId={comment.ownerId}
+                        itemId={comment.id}
+                        likes={(parent as ParentObjPost | TopicFeedbackFromComm).likes}
+                        classPrefix="item"
+                    />
+                )
+            }
+            else return null;
         }
+        else return null;
     };
 
     actionOpenLink = () => {

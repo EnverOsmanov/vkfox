@@ -1,7 +1,7 @@
 import {Collection, Model} from "backbone";
 import {ItemObj, UserId} from "../../vk/types/newsfeed";
 import {idMaker} from "../back/newsfeed/newsfeed.bg";
-import {LikesObj} from "../../vk/types/objects";
+import {UserLikesObj} from "../../vk/types/objects";
 import {GenericRS} from "../../vk/types";
 
 
@@ -25,7 +25,7 @@ export interface LikesChanged {
     owner_id: number
     item_id : number
 
-    likes   : LikesObj
+    likes   : UserLikesObj
 }
 
 
@@ -37,7 +37,7 @@ export class Item extends Model {
         return super.get("friends")
     }
 
-    set likes(value: LikesObj) {
+    set likes(value: UserLikesObj) {
         super.set("likes", value)
     }
 

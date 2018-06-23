@@ -1,4 +1,3 @@
-
 import {BrowserRouter as Router, Link, NavLink, Route, Switch} from 'react-router-dom'
 import {Redirect, withRouter} from "react-router"
 import * as React from "react"
@@ -14,8 +13,6 @@ import Msg from "../../mediator/messages";
 import {AuthState} from "../../back/auth/models";
 import Browser from '../../browser/browser.pu'
 import {VKNotificationI} from "../../notifications/types";
-import Resizer from "../resize/Resizer";
-
 
 
 class MainNavigation extends React.Component {
@@ -86,9 +83,11 @@ export default MainNavigation
 const NotificationRouter = withRouter(props => {
 
         props.history.listen(location => {
-            Mediator.pub(Msg.RouterChange, location.pathname);
-            Mediator.pub(Msg.RouterLastPathPut, location.pathname);
-            MainNavigation.model.set("lastPath", location.pathname);
+            if (location.pathname !== "/settings") {
+                Mediator.pub(Msg.RouterChange, location.pathname);
+                Mediator.pub(Msg.RouterLastPathPut, location.pathname);
+                MainNavigation.model.set("lastPath", location.pathname);
+            }
         });
 
         const  notificationsPromise: Promise<VKNotificationI[]> = new Promise(resolve => Mediator.sub(Msg.NotificationsQueue, resolve));

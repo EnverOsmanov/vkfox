@@ -1,5 +1,5 @@
 import {AttachmentContainer, CanPostable, PhotoItem, VideoItem} from "../../vk/types/newsfeed";
-import {LikesObj} from "../../vk/types/objects";
+import {UserLikesObj} from "../../vk/types/objects";
 import {
     CommentFromNews,
     CommentsNewsItem,
@@ -8,11 +8,11 @@ import {
     ParentComment,
     PorFPostItem, TopicCommentN,
     TopicItem,
-    WithFromId
+    WithFromId, WithLikes, WithUserLikes
 } from "../../vk/types/feedback";
 
 
-export interface NewsLikesObj extends LikesObj {
+export interface NewsLikesObj extends UserLikesObj {
     can_like   : number
     can_publish: number
 }
@@ -47,11 +47,11 @@ export interface WallMentionFeedback extends FeedbackObjShort {
 }
 
 
-export interface ReplyFeedback extends FeedbackObjShort {
+export interface ReplyFeedback extends FeedbackObjShort, WithLikes {
+    date: number
+    from_id: number
+    id: number
     text      : string
-
-    // added by VKfox ?
-    attachments : AttachmentContainer[]
 }
 
 interface TopicObj {
@@ -79,7 +79,7 @@ export interface TopicFeedbackFromNoti extends ParentObj {
 
     created     : number
     updated     : number
-    likes       : LikesObj
+    likes       : UserLikesObj
 }
 
 export interface PhotoFeedback extends ParentObj {

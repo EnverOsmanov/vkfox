@@ -45,9 +45,6 @@ class VKfoxAudio {
         source.buffer = await aContext.decodeAudioData(aBuffer);
         source.connect((aContext.destination));
         source.start();
-
-
-        console.debug("Result here");
     }
 }
 

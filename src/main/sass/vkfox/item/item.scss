@@ -2,7 +2,6 @@ $itemIconSize: 2.5em;
 $itemPadding: 0.75em;
 .item {
   background: white;
-  margin: 0;
   position: relative;
   box-sizing: border-box;
   padding: $itemPadding;
@@ -166,4 +165,37 @@ $itemPadding: 0.75em;
 }
 .item__action-active {
   opacity: 1;
+}
+
+.subfeedback {
+
+  &__action {
+    opacity: 0;
+    text-decoration: none !important;
+    display: inline-block;
+    cursor: pointer;
+    @include color-with-hover($peterRiver);
+  }
+
+  &__actions {
+    position: absolute;
+    height: 1em;
+    padding: 0.75em;
+    display: flex;
+    align-items: center;
+    top: 0.75em;
+    right: 0;
+    font-size: calc(1rem + 2px);
+  }
+
+  &:hover .subfeedback__actions {
+    box-shadow: -0.5em 0 0.5em 0 white;
+    background-color: white;
+    opacity: 1;
+  }
+
+  &:hover .subfeedback__action {
+    opacity: 1;
+  }
+
 }

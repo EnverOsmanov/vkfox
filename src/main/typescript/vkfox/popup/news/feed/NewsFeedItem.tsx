@@ -215,6 +215,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                         ownerId={itemPost.source_id}
                         itemId={itemPost.post_id}
                         likes={itemPost.likes}
+                        classPrefix="item"
                     />
 
                 </ItemActions>
@@ -307,6 +308,8 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
         return (
             <Item
+                itemClass="card-1 scrollable-card"
+                ownerClass="item__img"
                 owners={owner}>
 
                 <div className="item__body clearfix">

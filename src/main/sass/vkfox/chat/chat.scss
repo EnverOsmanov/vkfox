@@ -21,6 +21,16 @@
 }
 .chat__messages_out {
     text-align: right;
+
+    .chat__fwd {
+        margin-left: 5px;
+    }
+}
+
+.chat__messages_in {
+    .chat__fwd {
+        margin-left: -5p
+    }
 }
 .item__action.chat__item-action_mark-read
 {
@@ -28,8 +38,11 @@
     @include color-with-hover($alizarin);
 }
 
-.chat__fwd-message {
-    background: linear-gradient(to left, transparent, cornflowerblue);
-    border-radius: 4px;
+.chat__fwd {
+    background: aliceblue;
+    padding-right: 5px;
+    padding-left: 5px;
+
+    @extend .card-1
 }
 

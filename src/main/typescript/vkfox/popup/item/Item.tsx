@@ -6,21 +6,17 @@ import {profilePhotoPath} from "./item.pu";
 
 interface ItemProps {
     owners      : UserProfile | UserProfile[] | GroupProfile | GroupProfile[],
-    itemClass  ?: string
-    description?: string
+    itemClass   : string
+    ownerClass  : string
+    description?: JSX.Element
     title      ?: string
-
 }
 
 
 class Item extends React.Component<ItemProps> {
 
     heroIcon = () => {
-        const {owners, itemClass} = this.props;
-
-        const ownerClass = itemClass == "chat"
-            ? "item__avatar"
-            : "item__img";
+        const {owners, ownerClass} = this.props;
 
         const divForArray = (
             <div className={ownerClass}>
@@ -73,20 +69,8 @@ class Item extends React.Component<ItemProps> {
             : "";
     };
 
-    heroSmallDescription = () => {
-        const {description} = this.props;
-
-        return description
-            ?
-            <span
-                className="item__description">
-                {description}
-            </span>
-            : null
-    };
-
     render() {
-        const itemClass = this.props.itemClass || "";
+        const {itemClass, description} = this.props;
 
         return (
             <div className={`item ${itemClass}`}>
@@ -98,7 +82,7 @@ class Item extends React.Component<ItemProps> {
                             {this.heroName()}
                         </span>
 
-                        {this.heroSmallDescription()}
+                        {description}
                     </span>
                 </div>
 

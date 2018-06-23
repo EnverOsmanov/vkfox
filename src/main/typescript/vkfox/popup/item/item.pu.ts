@@ -3,6 +3,8 @@
 import {AttachmentDoc, AttachmentPhoto, AttachmentSticker} from "../../../vk/types/newsfeed";
 import {ProfileI} from "../../back/users/types";
 
+
+const VIDEO_VIEW_URL = "/pages/video.html";
 const DOC_VIEW_URL = "/pages/doc.html",
     IMAGE_VIEW_URL = "/pages/photo.html";
 
@@ -25,6 +27,11 @@ export function docViewPath(data: AttachmentDoc): string {
 export function imageViewPathByUrl(url: string): string {
 
     return `${IMAGE_VIEW_URL}#${btoa(url)}`;
+}
+
+export function videoViewPathByUrl(url: string): string {
+
+    return `${VIDEO_VIEW_URL}#${btoa(url)}`;
 }
 
 export function imageViewPath(photo: AttachmentPhoto): string | void {

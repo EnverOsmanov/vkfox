@@ -24,6 +24,7 @@ import {
     VkDialog
 } from "../../../vk/types";
 import {DialogI} from "../../popup/chat/types";
+import {html2text} from "../../rectify/helpers";
 
 const MAX_HISTORY_COUNT = 10;
 
@@ -368,10 +369,12 @@ function onLatestMessageIdChange() {
             GENDER: gender
         });
 
+        const sanitizedMessage = html2text(lastMessage.body);
+
         Notifications.notify({
             title,
             type   : NotifType.CHAT,
-            message: lastMessage.body,
+            message: sanitizedMessage,
             image  : profile.photo,
             noBadge: chatActive,
             noPopup: chatActive,

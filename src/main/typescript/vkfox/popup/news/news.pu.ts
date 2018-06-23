@@ -144,7 +144,7 @@ export function getSourceLink(type: string, parent: ParentObj): string {
 
             const ownedPart = topicP.post_id || (topicP as any).id || (topicP as any).tid;
 
-            return `${Config.VK_BASE}topic${parent.owner_id}_${ownedPart}?offset=last&scroll=1`;
+            return `${Config.VK_BASE}topic${topicP.owner_id}_${ownedPart}?offset=last&scroll=1`;
         }
 
         case 'photo': {

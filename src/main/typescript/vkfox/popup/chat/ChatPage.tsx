@@ -5,7 +5,7 @@ import {PuChatUserProfile, PuChatUserProfilesColl} from "../../chat/collections/
 import {Collection} from "backbone"
 import Msg from "../../mediator/messages";
 import I18N from "../../i18n/i18n";
-import DialogItem from "./dialogActions/DialogItem";
+import DialogItem from "./dialog/DialogItem";
 import {ChatDataI, DialogI} from "./types";
 import {UserProfile} from "../../back/users/types";
 import {Message} from "../../../vk/types";

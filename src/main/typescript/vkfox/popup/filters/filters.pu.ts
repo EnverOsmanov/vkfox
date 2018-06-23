@@ -10,9 +10,14 @@ import {NameSurname, OnlyName} from "../../chat/types";
  *
  * @returns {String}
  */
-export function duration(seconds: number) {
+export function duration(seconds?: number): string | null {
+    const format = (3600 <= seconds)
+        ? "HH:mm:ss"
+        : "mm:ss";
 
-    if (seconds) return moment.unix(seconds).format('HH:mm');
+    return seconds
+        ? moment.utc(seconds * 1000).format(format)
+        : null
 }
 
 /**

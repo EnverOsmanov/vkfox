@@ -8,6 +8,7 @@ import Request from "../../request/request.pu"
 import {SendMessageParams} from "../../chat/collections/DialogColl";
 import {FoxUserProfileI} from "../../chat/types";
 import ReplyMessage from "../reply/ReplyMessage";
+import {Description} from "../item/ItemDescription";
 
 interface BuddyItemProps {
     buddie  : FoxUserProfileI
@@ -97,6 +98,9 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
         }
     };
 
+    buddieDescription = (buddy: FoxUserProfileI) =>
+        <Description description={buddy.description}/>;
+
 
     render(): React.ReactNode {
         const buddie = this.props.buddie;
@@ -105,7 +109,8 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
             <Item
                 key={buddie.id}
                 itemClass={`buddies__item ${buddie.isFave && "buddies__item_is-fave"}`}
-                description={buddie.description}
+                ownerClass="item__img"
+                description={this.buddieDescription(buddie)}
                 owners={buddie}>
 
                 <div className="item__body clearfix">
