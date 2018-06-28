@@ -103,7 +103,10 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                 return (
                     <div key={i} className="chat__fwd">
                         {divForNotArray()}
-                        <span>{fwdMessage.body}</span>
+                        <RectifyPu
+                            text={fwdMessage.body}
+                            hasEmoji={false}
+                        />
 
                         {fwdMessage.attachments && attachmentsDivM(fwdMessage.attachments)}
                     </div>

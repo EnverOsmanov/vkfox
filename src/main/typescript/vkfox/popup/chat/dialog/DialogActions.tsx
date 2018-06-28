@@ -34,7 +34,7 @@ class DialogActions extends React.Component<DialogActionsProps, object> {
 
             this.props.addToProfilesColl(profiles);
 
-            if (messages.length > 1) {
+            if (messages.length > 0) {
                 const newMessages = dialog.messages.slice();
                 newMessages.unshift(...messages.reverse());
                 this.props.addToMessages(dialog.id, newMessages)
@@ -92,7 +92,7 @@ class DialogActions extends React.Component<DialogActionsProps, object> {
                 <ItemAction
                     className="fa fa-envelope"
                     title={I18N.get("Private message")}
-                    onClick={e => this.props.showReply()}
+                    onClick={_ => this.props.showReply()}
                 />
 
                 {this.markAsRead(unread)}

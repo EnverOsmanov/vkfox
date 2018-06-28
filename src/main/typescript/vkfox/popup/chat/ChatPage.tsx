@@ -18,16 +18,7 @@ interface ChatState {
 
 class ChatPage extends React.Component<object, ChatState> {
 
-    constructor(props) {
-        super(props);
-
-        const profilesColl = new PuChatUserProfilesColl();
-
-        this.state = {
-            dialogs: [],
-            profilesColl
-        };
-    }
+    public readonly state = ChatPageCpn.initialState;
 
     componentWillMount() {
         Mediator.sub(Msg.ChatData, this.onChatData);
@@ -145,3 +136,12 @@ class ChatPage extends React.Component<object, ChatState> {
 }
 
 export default ChatPage
+
+class ChatPageCpn {
+    private static profilesColl = new PuChatUserProfilesColl();
+
+    static initialState = {
+        dialogs     : [],
+        profilesColl: ChatPageCpn.profilesColl
+    };
+}

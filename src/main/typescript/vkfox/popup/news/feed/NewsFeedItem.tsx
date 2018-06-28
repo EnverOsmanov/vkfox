@@ -42,18 +42,7 @@ interface NewsFeedItemState {
 
 class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState> {
 
-    constructor(props) {
-        super(props);
-
-        const reply: ReplyI = {
-            visible: false
-        };
-
-        this.state = {
-            message: "",
-            reply
-        };
-    }
+    public readonly state = NewsFeedItemCpn.initialState;
 
 
     handleMessageChange = (message: string) => {
@@ -328,3 +317,17 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 }
 
 export default NewsFeedItem
+
+
+class NewsFeedItemCpn {
+
+    private static reply: ReplyI = {
+        visible: false
+    };
+
+    static initialState: NewsFeedItemState = {
+        message: "",
+        reply : NewsFeedItemCpn.reply
+    };
+
+}

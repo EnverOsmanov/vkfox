@@ -30,18 +30,7 @@ interface DialogItemState {
 
 class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
-    constructor(props) {
-        super(props);
-
-        const reply: ReplyI = {
-            visible: false
-        };
-
-        this.state = {
-            message: "",
-            reply
-        };
-    }
+    public readonly state = DialogItemCpn.initialState;
 
     handleMessageChange = (message: string) => {
         this.setState(prevState => {
@@ -165,3 +154,14 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 }
 
 export default DialogItem
+
+class DialogItemCpn {
+    private static reply: ReplyI = {
+        visible: false
+    };
+
+    static initialState = {
+        message : "",
+        reply   : DialogItemCpn.reply
+    };
+}

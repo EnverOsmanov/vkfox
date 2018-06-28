@@ -24,18 +24,7 @@ interface BuddyItemState {
 
 class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
 
-    constructor(props) {
-        super(props);
-
-        const reply: ReplyI = {
-            visible: false
-        };
-
-        this.state = {
-            message: "",
-            reply
-        };
-    }
+    public readonly state = BuddyItemCpn.initialState;
 
 
     bookmarkedElm = () => {
@@ -146,3 +135,14 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
 }
 
 export default BuddyItem
+
+class BuddyItemCpn {
+    private static reply: ReplyI = {
+        visible: false
+    };
+
+    static initialState: BuddyItemState = {
+        message : "",
+        reply   : BuddyItemCpn.reply
+    };
+}

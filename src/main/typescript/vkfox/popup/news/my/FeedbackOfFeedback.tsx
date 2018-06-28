@@ -6,7 +6,6 @@ import I18N from "../../../i18n/i18n";
 import RectifyPu from "../../../rectify/rectify.pu";
 import {FeedbackObj, ReplyFeedback} from "../../../feedbacks/types";
 import {GroupProfile, UserProfile} from "../../../back/users/types";
-import ItemActionLike from "../../itemActions/ItemActionLike";
 
 
 interface FeedbackItemProps {
@@ -21,18 +20,7 @@ interface FeedbackItemState {
 
 class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItemState> {
 
-    constructor(props) {
-        super(props);
-
-        const reply: ReplyI = {
-            visible: false
-        };
-
-        this.state = {
-            message: "",
-            reply
-        };
-    }
+    public readonly state = FeedbackOfFeedbackCpn.initialState;
 
     commentFeedback = (commentFeedback: ReplyFeedback) => {
         const attachments = commentFeedback.attachments
@@ -115,3 +103,14 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
 }
 
 export default FeedbackOfFeedback
+
+class FeedbackOfFeedbackCpn {
+    private static reply: ReplyI = {
+        visible: false
+    };
+
+    static initialState = {
+        message : "",
+        reply   : FeedbackOfFeedbackCpn.reply
+    };
+}

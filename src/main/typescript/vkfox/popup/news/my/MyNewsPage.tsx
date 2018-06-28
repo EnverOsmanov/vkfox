@@ -11,14 +11,11 @@ interface MyNewsProps extends RouteComponentProps<any> {}
 
 class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
 
-    constructor(props) {
-        super(props);
+    public readonly state = {
+        profiles: [],
+        items   : []
+    };
 
-        this.state = {
-            profiles: [],
-            items   : []
-        };
-    }
 
     componentWillMount() {
         Mediator.sub(Msg.FeedbacksData, this.onFeedbacksData);

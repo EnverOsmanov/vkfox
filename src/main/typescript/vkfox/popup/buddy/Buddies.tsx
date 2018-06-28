@@ -17,19 +17,8 @@ interface BuddiesState {
 
 class BuddiesPage extends React.Component<object, BuddiesState> {
 
-    static filtersModel = initBuddiesFilter();
 
-    constructor(props) {
-        super(props);
-
-        const filters = BuddiesPage.filtersModel.toJSON();
-
-        this.state = {
-            data        : [],
-            searchInput : "",
-            filters
-        };
-    }
+    public readonly state = BuddiesPageCpn.initialState;
 
     componentWillMount() {
         Mediator.sub(Msg.BuddiesData, this.onBuddiesData);
@@ -88,7 +77,7 @@ class BuddiesPage extends React.Component<object, BuddiesState> {
             };
             filters[filterName] = filterValue;
 
-            BuddiesPage.filtersModel.set(filters);
+            BuddiesPageCpn.filtersModel.set(filters);
 
             return {
                 ...prevState,
@@ -138,3 +127,17 @@ class BuddiesPage extends React.Component<object, BuddiesState> {
 }
 
 export default BuddiesPage
+
+
+class BuddiesPageCpn {
+
+    static filtersModel = initBuddiesFilter();
+
+    private static filters: BuddiesFilters = BuddiesPageCpn.filtersModel.toJSON();
+
+    static initialState: BuddiesState = {
+        data        : [],
+        searchInput : "",
+        filters: BuddiesPageCpn.filters
+    };
+}

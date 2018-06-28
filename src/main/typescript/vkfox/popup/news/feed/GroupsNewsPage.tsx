@@ -14,16 +14,7 @@ interface ChatState {
 
 class GroupNewsPage extends React.Component<ChatProps, ChatState> {
 
-    constructor(props) {
-        super(props);
-
-        const data: NewsfeedData = {
-            profiles: [],
-            items: []
-        };
-
-        this.state = { data };
-    }
+    public readonly state = GroupsNewsPageCpn.initialState;
 
     componentWillMount() {
         Mediator.sub(Msg.NewsfeedGroups, this.onNewsfeedData);
@@ -57,3 +48,16 @@ class GroupNewsPage extends React.Component<ChatProps, ChatState> {
 }
 
 export default GroupNewsPage
+
+
+class GroupsNewsPageCpn {
+
+    private static data: NewsfeedData = {
+        profiles: [],
+        items: []
+    };
+
+    static initialState: ChatState =
+        { data: GroupsNewsPageCpn.data };
+
+}

@@ -27,19 +27,7 @@ interface FeedbackItemState {
 
 class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState> {
 
-    constructor(props) {
-        super(props);
-
-        const reply: ReplyI = {
-            visible: false
-        };
-
-        this.state = {
-            message: "",
-            reply,
-            showAllFeedbacks: false
-        };
-    }
+    public readonly state = FeedbackItemCpn.initialState;
 
     showOrHideReply = () => {
         this.setState(prevState => {
@@ -187,3 +175,18 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
 }
 
 export default FeedbackItem
+
+
+class FeedbackItemCpn {
+
+    private static reply: ReplyI = {
+        visible: false
+    };
+
+    static initialState = {
+        message         : "",
+        reply           : FeedbackItemCpn.reply,
+        showAllFeedbacks: false
+    };
+
+}

@@ -23,12 +23,8 @@ interface SettingsState {
 
 class SettingsPage extends React.Component<object, SettingsState> {
 
+    public readonly state = defaultState;
 
-    constructor(props) {
-        super(props);
-
-        this.state = defaultState;
-    }
 
     componentWillMount() {
         Mediator.sub(Msg.ForceOnlineSettings, this.onForceOnlineSettings);

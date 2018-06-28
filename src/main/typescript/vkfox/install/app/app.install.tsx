@@ -11,11 +11,7 @@ import "../../../../sass/vkfox/install.scss"
 
 class App extends React.Component<object, InstallState> {
 
-    constructor(props) {
-        super(props);
-
-        this.state = {step: 0}
-    }
+    public readonly state = {step: 0};
 
 
     mainText(): string {

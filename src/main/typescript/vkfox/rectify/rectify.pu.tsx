@@ -18,11 +18,7 @@ const MAX_TEXT_LENGTH = 300,
 
 class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
 
-    constructor(props) {
-        super(props);
-
-        this.state = {hideButton: false}
-    }
+    public readonly state = {hideButton: false};
 
     static showMoreButtonLabel = I18N.get('more...');
 

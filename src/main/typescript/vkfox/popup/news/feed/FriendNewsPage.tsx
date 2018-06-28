@@ -15,14 +15,10 @@ interface ChatProps extends RouteComponentProps<any> {
 
 class FriendNewsPage extends React.Component<ChatProps, ChatState> {
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            profiles: [],
-            items: []
-        };
-    }
+    public readonly state = {
+        profiles: [],
+        items: []
+    };
 
     componentWillMount() {
         Mediator.sub(Msg.NewsfeedFriends, this.setState.bind(this));
