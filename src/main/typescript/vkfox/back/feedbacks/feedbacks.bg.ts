@@ -54,6 +54,7 @@ import {
     WithFromId
 } from "../../../vk/types/feedback";
 import {PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
+import {UserProfile} from "../users/types";
 
 /**
  * Responsible for "News -> My" page
@@ -553,7 +554,7 @@ function tryNotification() {
 
     // Don't show self messages
     if (ownerId !== userId) {
-        const profile = profilesColl.get(Math.abs(ownerId)).toJSON();
+        const profile: UserProfile = profilesColl.get(Math.abs(ownerId)).toJSON();
         const name = User.getName(profile);
         const gender = profile.sex === 1 ? "female" : "male";
 
@@ -586,7 +587,9 @@ function tryNotification() {
                 title = I18N.get('left a comment', { NAME: name, GENDER: gender });
                 message = (<ReplyFeedback>notificationItem).text;
                 break;
+
             default:
+                console.warn("Unknown notification type in feedback", type);
                 break;
         }
 
@@ -595,12 +598,14 @@ function tryNotification() {
             Browser.isVKSiteActive().then(function (active) {
                 const feedbacksActive = Browser.isPopupOpened() && Router.isFeedbackTabActive();
 
+                const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
+
                 if (!active) {
                     Notifications.notify({
                         type   : NotifType.NEWS,
-                        title  : title,
-                        message: message,
-                        image  : profile.photo,
+                        title,
+                        message,
+                        image,
                         noBadge: feedbacksActive,
                         noPopup: feedbacksActive,
                         sex    : profile.sex

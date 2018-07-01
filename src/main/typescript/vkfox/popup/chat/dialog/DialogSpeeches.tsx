@@ -16,6 +16,7 @@ interface DialogSpeechesProps {
     speeches    : Speech[],
     owners      : UserProfile | UserProfile[]
     profilesColl: Collection<PuChatUserProfile>
+    showReply(): void
 }
 
 
@@ -165,6 +166,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                 return (
                     <blockquote
                         key={i}
+                        onClick={_ => this.props.showReply()}
                         className="chat__item-content">
 
                         <div className={isOutClassName}>

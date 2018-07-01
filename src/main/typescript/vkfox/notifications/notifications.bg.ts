@@ -1,13 +1,11 @@
 "use strict";
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
-import {NotificationQueue, notificationsSettings, NotifType} from "./Notification";
+import {NotificationQueue, notificationsSettings, NotifType, VKNotification} from "./Notification";
 import {VKNotificationI} from "./types";
 import VKfoxAudio from "./VKfoxAudio";
-import NotificationOptions = browser.notifications.NotificationOptions;
 import {html2text} from "../rectify/helpers";
-import {Sex} from "../back/users/types";
-import {NotificationType} from "../../vk/types/feedback";
+import NotificationOptions = browser.notifications.NotificationOptions;
 
 
 const notificationQueue = new NotificationQueue();
@@ -50,11 +48,11 @@ export default class Notifications {
      * Create notifications. Usually you will need only this method
      *
      */
-    static notify(notification: VKNotificationI) {
+    static notify(notification: VKNotificationI): VKNotification {
         return notificationQueue.add(notification)
     }
 
-    static createPopup(options: VKNotificationI) {
+    static createPopup(options: VKNotificationI): void {
         function createP(base64: string): Promise<string | void> {
             const message = (popups.showText && options.message) || '';
 

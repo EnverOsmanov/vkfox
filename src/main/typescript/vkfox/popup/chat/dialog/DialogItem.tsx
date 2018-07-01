@@ -129,6 +129,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                         speeches={foldedMessages}
                         owners={owners}
                         profilesColl={profilesColl}
+                        showReply={this.showOrHideReply}
                     />
 
                     <DialogActions

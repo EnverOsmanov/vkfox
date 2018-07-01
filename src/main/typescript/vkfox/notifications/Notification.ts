@@ -55,7 +55,7 @@ export class NotifType {
     static NEWS = "news"
 }
 
-class VKNotification extends Model {
+export class VKNotification extends Model {
 
     get noBadge(): boolean {
         return super.get("noBadge")

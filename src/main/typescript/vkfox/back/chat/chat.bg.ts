@@ -371,11 +371,13 @@ function onLatestMessageIdChange() {
 
         const sanitizedMessage = html2text(lastMessage.body);
 
+        const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
+
         Notifications.notify({
             title,
             type   : NotifType.CHAT,
             message: sanitizedMessage,
-            image  : profile.photo,
+            image,
             noBadge: chatActive,
             noPopup: chatActive,
             sex    : profile.sex
