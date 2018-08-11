@@ -7,7 +7,6 @@ $fa-font-path: "~font-awesome/fonts";
 
 // Grid system and page structure
 @import "~bootstrap/scss/dropdown";
-@import "~bootstrap/scss/tooltip";
 @import "~bootstrap/scss/media";
 @import "~bootstrap/scss/utilities"; // Has to be last to override when necessary
 
@@ -31,6 +30,5 @@ $fa-font-path: "~font-awesome/fonts";
 @import "rectify/rectify";
 @import "select/select";
 @import "settings/settings";
-@import "tooltip/tooltip";
 @import "resize/resize";
 @import "material/card";

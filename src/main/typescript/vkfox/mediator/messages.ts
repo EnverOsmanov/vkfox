@@ -1,6 +1,6 @@
 "use strict";
 
-const Msg = {
+export const Msg = {
 
     AuthUser    : "auth:user",
     AuthToken   : "auth:token",
@@ -50,4 +50,8 @@ const Msg = {
     YandexSettingsPut: "yandex:settings:put"
 };
 
-export default Msg;
+export const ProxyNames = {
+    RequestBg: "../request/request.bg.ts",
+    UsersBg: "../users/users.bg.ts",
+    BrowserBg: "../browser/browser.bg"
+};

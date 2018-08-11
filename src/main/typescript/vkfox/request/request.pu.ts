@@ -1,21 +1,20 @@
 "use strict";
 import ProxyMethods from "../proxy-methods/proxy-methods.pu"
+import {ProxyNames} from "../mediator/messages";
 /**
  * Returns a correct implementation
  * for background or popup page
  */
 
-const namespace = "../request/request.bg.ts";
-
 
 export default {
 
     api<R>(params: any): Promise<R> {
-        return ProxyMethods.forwardM(namespace, "api", params)
+        return ProxyMethods.forwardM(ProxyNames.RequestBg, "api", params)
     },
 
     directApi<R>(method: string, params: object): Promise<R> {
-        return ProxyMethods.forwardM(namespace, "directApi", method, params)
+        return ProxyMethods.forwardM(ProxyNames.RequestBg, "directApi", method, params)
     }
 
 };

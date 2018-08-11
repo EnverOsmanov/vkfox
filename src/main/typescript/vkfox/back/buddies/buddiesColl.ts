@@ -1,6 +1,6 @@
 
-import GProfileColl, {GProfile} from "../../profiles-collection/profiles-collection.bg"
-import Request from "../../request/request.bg"
+import GProfileColl, {GProfile} from "../../common/profiles-collection/profiles-collection.bg"
+import RequestBg from "../../request/request.bg"
 import {MessagesLastActivityResponse} from "../../../vk/types/index";
 
 class BuddiesCollection extends GProfileColl<Buddy> {
@@ -53,7 +53,7 @@ export class Buddy extends GProfile {
             if (model.isWatched) {
                 const code = `return API.messages.getLastActivity({user_id: ${ model.id }})`;
 
-                Request.api<MessagesLastActivityResponse>({ code })
+                RequestBg.api<MessagesLastActivityResponse>({ code })
                     .then(handleResponse);
             }
             else model.unset("lastActivityTime");

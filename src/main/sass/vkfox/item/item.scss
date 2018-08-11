@@ -162,6 +162,8 @@ $itemPadding: 0.75em;
 }
 .item__body {
   padding-left: $itemIconSize + $itemPadding;
+  display: flex;
+  flex-direction: column;
 }
 .item__action-active {
   opacity: 1;

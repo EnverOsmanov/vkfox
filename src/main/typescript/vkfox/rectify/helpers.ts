@@ -1,6 +1,6 @@
 "use strict";
 
-import RectifyPu from "./rectify.pu";
+import RectifyPu from "./RectifyPu";
 
 function html2textBasic(html: string): string {
     const tag = document.createElement('div');

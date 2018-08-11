@@ -1,7 +1,7 @@
 "use strict";
-import Request from "../../request/request.bg";
+import RequestBg from "../../request/request.bg";
 import Mediator from "../../mediator/mediator.bg";
-import Msg from "../../mediator/messages";
+import {Msg} from "../../mediator/messages";
 import {AccessTokenError, LongPollKeyError} from "../../request/models";
 import {LongPollRS, LongPollServerRS} from "../../../vk/types";
 
@@ -44,7 +44,7 @@ function fetchUpdates(serverRS: LongPollServerRS) {
         }
     }
 
-    return Request
+    return RequestBg
         .get(`https://${serverRS.server}`, params, "json")
         .then(handleSuccess)
         .then(wait)
@@ -52,7 +52,7 @@ function fetchUpdates(serverRS: LongPollServerRS) {
 }
 
 export default function enableLongPollUpdates(ts?: number) {
-    return Request
+    return RequestBg
         .api<LongPollServerRS>({ code: "return API.messages.getLongPollServer();" })
         .then(server => {
             if (ts) server.ts = ts;

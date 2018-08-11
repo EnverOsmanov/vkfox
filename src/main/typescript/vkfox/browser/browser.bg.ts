@@ -1,6 +1,7 @@
 "use strict";
 import ProxyMethods from '../proxy-methods/proxy-methods.bg';
 import Tab = browser.tabs.Tab;
+import {ProxyNames} from "../mediator/messages";
 
 const BADGE_COLOR: [number, number, number, number] = [231, 76, 60, 255],
     ICON_ONLINE = {
@@ -21,7 +22,7 @@ class Browser {
         browser.browserAction.setBadgeBackgroundColor({color: BADGE_COLOR});
 
         // overcome circular dependency through mediator
-        ProxyMethods.connect('../browser/browser.bg', Browser);
+        ProxyMethods.connect(ProxyNames.BrowserBg, Browser);
     }
 
     static getVkfoxVersion(): Promise<string> {
@@ -39,14 +40,14 @@ class Browser {
     /**
      * Sets icon to offline status
      */
-    static setIconOffline() {
+    static setIconOffline(): Promise<void> {
         return browser.browserAction.setIcon({ path: ICON_OFFLINE })
     }
 
     /**
      * @param {String|Number} text
      */
-    static setBadgeText(text: string | number) {
+    static setBadgeText(text: string | number): void {
         return browser.browserAction.setBadgeText({ text: String(text) })
     }
 

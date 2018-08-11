@@ -5,8 +5,12 @@ import ProxyMethods from '../proxy-methods/proxy-methods.bg'
 import * as _ from "underscore"
 import Auth from '../back/auth/auth.bg'
 import {AccessTokenError} from "./models";
-import {API_VERSION} from "../config/config";
+import {API_VERSION} from "../common/config/config";
 import {ApiOptions, ApiQuery, DErrorResponse, DResponse, ExecuteResponse} from "./types";
+import Browser from "../browser/browser.bg";
+import {ProxyNames} from "../mediator/messages";
+import Request from "../common/request/Request"
+
 
 const apiQueriesQueue: ApiQuery[] = [];
 
@@ -17,55 +21,29 @@ const REAUTH_DEBOUNCE         = 2000;
 const networkErrorMessage = "NetworkError when attempting to fetch resource.";
 
 
-/**
- * Convert an object into a query params string
- *
- * @param {Object} params
- *
- * @returns {String}
- */
-function querystring(params: object): string {
-    const query = [];
 
-    for (const key in params) {
-        if (params[key] === undefined || params[key] === null) {
-            continue;
-        }
-        if (Array.isArray(params[key])) {
-            for (let i = 0; i < params[key].length; ++i) {
-                if (params[key][i] === undefined || params[key][i] === null) {
-                    continue;
-                }
-                query.push(encodeURIComponent(key) + '[]=' + encodeURIComponent(params[key][i]));
-            }
-        }
-        else query.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
-    }
-    return query.join('&');
-}
 
-function wait() {
+function wait(): Promise<any> {
     return new Promise( (resolve) => setTimeout(resolve, REAUTH_DEBOUNCE))
 }
 
 /**
- * Make HTTP Request
+ * Make HTTP RequestBg
  *
- * @param {String} type Post or get
- * @param {String} url
- * @param {Object|String} data to send
  */
-function xhrMy(type: string, url: string, data: string | object): Promise<any> {
+function xhrMy(type: string, url: string, data: string | object, networkIssues: boolean = false): Promise<any> {
 
     function handleResponse(response: Response): Promise<any> {
         if (response.status === 401) {
             console.debug("Some error", response);
             return Auth
                 .login(true)
-                .then(() => xhrMy(type, url, data))
+                .then(() => xhrMy(type, url, data, networkIssues))
         }
         else return response.text().then(text => {
             try {
+                if (networkIssues) Browser.setIconOnline();
+
                 return JSON.parse(text)
             }
             catch (e) {
@@ -76,7 +54,7 @@ function xhrMy(type: string, url: string, data: string | object): Promise<any> {
     }
 
     function myFetch(): Promise<Response> {
-        const encodedData = typeof data === "string" ? data : querystring(data);
+        const encodedData = typeof data === "string" ? data : Request.querystring(data);
         type = type.toUpperCase();
 
         if (type === 'POST') {
@@ -88,13 +66,14 @@ function xhrMy(type: string, url: string, data: string | object): Promise<any> {
 
             return fetch(url, opts);
         }
-        else return fetch(url + '?' + encodedData, {credentials: "include"});
+        else return fetch(`${url}?${encodedData}`, {credentials: "include"});
     }
 
     function handleError(e: Error) {
         if (e instanceof TypeError && e.message == networkErrorMessage) {
             console.debug("[F]: Network, retrying", url, data);
-            return wait().then(() => xhrMy(type, url, data))
+            Browser.setIconOffline();
+            return wait().then(() => xhrMy(type, url, data, true))
         }
         else return Promise.reject(e);
     }
@@ -129,7 +108,7 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
                 for (let i = 0; i < response.length; i++) {
                     queriesToProcess[i].resolve(response[i]);
                 }
-                Request._processApiQueries();
+                RequestBg._processApiQueries();
             }
             else if (data.error && data.error.error_msg) {
                 if (data.error.error_code == 5) {
@@ -160,7 +139,7 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
         };
         const method = "execute";
 
-        return Request
+        return RequestBg
             .post(`${API_DOMAIN}/method/${method}`, params)
             .then(handleSuccess)
             .catch(handleFailure);
@@ -168,7 +147,7 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
 }
 
 
-class Request {
+class RequestBg {
 
     static _processApiQueries = _.debounce( () => {
         if (apiQueriesQueue.length) {
@@ -189,7 +168,7 @@ class Request {
         function promisify(resolve, reject) {
             apiQueriesQueue.push({ params, resolve, reject });
         }
-        Request._processApiQueries();
+        RequestBg._processApiQueries();
         return new Promise(promisify);
     }
 
@@ -204,14 +183,14 @@ class Request {
         };
 
         const response: DResponse | DErrorResponse<object>
-            = await Request.get(`${API_DOMAIN}/method/${method}`, fullParams);
+            = await RequestBg.get(`${API_DOMAIN}/method/${method}`, fullParams);
 
         if ("response" in response) return response.response;
         else if (response.error.error_code == 5) {
             console.debug("[R]... Retrying", response.error.error_msg);
             await Auth.login(true);
 
-            return Request.directApi(method, params);
+            return RequestBg.directApi(method, params);
         }
         else {
             console.error("[R]", response.error);
@@ -220,13 +199,10 @@ class Request {
         }
     }
 
-    static customGet(url: string, params: object): Promise<Response> {
-        const urlSearchParams = querystring(params);
-        return fetch(url + urlSearchParams);
-    }
+
 
 }
 
-ProxyMethods.connect('../request/request.bg.ts', Request);
+ProxyMethods.connect(ProxyNames.RequestBg, RequestBg);
 
-export default Request;
+export default RequestBg;

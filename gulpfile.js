@@ -56,7 +56,7 @@ gulp.task("copy:firefoxResources", () => {
 
 gulp.task("copy:firefoxSrc", () => {
     return gulp.src([
-        __srcDir + "/vkfox/auth/oauth.vk.com.js"
+        __srcDir + "/vkfox/common/auth/oauth.vk.com.js"
     ], {base: __srcDir })
         .pipe(gulp.dest("./target/firefox"))
 });

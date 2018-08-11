@@ -1,5 +1,5 @@
 import {UserProfile} from "../../vkfox/back/users/types";
-import {LPMessage} from "../../vkfox/back/longpoll/models";
+import {LPMessage} from "../../vkfox/back/longpoll/types";
 import {AttachmentContainer} from "./newsfeed";
 
 export interface VideoGetUserVideosResponse {

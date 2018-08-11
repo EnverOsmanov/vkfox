@@ -1,12 +1,11 @@
 "use strict";
 import ProxyMethods from '../proxy-methods/proxy-methods.pu';
-import {ProfileI, UserProfile} from "../back/users/types";
+import {UserProfile} from "../back/users/types";
+import {ProxyNames} from "../mediator/messages";
 
-
-const namespace = "../users/users.bg.ts";
 
 export default {
     getProfilesById(userIds: number[]): Promise<UserProfile[]> {
-        return ProxyMethods.forwardM(namespace, "getProfilesById", userIds)
+        return ProxyMethods.forwardM(ProxyNames.UsersBg, "getProfilesById", userIds)
     }
 }

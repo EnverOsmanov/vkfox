@@ -1,36 +1,35 @@
 "use strict";
-import Request from '../../request/request.bg'
+import RequestBg from '../../request/request.bg'
 import * as _ from "underscore"
 import User from "../users/users.bg"
 import Mediator from "../../mediator/mediator.bg"
 import Router from "../router/router.bg"
 import Browser from "../../browser/browser.bg"
-import I18N from "../../i18n/i18n"
-import PersistentModel from "../../persistent-model/persistent-model"
+import I18N from "../../common/i18n/i18n"
+import PersistentModel from "../../common/persistent-model/persistent-model"
 import Notifications from "../../notifications/notifications.bg"
-import {Profiles, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
-import {Item, ItemColl} from "../../feedbacks/collections/ItemColl";
+import {Profiles, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
+import {Item, ItemColl} from "../../common/feedbacks/collections/ItemColl";
 import {NotifType} from "../../notifications/Notification";
-import {FeedbacksCollection} from "../../feedbacks/collections/FeedBacksCollection";
-import Msg from "../../mediator/messages";
-import {LikesChanged} from "../../newsfeed/types";
+import {FeedbacksCollection} from "../../common/feedbacks/collections/FeedBacksCollection";
+import {Msg} from "../../mediator/messages";
+import {LikesChanged} from "../newsfeed/types";
 import {AccessTokenError} from "../../request/models";
 import {AuthModelI} from "../auth/types";
 import {
+    CommentsNewsItemPar,
     FeedbackObj,
     FeedbackObjShort,
     FeedbackObjShortComment,
     FeedbackWithOwnerId,
-    FoxCommentsNewsItem,
     ParentObj,
     ParentObjPost,
     ParentWithOwnerId,
     ReplyFeedback,
-    TopicFeedbackFromComm,
     WallMentionFeedback
-} from "../../feedbacks/types";
+} from "../../common/feedbacks/types";
 import {NewsfeedGetCommentsRequest, NotificationsRequest} from "../../../vk/types";
-import {FeedbackItemObj, FeedbackUnsubOptions} from "../../popup/news/types";
+import {FeedbackItemObj, FeedbackUnsubOptions} from "../../ui/popup/news/types";
 import {
     CommentFromNews,
     CommentPhotoNoti,
@@ -79,7 +78,7 @@ const autoUpdateNotificationsParams: NotificationsRequest = {
 };
 
 const autoUpdateCommentsParams: NewsfeedGetCommentsRequest = {
-    last_comments_count: 1,
+    last_comments_count: 10,
     count        : MAX_ITEMS_COUNT
 };
 
@@ -144,7 +143,7 @@ function onLikesChanged(params: LikesChanged) {
         changedModel          = itemsColl.get(changedItemUniqueId);
 
     if (changedModel) {
-        (changedModel.parent as ParentObjPost | TopicFeedbackFromComm).likes = params.likes;
+        (changedModel.parent as ParentObjPost | CommentsNewsItemPar).likes = params.likes;
         itemsColl.trigger('change');
     }
 }
@@ -170,7 +169,7 @@ function onFeedbackUnsubcribe(params: FeedbackUnsubOptions): void {
         }
     }
 
-    Request
+    RequestBg
         .api<number>({ code })
         .then(handleResponse)
         .catch(handleError);
@@ -240,7 +239,7 @@ function generateFeedbackID(type: string, p: PhotoItem | VideoItem | ParentComme
 }
 
 
-function getOrCreateFeedbackItem(parentType: string, parent: FoxCommentsNewsItem): Item {
+function getOrCreateFeedbackItem(parentType: string, parent: CommentsNewsItemPar): Item {
     const itemID = generateItemID(parentType, parent);
     const itemModel = itemsColl.get(itemID);
 
@@ -301,7 +300,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
             ? (newsItem as PostCommentN).from_id
             : newsItem.source_id;
 
-        const parent: FoxCommentsNewsItem = {
+        const parent: CommentsNewsItemPar = {
             ...newsItem,
             owner_id
         };
@@ -325,7 +324,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
 }
 
 
-function createItemModelIfNotExist(parentType, p: ParentWithOwnerId): Item {
+function createItemModelIfNotExist(parentType: string, p: ParentWithOwnerId): Item {
     const itemID = generateItemID(parentType, p);
 
     let itemModel: Item;
@@ -462,7 +461,12 @@ function addRawNotificationsItemV2(item: NotificationObj): void {
             break;
         }
 
+
+        // TODO: implement when `like_post` example will be available
 /*        case "like_post": {
+            const noti = item as LikePostNoti;
+
+            if (noti.parent.text === "") return;
 
             break;
         }*/
@@ -496,10 +500,10 @@ function fetchFeedbacks(): Promise<void> {
             (notifications.items && notifications.items.length) ||
             (newsAboutComments.items && newsAboutComments.items.length)
         ) {
-            profilesColl.add(newsAboutComments.profiles, ProfilesCmpn.addOptions);
-            profilesColl.add(newsAboutComments.groups, ProfilesCmpn.addOptions);
-            profilesColl.add(notifications.profiles, ProfilesCmpn.addOptions);
-            profilesColl.add(notifications.groups, ProfilesCmpn.addOptions);
+            profilesColl.add(newsAboutComments.profiles, BBCollectionOps.addOptions);
+            profilesColl.add(newsAboutComments.groups, BBCollectionOps.addOptions);
+            profilesColl.add(notifications.profiles, BBCollectionOps.addOptions);
+            profilesColl.add(notifications.groups, BBCollectionOps.addOptions);
 
             notifications.items.forEach(addRawNotificationsItemV2);
             newsAboutComments.items.forEach(addRawCommentsItem);
@@ -514,7 +518,7 @@ function fetchFeedbacks(): Promise<void> {
         else console.error("Unsuccessful fetchFeedbacks... Retrying", e)
     }
 
-    return Request
+    return RequestBg
         .api<FeedbackRS>({ code })
         .then(feedbackHandler)
         .catch(handleError)
@@ -522,7 +526,7 @@ function fetchFeedbacks(): Promise<void> {
 }
 
 
-function tryNotification() {
+function tryNotification(): void {
     const itemModel = itemsColl.first();
 
     let notificationItem: ParentObj | FeedbackObjShort,
@@ -575,10 +579,10 @@ function tryNotification() {
                 message = (<WallMentionFeedback>notificationItem).text;
                 break;
             case 'like':
-                title = makeTitle(I18N.get('liked your ' + parentType, { GENDER: gender }));
+                title = makeTitle(I18N.get(`liked your ${parentType}`, { GENDER: gender }));
                 break;
             case 'copy':
-                title = makeTitle(I18N.get('shared your ' + parentType, { GENDER: gender }));
+                title = makeTitle(I18N.get(`shared your ${parentType}`, { GENDER: gender }));
                 break;
             case 'comment':
                 // 'mention_commentS' type in notifications
@@ -595,7 +599,7 @@ function tryNotification() {
 
         if (title) {
             // Don't notify, when active tab is vk.com
-            Browser.isVKSiteActive().then(function (active) {
+            Browser.isVKSiteActive().then( (active) => {
                 const feedbacksActive = Browser.isPopupOpened() && Router.isFeedbackTabActive();
 
                 const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
@@ -613,9 +617,10 @@ function tryNotification() {
                 }
             });
         }
-    }
 
-    function makeTitle(i18nText) { return `${name} ${i18nText}` }
+
+        function makeTitle(i18nText: string) { return `${name} ${i18nText}` }
+    }
 }
 
 /**

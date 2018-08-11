@@ -1,8 +1,8 @@
 import Settings from "./settings"
 import {SoundSetting} from "./types";
-import Request from "../request/request.bg"
+import Request from "../common/request/Request"
 import {Sex} from "../back/users/types";
-import {SPEECH_KEY} from "../config/config";
+import {SPEECH_KEY} from "../common/config/config";
 
 let audioInProgress = false;
 

@@ -1,8 +1,8 @@
 "use strict";
-import Request from '../../request/request.bg';
+import RequestBg from '../../request/request.bg';
 import Mediator from "../../mediator/mediator.bg"
-import PersistentModel from "../../persistent-model/persistent-model"
-import Msg from "../../mediator/messages";
+import PersistentModel from "../../common/persistent-model/persistent-model"
+import {Msg} from "../../mediator/messages";
 import {ForceOnlineSettingsI} from "../../notifications/types";
 
 
@@ -36,7 +36,7 @@ export default function init() {
 function markAsOffline(): Promise<number> {
     clearTimeout(timeoutId);
 
-    return Request.api<number>({code: 'return API.account.setOffline();'})
+    return RequestBg.api<number>({code: 'return API.account.setOffline();'})
         .then(() => timeoutId = window.setTimeout(markAsOffline, MARK_PERIOD))
 }
 

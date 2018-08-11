@@ -15,4 +15,9 @@
     &:active {
         color: lighten(black, 60%);
     }
+
+    &.btn-pressed {
+        background-color: darken($clouds, 10%);
+        border-bottom: 1px solid darken($clouds, 15%)
+    }
 }

@@ -8,13 +8,15 @@
     padding: 0;
     margin: 0;
     border: 0;
-    cursor: pointer;
 
     p {
         font-size: calc(1rem + 2px);
         line-height: $baseLineHeight;
         font-weight: normal;
     }
+}
+.chat__item-content:last-of-type {
+    cursor: pointer;
 }
 .chat__item-content + .chat__item-content {
     margin-top: 1.3em;

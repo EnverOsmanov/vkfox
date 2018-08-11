@@ -1,9 +1,9 @@
 "use strict";
 import Mediator from '../../mediator/mediator.bg'
 import * as _ from "underscore"
-import Request from '../../request/request.bg'
-import Msg from "../../mediator/messages";
-import {LikesChanged} from "../../newsfeed/types";
+import RequestBg from '../../request/request.bg'
+import {Msg} from "../../mediator/messages";
+import {LikesChanged} from "../newsfeed/types";
 import {LikesGenereicResponse} from "../../../vk/types";
 
 
@@ -24,7 +24,7 @@ function likesChange(params: LikesChanged) {
         }));
     }
 
-    Request
+    RequestBg
         .api<LikesGenereicResponse>({code: 'return API.likes.' + action + '(' + JSON.stringify(params) + ');'})
         .then(handleResponse)
         .catch(e => console.error("Like failed", e));

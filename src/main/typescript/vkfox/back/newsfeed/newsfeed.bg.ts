@@ -1,10 +1,10 @@
 "use strict";
-import Request from "../../request/request.bg";
+import RequestBg from "../../request/request.bg";
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
-import Msg from "../../mediator/messages"
-import {Profiles, ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
-import {ItemDulpColl, ItemsColl, LikesChanged,} from "../../newsfeed/types";
+import {Msg} from "../../mediator/messages"
+import {Profiles, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
+import {ItemDulpColl, ItemsColl, } from "./helper/models";
 import {AccessTokenError} from "../../request/models";
 import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
 import {
@@ -17,6 +17,7 @@ import {
     UserId,
     WallPhotoItem
 } from "../../../vk/types/newsfeed";
+import {LikesChanged} from "./types";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -84,8 +85,8 @@ function processRawItem(item: ItemObj) {
         if (propertyName) {
             // type "photo" item has "photos" property; note - notes etc
 
-            collection.add(item[propertyName].items, ProfilesCmpn.addOptions);
-            collection.add(collisionItem[propertyName].items, ProfilesCmpn.addOptions);
+            collection.add(item[propertyName].items, BBCollectionOps.addOptions);
+            collection.add(collisionItem[propertyName].items, BBCollectionOps.addOptions);
 
             item[propertyName] = {
                 count: collection.size(),
@@ -195,8 +196,8 @@ function fetchNewsfeed(): Promise<number | void> {
 
         autoUpdateParams.start_time = time;
 
-        profilesColl.add(newsfeed.profiles, ProfilesCmpn.addOptions);
-        profilesColl.add(newsfeed.groups, ProfilesCmpn.addOptions);
+        profilesColl.add(newsfeed.profiles, BBCollectionOps.addOptions);
+        profilesColl.add(newsfeed.groups, BBCollectionOps.addOptions);
 
         discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
 
@@ -216,7 +217,7 @@ function fetchNewsfeed(): Promise<number | void> {
         setTimeout(fetchNewsfeed, UPDATE_PERIOD);
     }
 
-    return Request
+    return RequestBg
         .api<NewsfeedResp>({ code })
         .then(responseHandler)
         .catch(handleError);

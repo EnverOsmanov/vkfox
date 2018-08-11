@@ -1,6 +1,6 @@
 import {ProfileI, UserProfile} from "../../vkfox/back/users/types";
 import {GenericRS} from "./index";
-import {WithUserLikes} from "./feedback";
+import {WithUserLikes, ZeroOne} from "./feedback";
 
 export interface ItemObj {
     id      ?: string;
@@ -91,20 +91,43 @@ export interface AttachmentContainer {
     type: string
 }
 
-export interface AttachmentPhoto extends Attachment {
-    id          : number
-    owner_id    : number
-    date        : number
-    photo_75    : string
-    photo_130   : string
-    photo_604   : string
-    photo_807   : string
-    text        : string
-    user_id     : number
-    height      : number
-    width       : number
-    album_id    : number
-    access_key  : string
+export interface AttachmentPhoto extends Attachment, media.Photo {}
+
+
+
+declare namespace media {
+
+    interface Video {
+        access_key  : string
+        can_add     : ZeroOne
+        can_edit    : ZeroOne
+        description : string
+        duration    : number
+        id          : number
+        owner_id    : number
+        photo_130   : string
+        photo_320   : string
+        views       : number
+        title       : string
+    }
+
+    interface Photo {
+        id          : number
+        owner_id    : number
+        date        : number
+        photo_75    : string
+        photo_130   : string
+        photo_604   : string
+        photo_807   : string
+        photo_1280 ?: string
+        photo_2560 ?: string
+        text        : string
+        user_id     : number
+        height      : number
+        width       : number
+        album_id    : number
+        access_key  : string
+    }
 }
 
 export interface AttachmentPhotoContainer extends AttachmentContainer {

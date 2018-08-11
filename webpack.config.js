@@ -13,13 +13,13 @@ const isDev = process.env.NODE_ENV === "development";
 module.exports = {
   context: __dirname + "/src/main/typescript",
   entry: {
-    "app.install"   : "./vkfox/install/app/app.install.tsx",
-    "app.pu"        : "./vkfox/popup/app/app.pu.tsx",
-    "app.sidebar"   : "./vkfox/sidebar/app/app.sidebar.tsx",
+    "app.install"   : "./vkfox/ui/install/app/app.install.tsx",
+    "app.pu"        : "./vkfox/ui/popup/app/app.pu.tsx",
+    "app.sidebar"   : "./vkfox/ui/sidebar/app/app.sidebar.tsx",
     "app.bg"        : "./vkfox/back/app/app.bg.ts",
-    "photo"         : "./vkfox/vkfox-io/photo.ts",
-    "video"         : "./vkfox/vkfox-io/video.ts",
-    "doc"           : "./vkfox/vkfox-io/doc.ts"
+    "photo"         : "./vkfox/ui/vkfox-io/photo.ts",
+    "video"         : "./vkfox/ui/vkfox-io/video.ts",
+    "doc"           : "./vkfox/ui/vkfox-io/doc.ts"
   },
   output: {
     path: __dirname + "/target/firefox/pages",

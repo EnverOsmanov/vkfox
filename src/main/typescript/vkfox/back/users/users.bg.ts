@@ -1,11 +1,11 @@
 "use strict";
-import Request from '../../request/request.bg';
+import RequestBg from '../../request/request.bg';
 import ProxyMethods from '../../proxy-methods/proxy-methods.bg'
 import Mediator from "../../mediator/mediator.bg"
 import * as _ from "underscore"
-import Msg from "../../mediator/messages"
-import {UserProfileColl} from "../../profiles-collection/profiles-collection.bg";
-import {NameSurname, OnlyName} from "../../chat/types";
+import {Msg, ProxyNames} from "../../mediator/messages"
+import {UserProfileColl} from "../../common/profiles-collection/profiles-collection.bg";
+import {NameSurname, OnlyName} from "../../common/chat/types";
 import {FriendProfile, UserProfile, UsersGetElem} from "./types";
 import {FriendsRequest} from "../../../vk/types";
 
@@ -71,7 +71,7 @@ const processGetUsersQueue = _.debounce( (processedQueue: UsersGetElem[]) => {
         inProgress = true;
 
         // TODO limit for uids.length
-        Request
+        RequestBg
             .api<UserProfile[]>({
                 code: 'return API.users.get({user_ids: "' + newUids.join() + '", fields: "online,photo,sex,nickname,lists"})'
             })
@@ -102,12 +102,12 @@ class Users {
     static init() {
         Mediator.sub(Msg.AuthUser, onUserChange);
 
-        ProxyMethods.connect('../users/users.bg.ts', Users);
+        ProxyMethods.connect(ProxyNames.UsersBg, Users);
     }
 
     static getFriendsProfiles(): Promise<FriendProfile[]> {
         if (!friendsProfilesDefer) {
-            friendsProfilesDefer = Request.api<FriendsRequest>({
+            friendsProfilesDefer = RequestBg.api<FriendsRequest>({
                 code: 'return API.friends.get({ fields : "photo,sex,nickname,lists", order: "hints" })'
             }).then( (response) => {
                 if (response && response.count) {

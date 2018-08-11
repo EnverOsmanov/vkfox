@@ -1,19 +1,19 @@
 "use strict";
-import Request from "../../request/request.bg"
+import RequestBg from "../../request/request.bg"
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import Users from "../users/users.bg"
-import I18N from "../../i18n/i18n"
+import I18N from "../../common/i18n/i18n"
 import Notifications from "../../notifications/notifications.bg"
 import PersistentSet from "../persistent-set/persistent-set.bg"
-import Msg from "../../mediator/messages"
+import {Msg} from "../../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
 import {NotifType} from "../../notifications/Notification"
-import {ProfilesCmpn} from "../../profiles-collection/profiles-collection.bg";
+import {BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
 
 import {UserProfile} from "../users/types";
 import {FaveGetUsersResponse} from "../../../vk/types";
-import {FoxUserProfileI} from "../../chat/types";
+import {FoxUserProfileI} from "../../common/chat/types";
 
 
 const watchedBuddiesSet = new PersistentSet("watchedBuddies");
@@ -44,7 +44,7 @@ export default function initialize() {
 
             if (profile.isWatched && model.changed.hasOwnProperty("online")) {
 
-                model.set({ "lastActivityTime": Date.now() }, ProfilesCmpn.beSilentOptions);
+                model.set({ "lastActivityTime": Date.now() }, BBCollectionOps.beSilentOptions);
 
                 const rawText = profile.online ? "is online":"went offline";
 
@@ -108,7 +108,7 @@ function saveOriginalBuddiesOrder() {
  * @returns [jQuery.Deferred]
  */
 function getFavouriteUsers(): Promise<UserProfile[]> {
-    return Request
+    return RequestBg
         .api<FaveGetUsersResponse>({ code: "return API.fave.getUsers()" })
         .then( response => {
             const uids = response

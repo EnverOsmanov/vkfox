@@ -1,4 +1,4 @@
-import {NameSurname, OnlyName } from "../../chat/types";
+import {NameSurname, OnlyName } from "../../common/chat/types";
 
 
 type IsOnline = 0 | 1;

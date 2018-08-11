@@ -1,18 +1,19 @@
 "use strict";
 import ProxyMethods from "../proxy-methods/proxy-methods.pu"
 import Tab = browser.tabs.Tab;
+import {ProxyNames} from "../mediator/messages";
 /**
  * Returns a correct implementation
  * for background or popup page
  */
 
-const namespace = "../browser/browser.bg";
 
+class BrowserPu {
+    static createTab(url: string): Promise<Tab> {
+        return ProxyMethods.forwardM<Tab>(ProxyNames.BrowserBg, "createTab", url);
+    }
 
-export default {
-    createTab(url: string): Promise<Tab> {
-        return ProxyMethods.forwardM<Tab>(namespace, "createTab", url);
-    },
-
-    closePopup() { window.close() }
+    static closePopup(): void { window.close() }
 }
+
+export default BrowserPu;

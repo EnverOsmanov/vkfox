@@ -1,9 +1,10 @@
 import {GroupProfile, UserProfile} from "../../vkfox/back/users/types";
-import {Attachment, AttachmentPhoto, PhotoItem, PostItem, VideoItem} from "./newsfeed";
+import {Attachment, AttachmentPhoto, media, PhotoItem, PostItem, VideoItem} from "./newsfeed";
 import {LikesObj, UserLikesObj} from "./objects";
 import {GenericRS} from "./index";
-import {NewsLikesObj} from "../../vkfox/feedbacks/types";
+import {NewsLikesObj} from "../../vkfox/common/feedbacks/types";
 
+export type ZeroOne = 0 | 1;
 
 interface Notifications extends GenericRS<NotificationObj>{
     profiles: UserProfile[]
@@ -43,7 +44,6 @@ interface FeedbackComment extends Comment, CommentReply {
 
 export interface ParentComment extends Comment, CommentReply {
     owner_id: number
-    post    : PostItem
 }
 
 // Todo I didn't see real example of this type:
@@ -215,7 +215,7 @@ export interface FeedbackRS {
     time         : number
 }
 
-export type CommentsNewsType = "post" | "photo" | "topic"
+export type CommentsNewsType = "post" | "photo" | "topic" | "video"
 
 export interface CommentsNewsItem {
     type        : CommentsNewsType // в фидбеке коммента к посту может нету
@@ -229,9 +229,10 @@ export interface CommentsNewsItem {
 
 interface TopicCommentN extends CommentsNewsItem {
     // type = "topic"
+    is_closed: boolean
 }
 
-export interface PhotoCommentN extends CommentsNewsItem, AttachmentPhoto {
+export interface PhotoCommentN extends CommentsNewsItem, media.Photo {
     // type = "photo"
 }
 
@@ -242,11 +243,15 @@ export interface PostCommentN extends CommentsNewsItem {
     attachments?: Attachment[]
 }
 
+export interface VideoCommentN extends CommentsNewsItem, media.Video {
+
+}
+
 
 
 interface CNewsCommentContainer {
     count   : number
-    can_post: number
+    can_post: 0 | 1
 
     list: CommentFromNews[]
 }

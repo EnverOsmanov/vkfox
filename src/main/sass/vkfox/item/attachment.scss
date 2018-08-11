@@ -40,6 +40,7 @@
     position: relative;
     opacity: 0.9;
     width: 100%;
+    cursor: pointer;
     @include box-shadow(inset 0px 0px 1px rgba(0,0,0,.5));
 
     &:after {

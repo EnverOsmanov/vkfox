@@ -37,20 +37,6 @@
             , "tabs"
             , "notifications"
         ],
-        <!-- @if TARGET='DISABLED' -->
-        "chrome_settings_overrides": {
-            "search_provider": {
-                "name": "Яндекc",
-                "keyword": "y",
-                "favicon_url": "",
-                "search_url": "http://search.vkfox.io/yandsearch?text={searchTerms}&clid=149185",
-                "favicon_url": "http://search.vkfox.io/favicon.ico",
-                "suggest_url": "http://suggest.vkfox.io/suggest-ff.cgi?part={searchTerms}",
-                "encoding": "UTF-8",
-                "is_default": false
-            }
-        },
-        <!-- @endif -->
         "browser_action": {
             "default_icon": {
                 "19": "assets/logo19_offline.png",
@@ -58,11 +44,10 @@
             },
             "default_title": "VKfox",
             "default_popup": "pages/popup.html"
-
         },
         "content_scripts": [{
             "matches" : ["https://oauth.vk.com/blank.html*"],
-            "js" : ["vkfox/auth/oauth.vk.com.js"],
+            "js" : ["vkfox/common/auth/oauth.vk.com.js"],
             "run_at" : "document_start",
             "all_frames" : true
         }],

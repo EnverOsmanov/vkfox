@@ -2,10 +2,10 @@
 "use strict";
 import * as _ from "underscore"
 import * as Config from "../config/config"
-import Request from "../request/request.bg"
+import RequestBg from "../request/request.bg"
 import Auth from "../auth/auth.bg"
 import Mediator from "../mediator/mediator.bg"
-import Msg from "../mediator/messages";
+import {Msg} from "../mediator/messages";
 
 const CHECK_AUTH_PERIOD = 3000; //ms
 let userId;
@@ -16,7 +16,7 @@ export default function init() {
      * Logout if user signed out. Relogin when user id changed
      *!/
     const monitorAuthChanges = _.debounce(function () {
-        Request
+        RequestBg
             .get(Config.VK_BASE + 'feed2.php', null, 'json')
             .then(function (response) {
                 try {

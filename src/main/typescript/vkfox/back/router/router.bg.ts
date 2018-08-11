@@ -1,8 +1,8 @@
 "use strict";
 
 import Mediator from "../../mediator/mediator.bg"
-import PersistentModel from "../../persistent-model/persistent-model"
-import Msg from "../../mediator/messages";
+import PersistentModel from "../../common/persistent-model/persistent-model"
+import {Msg} from "../../mediator/messages";
 
 
 const model = new PersistentModel(
