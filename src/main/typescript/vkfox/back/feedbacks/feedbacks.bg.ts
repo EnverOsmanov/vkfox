@@ -8,7 +8,7 @@ import Browser from "../../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import Notifications from "../../notifications/notifications.bg"
-import {Profiles, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
+import {BBCollectionOps, Profiles} from "../../common/profiles-collection/profiles-collection.bg";
 import {Item, ItemColl} from "../../common/feedbacks/collections/ItemColl";
 import {NotifType} from "../../notifications/Notification";
 import {FeedbacksCollection} from "../../common/feedbacks/collections/FeedBacksCollection";
@@ -22,9 +22,11 @@ import {
     FeedbackObjShort,
     FeedbackObjShortComment,
     FeedbackWithOwnerId,
+    FWithFromIdAndOwnerId,
     ParentObj,
     ParentObjPost,
     ParentWithOwnerId,
+    PostWithOwnerId,
     ReplyFeedback,
     WallMentionFeedback
 } from "../../common/feedbacks/types";
@@ -208,9 +210,9 @@ function generateItemID(type: string, parent): string {
 
         // replace wall with post,
         // to make correct merging items from 'notifications.get' and 'newsfeed.getComments'
-        const f = type === 'wall'
-            ? 'post'
-            :type;
+        const f = type === "wall"
+            ? "post"
+            : type;
 
         const s = ("id" in parent)
             ? (parent as ParentComment).id
@@ -227,9 +229,9 @@ function generateFeedbackID(type: string, p: PhotoItem | VideoItem | ParentComme
 
         // replace wall with post,
         // to make correct merging items from 'notifications.get' and 'newsfeed.getComments'
-        const f = type === 'wall'
-            ? 'post'
-            :type;
+        const f = type === "wall"
+            ? "post"
+            : type;
 
         const s = p.id;
 
@@ -238,35 +240,57 @@ function generateFeedbackID(type: string, p: PhotoItem | VideoItem | ParentComme
     else return _.uniqueId(type);
 }
 
+function generateFeedbackItemID(type: string, parent: CommentsNewsItemPar): string {
 
-function getOrCreateFeedbackItem(parentType: string, parent: CommentsNewsItemPar): Item {
-    const itemID = generateItemID(parentType, parent);
+    if (parent.owner_id) {
+
+        // replace wall with post,
+        // to make correct merging items from 'notifications.get' and 'newsfeed.getComments'
+        const f = type === "wall"
+            ? "post"
+            : type;
+
+        const s = parent.post_id;
+
+        const wallOwnerId = parent.source_id;
+
+        return `${f}:${s}:user:${wallOwnerId}`;
+    }
+    else return _.uniqueId(type);
+}
+
+
+function createItemModelIfNotExistComm(parentType: string, parent: CommentsNewsItemPar, date: number): Item {
+    const itemID = generateFeedbackItemID(parentType, parent);
     const itemModel = itemsColl.get(itemID);
 
     if (itemModel) return itemModel;
     else {
-        const newItemModel = createItemModel(parentType, parent);
+        const newItemModel = createItemModel(parentType, parent, itemID, date);
         itemsColl.add(newItemModel, ItemColl.addOptions);
-        return newItemModel
+        return newItemModel;
     }
 }
 
 /**
  * Creates feedbacks item
  *
- * @param {String} type Type of parent: post, wall, topic, photo etc
- * @param {Object} parent
- * @param {String} [itemID] pass if you already have ID
  *
  * @return {Object}
  */
-function createItemModel(type: string, parent: ParentObj, itemID?: string): Item {
-    const id = itemID ? itemID : generateItemID(type, parent);
+function createItemModel(type: string, parent: ParentObj, id: string, date: number): Item {
+    // converted to `FeedbackObj` when sending to front end
     const feedbacks: any = new FeedbacksCollection();
 
-    const item: FeedbackItemObj = {parent, type, id, feedbacks};
+    const item: FeedbackItemObj = {parent, type, id, feedbacks, date};
 
     return new Item(item);
+}
+
+function createItemModelWithNewId(type: string, parent: PostWithOwnerId | FWithFromIdAndOwnerId, date: number): Item {
+    const itemID = generateItemID(type, parent);
+
+    return createItemModel(type, parent, itemID, date)
 }
 
 /**
@@ -286,9 +310,11 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
             owner_id: comment.from_id
         };
 
+        const type = "comment";
+
         return {
-            id      : generateItemID("comment", feedback),
-            type    : "comment",
+            id      : generateItemID(type, feedback),
+            type,
             date    : comment.date,
             feedback
         };
@@ -305,14 +331,14 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
             owner_id
         };
 
-        const fbItemModel = getOrCreateFeedbackItem(parentType, parent);
+        const limitedComments = newsItem.comments.list.slice(-MAX_COMMENTS_COUNT);
+
+        lastCommentDate = limitedComments[limitedComments.length - 1].date;
+
+        const fbItemModel = createItemModelIfNotExistComm(parentType, parent, lastCommentDate);
 
         fbItemModel.feedbacks
-            .add(
-                newsItem.comments.list
-                    .slice(-MAX_COMMENTS_COUNT)
-                    .map(comment2Feedback)
-            );
+            .add(limitedComments.map(comment2Feedback));
 
         lastCommentDate = fbItemModel.feedbacks.last().date;
         if (!fbItemModel.has('date') || fbItemModel.date < lastCommentDate) {
@@ -324,17 +350,16 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
 }
 
 
-function createItemModelIfNotExist(parentType: string, p: ParentWithOwnerId): Item {
+function createItemModelIfNotExistFeed(parentType: string, p: ParentWithOwnerId, date: number): Item {
     const itemID = generateItemID(parentType, p);
+    const itemModel = itemsColl.get(itemID);
 
-    let itemModel: Item;
-
-    if (!(itemModel = itemsColl.get(itemID))) {
-        itemModel = createItemModel(parentType, p, itemID);
-        itemsColl.add(itemModel, ItemColl.addOptions);
+    if (itemModel) return itemModel;
+    else {
+        const newItemModel = createItemModel(parentType, p, itemID, date);
+        itemsColl.add(newItemModel, ItemColl.addOptions);
+        return newItemModel;
     }
-
-    return itemModel
 }
 
 function createFeedbackWithFromId(type: string, date: number, f: FeedbackComment | WithFromId, p: PhotoItem | VideoItem | ParentComment) {
@@ -354,15 +379,12 @@ function createFeedbackWithFromId(type: string, date: number, f: FeedbackComment
 }
 
 function createItemWithOwnerId(type: string, date: number, f: PorFPostItem | WithFromId): Item {
-    const fWithOwnerId = {
+    const fWithOwnerId: PostWithOwnerId | FWithFromIdAndOwnerId = {
         ...f,
         owner_id: f.from_id
     };
 
-    const itemModel = createItemModel(type, fWithOwnerId);
-    itemModel.date = date;
-
-    return itemModel;
+    return createItemModelWithNewId(type, fWithOwnerId, date);
 }
 
 /**
@@ -415,7 +437,7 @@ function addRawNotificationsItemV2(item: NotificationObj): void {
             const parentType = typeTokens[1];
             const p = lcN.parent;
 
-            const itemModel = createItemModelIfNotExist(parentType, p);
+            const itemModel = createItemModelIfNotExistFeed(parentType, p, item.date);
 
             const feedbacks = lcN.feedback.items
                 .map(f => createFeedbackWithFromId(feedbackType, item.date, f, p));
@@ -445,7 +467,7 @@ function addRawNotificationsItemV2(item: NotificationObj): void {
             const parentType = typeTokens[1];
             const p = noti.parent;
 
-            const itemModel = createItemModelIfNotExist(parentType, p);
+            const itemModel = createItemModelIfNotExistFeed(parentType, p, item.date);
 
             const f = noti.feedback;
 
@@ -626,7 +648,7 @@ function tryNotification(): void {
 /**
  * Initialize all variables
  */
-function initialize(readyPromise: Promise<void>) {
+function initialize(readyPromise: Promise<void>): void {
 
     readyPromise.then( () => {
         itemsColl.on('add change remove', _.debounce( () => {

@@ -4,7 +4,7 @@ export interface FeedbackItemObj {
     parent: ParentObj
     type  : string
     id    : string
-    date  ?: number
+    date  : number
 
     feedbacks       : FeedbackObj[]
 }

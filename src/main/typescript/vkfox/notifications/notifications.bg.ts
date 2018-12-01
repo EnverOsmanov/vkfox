@@ -81,7 +81,7 @@ export default class Notifications {
         const sound = notificationsSettings.sound;
 
         if (notificationsSettings.enabled && sound.enabled) {
-            if (isChat(noti) && sound.text2Speech) VKfoxAudio.readTextInVoice(noti.message, noti.sex);
+            if (isChat(noti) && sound.text2Speech && !!noti.message) VKfoxAudio.readTextInVoice(noti.message, noti.sex);
             else VKfoxAudio.play(sound);
         }
     }

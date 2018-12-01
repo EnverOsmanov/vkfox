@@ -6,6 +6,7 @@ import I18N from "../../../../common/i18n/i18n";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {ParentObjPost, TopicParFromComm} from "../../../../common/feedbacks/types";
 import {FeedbackItemObj} from "../types";
+import {AttachmentContainer, WithCopyHistory} from "../../../../../vk/types/newsfeed";
 
 
 interface MyFeedbackPostProps {
@@ -14,35 +15,62 @@ interface MyFeedbackPostProps {
 
 class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
 
-    postCommentOrWallElm = (item: FeedbackItemObj) => {
+    static repostsElm(itemPost: WithCopyHistory): JSX.Element[] {
+        function repostElm(originP: ParentObjPost, i: number): JSX.Element {
+            if (originP.text || originP.attachments) {
+                return (
+                    <div key={i}>
+                        <i className="news__post_repost fa fa-bullhorn"/>
+
+                        <RectifyPu text={originP.text} hasEmoji={false}/>
+
+                        {MyFeedbackPost.postAttachmentElms(originP)}
+                    </div>
+                )
+            }
+            else return null;
+        }
+
+        return itemPost.copy_history
+            ? itemPost.copy_history.map(repostElm)
+            : null;
+    };
+
+    static postAttachmentElms(postParent: ParentObjPost): JSX.Element[] | null {
+        function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
+
+            return (
+                <AttachmentC
+                    key={i}
+                    type={attachment.type}
+                    data={attachment[attachment.type]}
+                    showFullWidth={postParent.attachments.length === 1}
+                />
+            )
+        }
+
+        return postParent.attachments
+            ? postParent.attachments.map(singleAttachment)
+            : null;
+    }
+
+    static postCommentOrWallElm(item: FeedbackItemObj): JSX.Element {
         const postParent = item.parent as ParentObjPost;
-        const attachments = postParent.attachments
-            ? postParent.attachments.map((attachment, i) => {
-                    return (
-                        <AttachmentC
-                            key={i}
-                            type={attachment.type}
-                            data={attachment[attachment.type]}
-                            showFullWidth={postParent.attachments.length === 1}
-                        />
-                    )
-                }
-            ) : null;
+        const attachments = MyFeedbackPost.postAttachmentElms(postParent);
 
         const text = postParent.text &&
-            <span>
-                <RectifyPu text={postParent.text} hasEmoji={false}/>
-            </span>;
+            <RectifyPu text={postParent.text} hasEmoji={false}/>;
 
         return (
             <div>
                 {text}
+                {MyFeedbackPost.repostsElm(postParent)}
                 {attachments}
             </div>
         );
     };
 
-    myFeedbackPost = (item: FeedbackItemObj) => {
+    static myFeedbackPost(item: FeedbackItemObj): JSX.Element | null {
 
         switch (item.type) {
             case "photo":
@@ -87,7 +115,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
                     item.type.indexOf("wall") !== -1;
 
                 if (postCommentOrWall)
-                    return this.postCommentOrWallElm(item);
+                    return MyFeedbackPost.postCommentOrWallElm(item);
                 else {
                     console.warn("Unknown feedback", item);
                     return null
@@ -99,7 +127,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
     render() {
         const {item} = this.props;
 
-        return this.myFeedbackPost(item)
+        return MyFeedbackPost.myFeedbackPost(item)
     }
 }
 

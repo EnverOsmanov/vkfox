@@ -146,7 +146,7 @@ export type FeedbackWithOwnerId =
 
 interface FCommentWithOwnerId extends FeedbackComment, WithOwnerId {}
 
-interface FWithFromIdAndOwnerId extends WithFromId, WithOwnerId {}
+export interface FWithFromIdAndOwnerId extends WithFromId, WithOwnerId {}
 
 export interface SendMessageI {
     type    : string

@@ -47,6 +47,7 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
             : text;
 
         const sanitized = sanitizeHtml(jEmojedText, {
+            parser: {},
             allowedTags: [ "br" ]
         });
         const linkifiedText: string = linkifyHtml(sanitized, {
@@ -78,8 +79,7 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
     buttonOrFullText = (text: string, spaceIndex: number, hasEmoji: boolean) => {
 
         if (this.state.hideButton) {
-            const restOfText =  RectifyPu.escapeQuotes(text.slice(spaceIndex));
-            const resultText = RectifyPu.linkifySanitizeEmoji(restOfText, hasEmoji);
+            const resultText = RectifyPu.linkifySanitizeEmoji(text, hasEmoji);
 
             return (
                 <div
@@ -88,14 +88,24 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
                 />
             )
         }
-        else
-        return (
-            <span
-                className="show-more btn rectify__button"
-                onClick={() => this.showMore()}>
-                {RectifyPu.showMoreButtonLabel}
-            </span>
-        )
+        else {
+            const firstPartOfText = RectifyPu.linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji);
+
+            return (
+                <div>
+                    <div
+                        className="news__item-text"
+                        dangerouslySetInnerHTML={{__html: firstPartOfText}}
+                    />
+
+                    <span className="show-more btn rectify__button"
+                          onClick={() => this.showMore()}
+                    >{RectifyPu.showMoreButtonLabel}
+                    </span>
+                </div>
+            )
+        }
+
     };
 
     /**
@@ -117,17 +127,7 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
             const spaceIndex = text.indexOf(" ", TRUNCATE_LENGTH);
 
             if (spaceIndex !== -1) {
-                const firstPartOfText = RectifyPu.linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji);
-
-                return (
-                    <div>
-                        <div
-                            className="news__item-text"
-                            dangerouslySetInnerHTML={{__html: firstPartOfText}}
-                        />
-                        {this.buttonOrFullText(text, spaceIndex, hasEmoji)}
-                    </div>
-                );
+                return this.buttonOrFullText(text, spaceIndex, hasEmoji);
             }
             else return <div
                 className="news__item-text"

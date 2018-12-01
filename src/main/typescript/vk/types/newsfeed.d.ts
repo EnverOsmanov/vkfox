@@ -9,8 +9,12 @@ export interface ItemObj {
     source_id: number;
 }
 
+export interface WithCopyHistory {
+    copy_history?: PostItem[]
+}
 
-export interface PostItem extends ItemObj, WithUserLikes {
+
+export interface PostItem extends ItemObj, WithUserLikes, WithCopyHistory {
     text       ?: string
     attachments?: AttachmentContainer[]
     comments    : CanPostable
@@ -18,7 +22,6 @@ export interface PostItem extends ItemObj, WithUserLikes {
     post_id     : number
     post_type   : string
     post_source : UserMeta
-    copy_history?: PostItem[]
 }
 
 export interface PhotoItem extends ItemObj {
@@ -233,12 +236,21 @@ export interface AttachmentWallContainer extends AttachmentContainer {
 }
 
 export interface AttachmentWall extends Attachment {
-    from_id     : number
-    id          : number
-    likes       : object
-    post_type   : string
-    text        : string
-    attachments : AttachmentContainer[]
+    access_key      : string
+    attachments     ?: AttachmentContainer[]
+    comments        : object
+    copy_history    : PostItem[]
+    date            : number
+    from_id         : number
+    id              : number
+    likes           : object
+    marked_as_ads   : number
+    post_source     : object
+    post_type       : string // "wall"
+    reposts         : object
+    text            : string
+    to_id           : number
+    views           : object
 }
 
 interface AStickerImage {

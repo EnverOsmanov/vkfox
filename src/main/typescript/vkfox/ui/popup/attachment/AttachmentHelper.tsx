@@ -27,6 +27,7 @@ import {
 } from "../../../../vk/types/newsfeed";
 import {attachmentsDivM} from "../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../rectify/RectifyPu";
+import MyFeedbackPost from "../news/my/MyFeedbackPost";
 
 
 function imageProperties(src: string): CSSProperties {
@@ -213,6 +214,7 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
                     <i className="fa fa-bullhorn"/>
 
                     <RectifyPu text={wall.text} hasEmoji={false}/>
+                    {MyFeedbackPost.repostsElm(wall)}
                     { attachmentsDivM(wall.attachments)}
                 </div>
             );

@@ -59,7 +59,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
         else return undefined;
     };
 
-    forwardedMessages = (messageItem: Message) => {
+    forwardedMessages(messageItem: Message) {
         const {profilesColl} = this.props;
 
         if (messageItem.fwd_messages) {
@@ -127,10 +127,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
         return (
             <div key={messageItem.id}>
-                <RectifyPu
-                    text={messageItem.body}
-                    hasEmoji={false}
-                />
+                <RectifyPu text={messageItem.body} hasEmoji={false}/>
 
                 {this.forwardedMessages(messageItem)}
 

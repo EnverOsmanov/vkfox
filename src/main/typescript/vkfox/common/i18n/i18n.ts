@@ -4,12 +4,14 @@ import {Sex} from "../../back/users/types";
 const DEFAULT_LANGUAGE = 'en';
 
 const i18n: any = {
-  ru: require('./ru.js'),
-  uk: require('./uk.js'),
-  en: require('./en.js')
+    ...require('./ru.js'),
+    ...require('./uk.js'),
+    ...require('./en.js')
 };
 
-let language, locale, messages;
+let language: string,
+    locale: string,
+    messages: object;
 
 // Show russian locale for belorus
 i18n.be = i18n.ru;
@@ -23,7 +25,7 @@ if (!i18n[language]) {
     language = DEFAULT_LANGUAGE;
 }
 
-messages = i18n[language].i18n[language];
+messages = i18n[language];
 
 export default class I18N {
     /**
