@@ -1,7 +1,7 @@
 import * as React from "react"
 import {CSSProperties} from "react"
 import Browser, {default as BrowserPu} from "../../../browser/browser.pu"
-import Request from "../../../request/request.pu"
+import Request from "../request/request.pu"
 import {
     buildSrcSet,
     docViewPath,

@@ -1,6 +1,6 @@
 
 import GProfileColl, {GProfile} from "../../common/profiles-collection/profiles-collection.bg"
-import RequestBg from "../../request/request.bg"
+import RequestBg from "../request/request.bg"
 import {MessagesLastActivityResponse} from "../../../vk/types/index";
 
 class BuddiesCollection extends GProfileColl<Buddy> {

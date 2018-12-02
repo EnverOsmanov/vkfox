@@ -1,6 +1,6 @@
 "use strict";
-import ProxyMethods from "../proxy-methods/proxy-methods.pu"
-import {ProxyNames} from "../mediator/messages";
+import ProxyMethods from "../../../proxy-methods/proxy-methods.pu"
+import {ProxyNames} from "../../../mediator/messages";
 /**
  * Returns a correct implementation
  * for background or popup page

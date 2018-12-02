@@ -1,14 +1,14 @@
 "use strict";
-import RequestBg from "../../request/request.bg"
+import RequestBg from "../request/request.bg"
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import Users from "../users/users.bg"
 import I18N from "../../common/i18n/i18n"
-import Notifications from "../../notifications/notifications.bg"
+import Notifications from "../notifications/notifications.bg"
 import PersistentSet from "../persistent-set/persistent-set.bg"
 import {Msg} from "../../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
-import {NotifType} from "../../notifications/Notification"
+import {NotifType} from "../notifications/VKNotification"
 import {BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
 
 import {UserProfile} from "../users/types";

@@ -1,5 +1,5 @@
 "use strict";
-import Browser from "../../browser/browser.bg";
+import Browser from "../browser/browser.bg";
 import Buddies from "../buddies/buddies.bg";
 import ChatBg from "../chat/chat.bg";
 import NewsfeedBg from "../newsfeed/newsfeed.bg";
@@ -11,6 +11,7 @@ import LongpollBg from "../longpoll/longpoll.bg";
 import InstallPageOrLogin from "../yandex/yandex.bg";
 import Auth from "../auth/auth.bg";
 import Users from "../users/users.bg";
+import Notifications from "../notifications/notifications.bg";
 
 
 Browser.init();
@@ -19,6 +20,7 @@ Buddies();
 Users.init();
 ChatBg();
 NewsfeedBg();
+Notifications.init();
 FeedbacksBg();
 RouterBg.init();
 LikesBg();

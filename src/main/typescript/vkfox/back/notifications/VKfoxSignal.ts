@@ -1,4 +1,5 @@
 "use strict";
+
 export default {
     standart: "../assets/sounds/standart.ogg",
     original: "../assets/sounds/original.ogg",

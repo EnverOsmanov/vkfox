@@ -2,8 +2,8 @@ import * as React from "react"
 import iassign from "immutable-assign";
 import Mediator from "../../../mediator/mediator.pu"
 import {Msg} from "../../../mediator/messages"
-import {ForceOnlineSettingsI, NotificationsSettingsI} from "../../../notifications/types";
-import VKfoxAudio from "../../../notifications/VKfoxAudio";
+import {ForceOnlineSettingsI, NotificationsSettingsI} from "../../../common/notifications/types";
+import VKfoxAudio from "../../../common/notifications/VKfoxAudio";
 import ForceOnlineSetting from "./components/ForceOnlineSetting";
 import NotificationsSetting from "./components/NotificationsSetting";
 import NotificationsSoundSetting from "./components/NotificationsSoundSetting";

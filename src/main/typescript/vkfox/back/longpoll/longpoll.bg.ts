@@ -1,8 +1,8 @@
 "use strict";
-import RequestBg from "../../request/request.bg";
+import RequestBg from "../request/request.bg";
 import Mediator from "../../mediator/mediator.bg";
 import {Msg} from "../../mediator/messages";
-import {AccessTokenError, LongPollKeyError} from "../../request/models";
+import {AccessTokenError, LongPollKeyError} from "../request/models";
 import {LongPollRS, LongPollServerRS} from "../../../vk/types";
 
 const LONG_POLL_WAIT = 25,

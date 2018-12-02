@@ -1,8 +1,8 @@
-import Settings from "./settings"
+import Settings from "../../back/notifications/VKfoxSignal"
 import {SoundSetting} from "./types";
-import Request from "../common/request/Request"
-import {Sex} from "../back/users/types";
-import {SPEECH_KEY} from "../common/config/config";
+import Request from "../request/Request"
+import {Sex} from "../../back/users/types";
+import {SPEECH_KEY} from "../config/config";
 
 let audioInProgress = false;
 

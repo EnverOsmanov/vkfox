@@ -1,6 +1,6 @@
 import * as React from 'react';
 import I18N from "../../../../common/i18n/i18n";
-import {NotificationsSettingsI} from "../../../../notifications/types";
+import {NotificationsSettingsI} from "../../../../common/notifications/types";
 
 
 interface Props {

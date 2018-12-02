@@ -1,5 +1,5 @@
 "use strict";
-import RequestBg from '../../request/request.bg';
+import RequestBg from '../request/request.bg';
 import ProxyMethods from '../../proxy-methods/proxy-methods.bg'
 import Mediator from "../../mediator/mediator.bg"
 import * as _ from "underscore"

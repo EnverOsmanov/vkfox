@@ -12,7 +12,7 @@ import Mediator from '../../../mediator/mediator.pu'
 import {Msg} from "../../../mediator/messages";
 import {AuthState} from "../../../back/auth/models";
 import Browser, {default as BrowserPu} from '../../../browser/browser.pu'
-import {VKNotificationI} from "../../../notifications/types";
+import {VKNotificationI} from "../../../common/notifications/types";
 
 
 class MainNavigation extends React.Component {

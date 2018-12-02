@@ -1,6 +1,6 @@
 "use strict";
-import Request from "../../../../request/request.pu";
-import Users from "../../../../users/users.pu";
+import Request from "../../request/request.pu";
+import Users from "../../users/users.pu";
 import {Collection} from "backbone"
 import {PuChatUserProfile} from "../../../../common/chat/collections/ProfilesColl"
 import {GetHistoryParams} from "../../../../common/chat/types";

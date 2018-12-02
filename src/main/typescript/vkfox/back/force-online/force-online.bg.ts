@@ -1,9 +1,9 @@
 "use strict";
-import RequestBg from '../../request/request.bg';
+import RequestBg from '../request/request.bg';
 import Mediator from "../../mediator/mediator.bg"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import {Msg} from "../../mediator/messages";
-import {ForceOnlineSettingsI} from "../../notifications/types";
+import {ForceOnlineSettingsI} from "../../common/notifications/types";
 
 
 const MARK_PERIOD   = 30 * 1000; //5 min

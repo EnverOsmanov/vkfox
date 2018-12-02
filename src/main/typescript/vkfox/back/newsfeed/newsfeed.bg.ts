@@ -1,11 +1,11 @@
 "use strict";
-import RequestBg from "../../request/request.bg";
+import RequestBg from "../request/request.bg";
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import {Msg} from "../../mediator/messages"
 import {Profiles, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
 import {ItemDulpColl, ItemsColl, } from "./helper/models";
-import {AccessTokenError} from "../../request/models";
+import {AccessTokenError} from "../request/models";
 import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
 import {
     AttachmentPhoto,

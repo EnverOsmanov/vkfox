@@ -1,5 +1,5 @@
-import {ForceOnlineSettingsI, NotificationsSettingsI, PopupSetting, SoundSetting} from "../../../../notifications/types";
-import Settings from "../../../../notifications/settings";
+import {ForceOnlineSettingsI, NotificationsSettingsI, PopupSetting, SoundSetting} from "../../../../common/notifications/types";
+import VKfoxSignal from "../../../../back/notifications/VKfoxSignal";
 
 
 const popups: PopupSetting = {
@@ -10,7 +10,7 @@ const popups: PopupSetting = {
 const sound: SoundSetting = {
     enabled     : true,
     volume      : 0.5,
-    signal      : Settings.standart,
+    signal      : VKfoxSignal.standart,
     text2Speech : false
 };
 

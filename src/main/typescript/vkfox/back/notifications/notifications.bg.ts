@@ -1,14 +1,34 @@
 "use strict";
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
-import {NotificationQueue, notificationsSettings, NotifType, VKNotification} from "./Notification";
-import {VKNotificationI} from "./types";
-import VKfoxAudio from "./VKfoxAudio";
-import {html2text} from "../rectify/helpers";
+import {NotifType, VKNotification} from "./VKNotification";
+import {NotificationsSettingsI, VKNotificationI} from "../../common/notifications/types";
+import VKfoxAudio from "../../common/notifications/VKfoxAudio";
+import {html2text} from "../../rectify/helpers";
 import NotificationOptions = browser.notifications.NotificationOptions;
+import {NotificationQueue} from "./models/NotificationQueue";
+import {NotificationsSettings} from "./models/NotificationSettings";
+import VKfoxSignal from "./VKfoxSignal";
 
 
+const defaultSettingsState: NotificationsSettingsI = {
+    enabled: true,
+    sound: {
+        enabled: true,
+        volume: 0.5,
+        signal: VKfoxSignal.standart,
+        text2Speech: false
+    },
+    popups: {
+        enabled: true,
+        showText: true
+    }
+};
+
+const notificationsSettings: NotificationsSettings =
+    new NotificationsSettings(defaultSettingsState, {name: 'notificationsSettings'});
 const notificationQueue = new NotificationQueue();
+
 
 function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: any) {
     const xhr = new XMLHttpRequest();
@@ -44,6 +64,18 @@ function isChat(noti: VKNotificationI): boolean {
 
 export default class Notifications {
 
+    static init() {
+
+        // Clear badge, when notifications turned off and vice versa
+        notificationsSettings.on('change:enabled', (event, enabled: boolean) => {
+            const count = enabled
+                ? notificationQueue.size()
+                : '';
+
+            Notifications.setBadge(count, true);
+        });
+    }
+
     /**
      * Create notifications. Usually you will need only this method
      *
@@ -68,7 +100,7 @@ export default class Notifications {
                 .catch(e => console.error("Failed to create notification", e));
         }
 
-        const popups = notificationsSettings.popups;
+        const {popups} = notificationsSettings;
 
         if (notificationsSettings.enabled && popups.enabled) {
             getBase64FromImage(options.image, createP);
@@ -78,7 +110,7 @@ export default class Notifications {
 
     static playSound(noti: VKNotificationI): void {
 
-        const sound = notificationsSettings.sound;
+        const {sound} = notificationsSettings;
 
         if (notificationsSettings.enabled && sound.enabled) {
             if (isChat(noti) && sound.text2Speech && !!noti.message) VKfoxAudio.readTextInVoice(noti.message, noti.sex);

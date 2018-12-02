@@ -3,7 +3,7 @@ import I18N from "../../../common/i18n/i18n";
 import ItemActions from "../itemActions/ItemActions";
 import ItemAction from "../itemActions/ItemAction";
 import {ReplyI} from "../chat/types";
-import Request from "../../../request/request.pu"
+import Request from "../request/request.pu"
 import {SendMessageParams} from "../chat/types";
 import {FoxUserProfileI} from "../../../common/chat/types";
 import ReplyMessage from "../reply/ReplyMessage";

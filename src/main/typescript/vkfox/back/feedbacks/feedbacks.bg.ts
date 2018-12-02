@@ -1,20 +1,20 @@
 "use strict";
-import RequestBg from '../../request/request.bg'
+import RequestBg from '../request/request.bg'
 import * as _ from "underscore"
 import User from "../users/users.bg"
 import Mediator from "../../mediator/mediator.bg"
 import Router from "../router/router.bg"
-import Browser from "../../browser/browser.bg"
+import Browser from "../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
 import PersistentModel from "../../common/persistent-model/persistent-model"
-import Notifications from "../../notifications/notifications.bg"
+import Notifications from "../notifications/notifications.bg"
 import {BBCollectionOps, Profiles} from "../../common/profiles-collection/profiles-collection.bg";
 import {Item, ItemColl} from "../../common/feedbacks/collections/ItemColl";
-import {NotifType} from "../../notifications/Notification";
+import {NotifType} from "../notifications/VKNotification";
 import {FeedbacksCollection} from "../../common/feedbacks/collections/FeedBacksCollection";
 import {Msg} from "../../mediator/messages";
 import {LikesChanged} from "../newsfeed/types";
-import {AccessTokenError} from "../../request/models";
+import {AccessTokenError} from "../request/models";
 import {AuthModelI} from "../auth/types";
 import {
     CommentsNewsItemPar,

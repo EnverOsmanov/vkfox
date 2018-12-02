@@ -3,7 +3,7 @@ import {SendMessageParams} from "../types";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../helpers/chat.pu";
-import Request from "../../../../request/request.pu"
+import Request from "../../request/request.pu"
 import {timeAgo} from "../../filters/filters.pu";
 import {PuChatUserProfile} from "../../../../common/chat/collections/ProfilesColl";
 import {Collection} from "backbone";

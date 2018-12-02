@@ -1,16 +1,16 @@
 "use strict";
-import RequestBg from '../../request/request.bg'
+import RequestBg from '../request/request.bg'
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import Users from "../users/users.bg"
 import Router from "../router/router.bg"
-import Browser from "../../browser/browser.bg"
+import Browser from "../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
-import Notifications from "../../notifications/notifications.bg"
+import Notifications from "../notifications/notifications.bg"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import {Msg} from "../../mediator/messages"
 import {Dialog, DialogColl} from "../../common/chat/collections/DialogColl";
-import {NotifType} from "../../notifications/Notification";
+import {NotifType} from "../notifications/VKNotification";
 import {LPMessage} from "../longpoll/types";
 import {ChatUserProfileColl, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
 import {AuthModelI} from "../auth/types";

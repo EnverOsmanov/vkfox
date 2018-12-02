@@ -1,7 +1,7 @@
 "use strict";
-import ProxyMethods from '../proxy-methods/proxy-methods.bg';
+import ProxyMethods from '../../proxy-methods/proxy-methods.bg';
 import Tab = browser.tabs.Tab;
-import {ProxyNames} from "../mediator/messages";
+import {ProxyNames} from "../../mediator/messages";
 
 const BADGE_COLOR: [number, number, number, number] = [231, 76, 60, 255],
     ICON_ONLINE = {
