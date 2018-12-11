@@ -14,7 +14,7 @@ import {
     VideoParFromComm,
     WallMentionFeedback
 } from "../../../common/feedbacks/types";
-import Request from "../request/request.pu";
+import Request from "../components/request/request.pu";
 import {BoardCreateComment, PhotosCreateComment, VideoCreateComment, WallCreateComment} from "../../../../vk/types";
 
 

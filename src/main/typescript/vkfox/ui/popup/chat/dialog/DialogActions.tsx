@@ -1,8 +1,8 @@
 import * as React from "react"
 import ChatPage from "../ChatPage";
-import ItemAction from "../../itemActions/ItemAction";
+import ItemAction from "../../components/itemActions/ItemAction";
 import I18N from "../../../../common/i18n/i18n";
-import ItemActions from "../../itemActions/ItemActions";
+import ItemActions from "../../components/itemActions/ItemActions";
 
 import {getHistory, markAsRead} from "../helpers/chat.pu";
 import * as _ from "underscore"

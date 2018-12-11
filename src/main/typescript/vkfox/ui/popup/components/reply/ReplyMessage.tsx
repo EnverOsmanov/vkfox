@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {ReplyI} from "../chat/types";
+import {ReplyI} from "../../chat/types";
 
 interface ReplyMessageP {
     reply      : ReplyI

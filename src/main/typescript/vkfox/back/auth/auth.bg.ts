@@ -5,6 +5,8 @@ import Browser from "../browser/browser.bg";
 import {Msg} from "../../mediator/messages";
 import {AuthModel, AuthState} from "./models";
 import {AuthModelI} from "./types";
+import Tab = browser.tabs.Tab;
+
 
 const RETRY_INTERVAL = 60000; //ms
 
@@ -67,9 +69,10 @@ function onAuthIframe(url: string) {
     freeLogin();
 }
 
-function loginWithWindow() {
+function loginWithWindow(): Promise<Tab> {
     if (iframe) freeLogin();
-    Browser.getOrCreate(Config.AUTH_URI);
+
+    return Browser.getOrCreate(Config.AUTH_URI);
 }
 
 function onAuthStateGet(): void {
@@ -96,7 +99,7 @@ function promisify(resolve: (AuthModelI) => void) {
 
 export default class Auth {
 
-    static login(resetToken?: boolean, withWindow?: boolean): Promise<AuthModelI> {
+    static async login(resetToken?: boolean, withWindow?: boolean): Promise<AuthModelI> {
         //console.debug("Login", state, resetToken, withWindow);
         //console.trace();
 
@@ -114,7 +117,7 @@ export default class Auth {
             }
         }
 
-        Browser.setIconOffline();
+        await Browser.setIconOffline();
 
         if (resetToken) return authPromise = new Promise(promisify);
         else return Auth.tokenReady();

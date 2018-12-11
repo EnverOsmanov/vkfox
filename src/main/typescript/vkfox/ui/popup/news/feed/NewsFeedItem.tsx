@@ -2,12 +2,12 @@ import * as React from "react"
 import {ReplyI} from "../../chat/types";
 import * as _ from "underscore"
 import I18N from "../../../../common/i18n/i18n";
-import ItemActionLike from "../../itemActions/ItemActionLike";
-import ItemActionComment from "../../itemActions/ItemActionComment";
-import ItemAction from "../../itemActions/ItemAction";
-import ItemActions from "../../itemActions/ItemActions";
-import {addVKBase, profile2Name} from "../../filters/filters.pu";
-import AttachmentC from "../../attachment/AttachmentC";
+import ItemActionLike from "../../components/itemActions/ItemActionLike";
+import ItemActionComment from "../../components/itemActions/ItemActionComment";
+import ItemAction from "../../components/itemActions/ItemAction";
+import ItemActions from "../../components/itemActions/ItemActions";
+import {addVKBase, profile2Name} from "../../components/filters/filters.pu";
+import AttachmentC from "../../components/attachment/AttachmentC";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {UserProfile} from "../../../../back/users/types";
 import {
@@ -20,14 +20,14 @@ import {
     PostItem,
     UserId,
     VideoItem,
-    WallPhotoItem
+    WallPhotoItem, WidgetSource
 } from "../../../../../vk/types/newsfeed";
 import {GenericRS} from "../../../../../vk/types";
 import {onReply} from "../news.pu";
-import ReplyMessage from "../../reply/ReplyMessage";
+import ReplyMessage from "../../components/reply/ReplyMessage";
 import {SendMessageI} from "../../../../common/feedbacks/types";
 import BrowserPu from "../../../../browser/browser.pu";
-import ItemHero from "../../item/ItemHero";
+import ItemHero from "../../components/item/ItemHero";
 
 
 interface NewsFeedItemProps {
@@ -89,6 +89,36 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             }
         })
     };
+
+    static postSourceElm(itemPost: PostItem): JSX.Element {
+        const {type} = itemPost.post_source;
+
+        switch (type) {
+            case "widget":
+                const post_source = itemPost.post_source as WidgetSource;
+
+                const {link} = post_source;
+                return (
+                    <div>
+                        <i className="news__post_repost fa fa-commenting"/>
+
+                        <a className="data-anchor"
+                           title={link.url}
+                           onClick={ _ => BrowserPu.createTab(link.url) }>
+                            {link.title}
+                        </a>
+                    </div>
+                );
+
+            case "api":
+            case "vk":
+                return null;
+
+            default:
+                console.warn("Unknown post source", type, itemPost);
+                return null;
+        }
+    }
 
     static postAttachmentElms(itemPost: PostItem): JSX.Element[] {
         function postAttachments(attachments: AttachmentContainer[]) {
@@ -166,6 +196,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                         <RectifyPu text={originP.text} hasEmoji={false}/>
 
                         {NewsFeedItem.postAttachmentElms(originP)}
+                        {NewsFeedItem.postSourceElm(originP)}
                     </div>
                 )
             }

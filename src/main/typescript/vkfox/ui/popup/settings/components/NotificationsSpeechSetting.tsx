@@ -1,6 +1,6 @@
 import * as React from 'react';
 import I18N from "../../../../common/i18n/i18n";
-import Checkbox from "../../checkbox/Checkbox";
+import Checkbox from "../../components/checkbox/Checkbox";
 import {NotificationsSettingsI} from "../../../../common/notifications/types";
 
 interface Props {

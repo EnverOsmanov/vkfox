@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom"
-import anchor from "../../popup/anchor/anchor.pu";
+import anchor from "../../popup/components/anchor/anchor.pu";
 import MainNavigation from "../../popup/navigation/MainNavigation";
 
 import "../../../../../sass/vkfox/popup.scss"

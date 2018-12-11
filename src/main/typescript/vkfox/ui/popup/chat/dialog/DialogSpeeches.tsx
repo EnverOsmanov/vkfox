@@ -1,6 +1,6 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import {addVKBase, profile2Name} from "../../filters/filters.pu";
+import {addVKBase, profile2Name} from "../../components/filters/filters.pu";
 import {Speech} from "../types";
 import {GroupProfile, UserProfile} from "../../../../back/users/types";
 import {Message, MessageWithAction} from "../../../../../vk/types";
@@ -8,7 +8,7 @@ import RectifyPu from "../../../../rectify/RectifyPu";
 import I18N from "../../../../common/i18n/i18n";
 import {PuChatUserProfile} from "../../../../common/chat/collections/ProfilesColl";
 import {Collection} from "backbone";
-import {profilePhotoPath} from "../../item/item.pu";
+import {profilePhotoPath} from "../../components/item/item.pu";
 import {attachmentsDivM} from "./helpers/dialog.pu";
 import BrowserPu from "../../../../browser/browser.pu";
 

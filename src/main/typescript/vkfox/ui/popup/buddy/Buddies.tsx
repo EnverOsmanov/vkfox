@@ -4,7 +4,7 @@ import {Msg} from "../../../mediator/messages"
 import {buddiesFilter, initBuddiesFilter} from "./buddies.pu"
 import BuddyItem from "./BuddyItem";
 import BuddiesSearch from "./BuddiesSearch";
-import ItemList from "../item-list/ItemList";
+import ItemList from "../components/item-list/ItemList";
 import {FoxUserProfileI} from "../../../common/chat/types";
 import {BuddiesFilters} from "./types";
 

@@ -1,4 +1,4 @@
-import Settings from "../../back/notifications/VKfoxSignal"
+import Settings from "./VKfoxSignal"
 import {SoundSetting} from "./types";
 import Request from "../request/Request"
 import {Sex} from "../../back/users/types";

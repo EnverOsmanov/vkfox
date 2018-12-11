@@ -8,8 +8,8 @@ import {FeedbackObj, SendMessageI,} from "../../../../common/feedbacks/types";
 import {GroupProfile, UserProfile} from "../../../../back/users/types";
 import {FeedbackItemObj} from "../types";
 import {getActionsData, onReply} from "../news.pu";
-import ReplyMessage from "../../reply/ReplyMessage";
-import ItemHero from "../../item/ItemHero";
+import ReplyMessage from "../../components/reply/ReplyMessage";
+import ItemHero from "../../components/item/ItemHero";
 
 
 interface FeedbackItemProps {

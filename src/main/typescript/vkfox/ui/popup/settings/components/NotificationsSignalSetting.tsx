@@ -1,7 +1,7 @@
 import * as React from 'react';
 import I18N from "../../../../common/i18n/i18n";
 import {NotificationsSettingsI} from "../../../../common/notifications/types";
-import Settings from "../../../../back/notifications/VKfoxSignal";
+import Settings from "../../../../common/notifications/VKfoxSignal";
 
 interface Props {
     notifications: NotificationsSettingsI

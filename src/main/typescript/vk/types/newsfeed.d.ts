@@ -2,6 +2,7 @@ import {ProfileI, UserProfile} from "../../vkfox/back/users/types";
 import {GenericRS} from "./index";
 import {WithUserLikes, ZeroOne} from "./feedback";
 
+
 export interface ItemObj {
     id      ?: string;
     type     : string;
@@ -21,7 +22,7 @@ export interface PostItem extends ItemObj, WithUserLikes, WithCopyHistory {
 
     post_id     : number
     post_type   : string
-    post_source : UserMeta
+    post_source : PostSource
 }
 
 export interface PhotoItem extends ItemObj {
@@ -69,11 +70,36 @@ interface CanPostable {
     can_post: number
 }
 
-interface UserMeta {
-    type: string
-    platform: string
+interface VkLink {
+    description: string
+    title: string
+    url: string
 }
 
+
+// PostSources
+interface PostSource {
+    type: "widget" | "api" | "vk"
+}
+
+interface WidgetSource extends PostSource {
+    type: "widget"
+    data: "comments"
+    link: VkLink
+}
+
+interface ApiSource extends PostSource {
+    type: "api"
+}
+
+interface VkSource extends PostSource {
+    type: "vk"
+}
+
+interface UserMeta extends PostSource{
+    platform: string
+}
+//
 
 export interface VideoVideo {
     id      : number

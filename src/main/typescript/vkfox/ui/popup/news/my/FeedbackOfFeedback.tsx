@@ -1,11 +1,11 @@
 import * as React from "react"
 import {ReplyI} from "../../chat/types";
-import AttachmentC from "../../attachment/AttachmentC";
+import AttachmentC from "../../components/attachment/AttachmentC";
 import I18N from "../../../../common/i18n/i18n";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {FeedbackObj, ReplyFeedback} from "../../../../common/feedbacks/types";
 import {GroupProfile, UserProfile} from "../../../../back/users/types";
-import ItemHero from "../../item/ItemHero";
+import ItemHero from "../../components/item/ItemHero";
 
 
 interface FeedbackItemProps {

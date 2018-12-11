@@ -1,6 +1,6 @@
 import * as React from "react"
 import {AttachmentContainer} from "../../../../../../vk/types/newsfeed";
-import AttachmentC from "../../../attachment/AttachmentC";
+import AttachmentC from "../../../components/attachment/AttachmentC";
 
 export function attachmentsDivM(attachments?: AttachmentContainer[]): JSX.Element {
     if (attachments) {

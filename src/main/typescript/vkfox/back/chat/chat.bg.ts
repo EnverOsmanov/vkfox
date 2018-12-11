@@ -12,7 +12,7 @@ import {Msg} from "../../mediator/messages"
 import {Dialog, DialogColl} from "../../common/chat/collections/DialogColl";
 import {NotifType} from "../notifications/VKNotification";
 import {LPMessage} from "../longpoll/types";
-import {ChatUserProfileColl, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
+import {BBCollectionOps, ChatUserProfileColl} from "../../common/profiles-collection/profiles-collection.bg";
 import {AuthModelI} from "../auth/types";
 import {UserProfile} from "../users/types";
 import {
@@ -46,18 +46,22 @@ const publishData = _.debounce( () => {
 }, 0);
 
 
-export default function init() {
-
-    const readyPromise = getDialogs()
-        .then(getUnreadMessages)
-        .then(fetchProfiles);
-
-    initialize(readyPromise);
+export default async function init() {
     Mediator.sub(Msg.AuthUser, (data: AuthModelI) => {
         userId = data.userId;
         dialogColl.reset();
         profilesColl.reset();
     });
+
+    const dialogs = await getDialogs();
+
+    const dialogsWithUnreadMessages = await getUnreadMessages(dialogs);
+
+    dialogColl.reset(dialogsWithUnreadMessages);
+
+    const readyPromise = fetchProfiles(dialogsWithUnreadMessages);
+
+    initialize(readyPromise);
 }
 
 
@@ -76,7 +80,7 @@ function updateLatestMessageId(): void {
     }
 }
 
-function fetchProfiles(): Promise<void> {
+function fetchProfiles(dialogs: Dialog[]): Promise<void> {
 
     function dialog2Uuids(accUids: number[], dialog: Dialog): number[] {
         const allDialogUids = dialog.messages.map( message => message.user_id);
@@ -94,7 +98,7 @@ function fetchProfiles(): Promise<void> {
         profilesColl.get(userId).isSelf = true;
     }
 
-    const requiredUids = dialogColl.reduce(dialog2Uuids, [userId]);
+    const requiredUids = dialogs.reduce(dialog2Uuids, [userId]);
     const cachesUids = profilesColl.map(p => p.id);
     const missingUids = _
         .chain(requiredUids)
@@ -136,7 +140,7 @@ function initialize(readyPromise: Promise<void>) {
     readyPromise.then( () => {
         updateLatestMessageId();
         publishData();
-    });
+    }).catch(console.error);
 }
 
 /**
@@ -145,10 +149,11 @@ function initialize(readyPromise: Promise<void>) {
  *
  * @param {Dialog} dialog subject for mutation
  */
-function removeReadMessages(dialog: Dialog): void {
+function removeReadMessages(dialog: Dialog): Dialog {
     const {messages} = dialog;
-    const result = [messages.pop()];
-    const originalOut = result[0].out;
+    const lastMessage = messages.pop();
+    const result = [lastMessage];
+    const originalOut = lastMessage.out;
 
     messages.reverse().some(function (message) {
         if (message.out === originalOut && message.read_state === 0) {
@@ -158,12 +163,30 @@ function removeReadMessages(dialog: Dialog): void {
         else return true;
     });
     dialog.messages = result;
+
+    return dialog;
 }
 
-function getDialogs(): Promise<void> {
+function dropReadMessages(messages: Message[]): Message[] {
+    const lastMessage = messages.pop();
+    const result = [lastMessage];
+    const originalOut = lastMessage.out;
+
+    messages.reverse().some(function (message) {
+        if (message.out === originalOut && message.read_state === 0) {
+            result.unshift(message);
+        }
+        // stop copying messages
+        else return true;
+    });
+
+    return result;
+}
+
+function getDialogs(): Promise<Dialog[]> {
     const code = "return API.messages.getDialogs({preview_length: 0});";
 
-    function handleRequest(response: MessagesGetDialogsResponse): void {
+    function handleRequest(response: MessagesGetDialogsResponse): Dialog[] {
 
        function toDialog(messageCnt: VkDialog): Dialog {
            const message = messageCnt.message;
@@ -186,13 +209,12 @@ function getDialogs(): Promise<void> {
 
 
         if (response && response.count) {
-            dialogColl.reset(
-                response
-                    .items
-                    .filter( item => item.message.user_id > 0)
-                    .map(toDialog)
-            );
+            return response
+                .items
+                .filter( item => item.message.user_id > 0)
+                .map(toDialog)
         }
+        else return []
     }
 
     return RequestBg
@@ -255,7 +277,7 @@ function onUpdates(updates: LPMessage[]) {
  * If last message in dialog is unread,
  * fetch dialog history and get last unread messages in a row
  */
-function getUnreadMessages(): Promise<void> {
+async function getUnreadMessages(dialogs: Dialog[]): Promise<Dialog[]> {
     function getHistory(dialog: Dialog): Promise<MessagesGetHistoryResponse> {
         const code = "return API.messages.getHistory({" +
             `user_id: ${dialog.uid},` +
@@ -265,25 +287,26 @@ function getUnreadMessages(): Promise<void> {
         return RequestBg.api({ code });
     }
 
-    // FIXME wtf models.filter?
-    const unreadDialogs =
-        dialogColl.models
-            .filter( dialog => !dialog.chat_id && !dialog.messages[0].read_state );
+    function getUnreadMessagesForDialog(dialog: Dialog) {
+        const isUnread = !dialog.chat_id && !dialog.messages[0].read_state;
 
-    const unreadHistoryRequests = unreadDialogs.map(getHistory);
+        if (isUnread) {
+            return getHistory(dialog).then( historyMessages => {
+                if (historyMessages && historyMessages.items[0]) {
+                    const rawHistoryMessages = historyMessages.items.reverse();
 
-    return Promise
-        .all(unreadHistoryRequests)
-        .then( (args: MessagesGetHistoryResponse[]) => {
-            args.forEach( (historyMessages, index) => {
-                if (historyMessages && historyMessages[0]) {
-
-                    unreadDialogs[index].messages = historyMessages.items.reverse();
-
-                    removeReadMessages(unreadDialogs[index]);
+                    dialog.messages = dropReadMessages(rawHistoryMessages);
+                    return dialog;
                 }
-            });
-        });
+                else return dialog;
+            })
+        }
+        else return Promise.resolve(dialog);
+    }
+
+    const dialogsWithUnreadMessages = dialogs.map(getUnreadMessagesForDialog);
+
+    return Promise.all(dialogsWithUnreadMessages);
 }
 
 
@@ -349,7 +372,7 @@ function addNewMessage(update: LPMessage) {
             dialogColl.add(firstMessage, BBCollectionOps.beSilentOptions);
         }
 
-        return fetchProfiles().then( () => {
+        return fetchProfiles(dialogColl.models).then( () => {
             // important to trigger change, when profiles are available
             // because will cause an error, when creating notifications
             dialogColl.trigger("change");
@@ -418,7 +441,7 @@ function onLatestMessageIdChange() {
         function notifyIfVkIsNotActive(active: boolean): Promise<void> {
             return active
                 ? Promise.resolve()
-                : fetchProfiles().then(notifyAboutMessage)
+                : fetchProfiles(dialogColl.models).then(notifyAboutMessage)
         }
 
         // Don't notify, when active tab is vk.com

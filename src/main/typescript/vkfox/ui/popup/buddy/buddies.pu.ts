@@ -1,6 +1,6 @@
 "use strict";
 import PersistentModel from '../../../common/persistent-model/persistent-model'
-import {profile2Name} from "../filters/filters.pu";
+import {profile2Name} from "../components/filters/filters.pu";
 import {BuddiesFilters} from "./types";
 import {UserProfile} from "../../../back/users/types";
 import {FoxUserProfileI} from "../../../common/chat/types";

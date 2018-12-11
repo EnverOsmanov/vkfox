@@ -1,9 +1,9 @@
 import * as React from "react"
-import I18N from "../../../common/i18n/i18n";
-import {Msg} from "../../../mediator/messages";
-import Mediator from "../../../mediator/mediator.pu"
-import {NewsLikesObj} from "../../../common/feedbacks/types";
-import {UserLikesObj} from "../../../../vk/types/objects";
+import I18N from "../../../../common/i18n/i18n";
+import {Msg} from "../../../../mediator/messages";
+import Mediator from "../../../../mediator/mediator.pu"
+import {NewsLikesObj} from "../../../../common/feedbacks/types";
+import {UserLikesObj} from "../../../../../vk/types/objects";
 
 
 interface ItemActionProps {

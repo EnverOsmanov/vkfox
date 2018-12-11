@@ -3,17 +3,17 @@ import {SendMessageParams} from "../types";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../helpers/chat.pu";
-import Request from "../../request/request.pu"
-import {timeAgo} from "../../filters/filters.pu";
+import Request from "../../components/request/request.pu"
+import {timeAgo} from "../../components/filters/filters.pu";
 import {PuChatUserProfile} from "../../../../common/chat/collections/ProfilesColl";
 import {Collection} from "backbone";
 import {DialogI, ReplyI} from "../types";
 import {UserProfile} from "../../../../back/users/types";
 import {Message} from "../../../../../vk/types";
 import DialogSpeeches from "./DialogSpeeches";
-import ReplyMessage from "../../reply/ReplyMessage";
-import {Description} from "../../item/ItemDescription";
-import ItemHero from "../../item/ItemHero";
+import ReplyMessage from "../../components/reply/ReplyMessage";
+import {Description} from "../../components/item/ItemDescription";
+import ItemHero from "../../components/item/ItemHero";
 
 interface DialogItemProps {
     dialog      : DialogI

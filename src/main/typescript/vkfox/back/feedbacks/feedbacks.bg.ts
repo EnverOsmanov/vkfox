@@ -68,7 +68,8 @@ const MAX_ITEMS_COUNT  = 50,
     MAX_COMMENTS_COUNT = 3,
     UPDATE_PERIOD      = 3000; //ms
 
-let persistentModel, userId;
+let persistentModel: PersistentModel,
+    userId: number;
 
 const itemsColl = new ItemColl();
 const profilesColl = new Profiles();

@@ -1,11 +1,11 @@
 import * as React from "react"
-import ItemActions from "../../itemActions/ItemActions";
+import ItemActions from "../../components/itemActions/ItemActions";
 import {getSourceLink, unsubscribe} from "../news.pu";
-import {Capitalize} from "../../filters/filters.pu";
+import {Capitalize} from "../../components/filters/filters.pu";
 import I18N from "../../../../common/i18n/i18n";
-import ItemAction from "../../itemActions/ItemAction";
-import ItemActionComment from "../../itemActions/ItemActionComment";
-import ItemActionLike from "../../itemActions/ItemActionLike";
+import ItemAction from "../../components/itemActions/ItemAction";
+import ItemActionComment from "../../components/itemActions/ItemActionComment";
+import ItemActionLike from "../../components/itemActions/ItemActionLike";
 import {ParentObj, ParentObjPost, SendMessageI, TopicParFromComm} from "../../../../common/feedbacks/types";
 import {FeedbackItemObj} from "../types";
 import BrowserPu from "../../../../browser/browser.pu";

@@ -1,6 +1,6 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import Browser, {default as BrowserPu} from "../../../browser/browser.pu"
+import Browser, {default as BrowserPu} from "../../../../browser/browser.pu"
 import Request from "../request/request.pu"
 import {
     buildSrcSet,
@@ -12,7 +12,7 @@ import {
     videoViewPathByUrl
 } from "../item/item.pu";
 import {duration} from "../filters/filters.pu";
-import {VideoGetUserVideosResponse} from "../../../../vk/types";
+import {VideoGetUserVideosResponse} from "../../../../../vk/types";
 import {
     Attachment,
     AttachmentAudio,
@@ -24,10 +24,10 @@ import {
     AttachmentSticker,
     AttachmentVideo,
     AttachmentWall
-} from "../../../../vk/types/newsfeed";
-import {attachmentsDivM} from "../chat/dialog/helpers/dialog.pu";
-import RectifyPu from "../../../rectify/RectifyPu";
-import MyFeedbackPost from "../news/my/MyFeedbackPost";
+} from "../../../../../vk/types/newsfeed";
+import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
+import RectifyPu from "../../../../rectify/RectifyPu";
+import MyFeedbackPost from "../../news/my/MyFeedbackPost";
 
 
 function imageProperties(src: string): CSSProperties {

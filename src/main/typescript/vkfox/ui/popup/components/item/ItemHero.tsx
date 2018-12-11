@@ -1,8 +1,8 @@
 import * as React from "react"
 import {CSSProperties} from "react"
 import {addVKBase, profile2Name} from "../filters/filters.pu";
-import {GroupProfile, ProfileI, UserProfile} from "../../../back/users/types";
-import BrowserPu from "../../../browser/browser.pu";
+import {GroupProfile, ProfileI, UserProfile} from "../../../../back/users/types";
+import BrowserPu from "../../../../browser/browser.pu";
 import {profilePhotoPath} from "./item.pu";
 
 interface ItemHeroProps {

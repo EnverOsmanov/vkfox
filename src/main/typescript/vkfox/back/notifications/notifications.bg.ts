@@ -8,7 +8,7 @@ import {html2text} from "../../rectify/helpers";
 import NotificationOptions = browser.notifications.NotificationOptions;
 import {NotificationQueue} from "./models/NotificationQueue";
 import {NotificationsSettings} from "./models/NotificationSettings";
-import VKfoxSignal from "./VKfoxSignal";
+import VKfoxSignal from "../../common/notifications/VKfoxSignal";
 
 
 const defaultSettingsState: NotificationsSettingsI = {

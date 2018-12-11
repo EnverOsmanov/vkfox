@@ -1,14 +1,14 @@
 import * as React from "react"
 import I18N from "../../../common/i18n/i18n";
-import ItemActions from "../itemActions/ItemActions";
-import ItemAction from "../itemActions/ItemAction";
+import ItemActions from "../components/itemActions/ItemActions";
+import ItemAction from "../components/itemActions/ItemAction";
 import {ReplyI} from "../chat/types";
-import Request from "../request/request.pu"
+import Request from "../components/request/request.pu"
 import {SendMessageParams} from "../chat/types";
 import {FoxUserProfileI} from "../../../common/chat/types";
-import ReplyMessage from "../reply/ReplyMessage";
-import {Description} from "../item/ItemDescription";
-import ItemHero from "../item/ItemHero";
+import ReplyMessage from "../components/reply/ReplyMessage";
+import {Description} from "../components/item/ItemDescription";
+import ItemHero from "../components/item/ItemHero";
 
 interface BuddyItemProps {
     buddie  : FoxUserProfileI

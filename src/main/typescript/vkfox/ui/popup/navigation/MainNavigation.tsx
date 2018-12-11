@@ -3,7 +3,7 @@ import {Redirect, withRouter} from "react-router"
 import * as React from "react"
 import ChatPage from "../chat/ChatPage";
 import BuddiesPage from "../buddy/Buddies";
-import {addVKBase} from "../filters/filters.pu";
+import {addVKBase} from "../components/filters/filters.pu";
 import SettingsPage from "../settings/SettingsPage";
 import I18N from "../../../common/i18n/i18n";
 import PersistentModel from "../../../common/persistent-model/persistent-model";

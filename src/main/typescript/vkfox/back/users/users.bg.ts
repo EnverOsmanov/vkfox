@@ -9,6 +9,7 @@ import {NameSurname, OnlyName} from "../../common/chat/types";
 import {FriendProfile, UserProfile, UsersGetElem} from "./types";
 import {FriendsRequest} from "../../../vk/types";
 
+
 const DROP_PROFILES_INTERVAL = 60000,
     USERS_GET_DEBOUNCE       = 400;
 

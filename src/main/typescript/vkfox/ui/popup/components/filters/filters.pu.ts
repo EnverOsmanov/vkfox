@@ -1,7 +1,7 @@
 "use strict";
 import * as moment from "moment";
-import * as Config from '../../../common/config/config';
-import {NameSurname, OnlyName} from "../../../common/chat/types";
+import * as Config from '../../../../common/config/config';
+import {NameSurname, OnlyName} from "../../../../common/chat/types";
 
 /**
  * Returns time duration in format 'HH:mm'

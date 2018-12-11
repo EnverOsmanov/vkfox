@@ -1,7 +1,7 @@
 "use strict";
 
-import {AttachmentDoc, AttachmentPhoto, AttachmentSticker} from "../../../../vk/types/newsfeed";
-import {ProfileI} from "../../../back/users/types";
+import {AttachmentDoc, AttachmentPhoto, AttachmentSticker} from "../../../../../vk/types/newsfeed";
+import {ProfileI} from "../../../../back/users/types";
 
 
 const VIDEO_VIEW_URL = "/pages/video.html";

@@ -1,5 +1,5 @@
 import * as React from "react"
-import PersistentModel from "../../../common/persistent-model/persistent-model";
+import PersistentModel from "../../../../common/persistent-model/persistent-model";
 
 
 const DEFAULT_WIDTH   = 320,

@@ -1,5 +1,5 @@
 import * as React from "react"
-import I18N from "../../../common/i18n/i18n";
+import I18N from "../../../../common/i18n/i18n";
 
 interface ItemActionProps {
     showIf  : boolean
