@@ -1,6 +1,6 @@
 "use strict";
 
-import {AttachmentDoc, AttachmentPhoto, AttachmentSticker} from "../../../../../vk/types/newsfeed";
+import {AttachmentDoc, AttachmentGift, AttachmentPhoto, AttachmentSticker} from "../../../../../vk/types/attachment";
 import {ProfileI} from "../../../../back/users/types";
 
 
@@ -23,6 +23,12 @@ const profilePhotoSizes = [
     "photo_100",
     "photo_200",
     "photo"
+];
+
+const giftSizes = [
+    "thumb_256",
+    "thumb_96",
+    "thumb_48"
 ];
 
 export function docViewPath(data: AttachmentDoc): string {
@@ -65,6 +71,17 @@ export function imageViewPath(photo: AttachmentPhoto): string | null {
     }
 }
 
+export function giftViewPath(gift: AttachmentGift): string | null {
+
+    if (gift) {
+        for (const i in giftSizes) {
+            if (giftSizes[i] in gift) {
+                return `${IMAGE_VIEW_URL}#${btoa(gift[giftSizes[i]])}`;
+            }
+        }
+    }
+}
+
 export function profilePhotoPath(photo: ProfileI): string | void {
 
     if (photo) {
@@ -99,6 +116,16 @@ export function buildSrcSet(photo: AttachmentPhoto): string {
     if (photo.photo_807) arr.push(`${photo.photo_807} 807w`);
     if (photo.photo_1280) arr.push(`${photo.photo_1280} 1280w`);
     if (photo.photo_2560) arr.push(`${photo.photo_2560} 2560w`);
+
+    return arr.toString();
+}
+
+export function buildSrcSetGift(photo: AttachmentGift): string {
+    const arr: string[] = [];
+
+    if (photo.thumb_48) arr.push(`${photo.thumb_48} 48w`);
+    if (photo.thumb_96) arr.push(`${photo.thumb_96} 96w`);
+    if (photo.thumb_256) arr.push(`${photo.thumb_256} 256w`);
 
     return arr.toString();
 }

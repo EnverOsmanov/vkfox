@@ -6,7 +6,8 @@ import I18N from "../../../../common/i18n/i18n";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {ParentObjPost, TopicParFromComm} from "../../../../common/feedbacks/types";
 import {FeedbackItemObj} from "../types";
-import {AttachmentContainer, WithCopyHistory} from "../../../../../vk/types/newsfeed";
+import {WithCopyHistory} from "../../../../../vk/types/newsfeed";
+import {AttachmentContainer} from "../../../../../vk/types/attachment";
 
 
 interface MyFeedbackPostProps {

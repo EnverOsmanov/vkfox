@@ -7,7 +7,7 @@ import "../../../../../sass/vkfox/popup.scss"
 import "emoji/lib/emoji.css"
 
 
-const Sidebar: React.StatelessComponent = () => {
+const Sidebar: React.FunctionComponent = () => {
     return (
         <div className="fullpage">
             <MainNavigation/>

@@ -8,8 +8,6 @@ import {ItemDulpColl, ItemsColl, } from "./helper/models";
 import {AccessTokenError} from "../request/models";
 import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
 import {
-    AttachmentPhoto,
-    AttachmentPhotoContainer,
     ItemObj,
     NewsfeedRequestParams,
     NewsfeedResp,
@@ -18,6 +16,7 @@ import {
     WallPhotoItem
 } from "../../../vk/types/newsfeed";
 import {LikesChanged} from "./types";
+import {AttachmentPhoto, AttachmentPhotoContainer} from "../../../vk/types/attachment";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -258,8 +257,6 @@ export default function initialize() {
     Mediator.sub(Msg.NewsfeedFriendsGet, () => readyPromise.then(publishNewsfeedFriends) );
 
     Mediator.sub(Msg.NewsfeedGroupsGet, () => readyPromise.then(publishNewsfeedGroups) );
-
-    readyPromise.then( () => Mediator.sub(Msg.LikesChanged, onLikesChanged) );
 
     readyPromise.then( () => {
         Mediator.sub(Msg.LikesChanged, onLikesChanged);

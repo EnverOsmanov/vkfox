@@ -11,8 +11,6 @@ import AttachmentC from "../../components/attachment/AttachmentC";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {UserProfile} from "../../../../back/users/types";
 import {
-    AttachmentContainer,
-    AttachmentPhoto,
     AudioItem,
     FriendItem,
     ItemObj,
@@ -28,6 +26,7 @@ import ReplyMessage from "../../components/reply/ReplyMessage";
 import {SendMessageI} from "../../../../common/feedbacks/types";
 import BrowserPu from "../../../../browser/browser.pu";
 import ItemHero from "../../components/item/ItemHero";
+import {AttachmentContainer, AttachmentPhoto} from "../../../../../vk/types/attachment";
 
 
 interface NewsFeedItemProps {
@@ -112,6 +111,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
             case "api":
             case "vk":
+            case "mvk":
                 return null;
 
             default:

@@ -1,6 +1,4 @@
-
 import {UserProfile} from "../../back/users/types";
-import {AttachmentContainer} from "../../../vk/types/newsfeed";
 
 export interface GetHistoryParams {
     offset  : number

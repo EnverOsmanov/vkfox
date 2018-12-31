@@ -3,8 +3,8 @@ import {CSSProperties} from "react"
 import Browser, {default as BrowserPu} from "../../../../browser/browser.pu"
 import Request from "../request/request.pu"
 import {
-    buildSrcSet,
-    docViewPath,
+    buildSrcSet, buildSrcSetGift,
+    docViewPath, giftViewPath,
     imageViewPath,
     imageViewPathByUrl,
     stickerImageUrl,
@@ -16,7 +16,7 @@ import {VideoGetUserVideosResponse} from "../../../../../vk/types";
 import {
     Attachment,
     AttachmentAudio,
-    AttachmentDoc,
+    AttachmentDoc, AttachmentGift,
     AttachmentLink,
     AttachmentNote,
     AttachmentPhoto,
@@ -24,7 +24,7 @@ import {
     AttachmentSticker,
     AttachmentVideo,
     AttachmentWall
-} from "../../../../../vk/types/newsfeed";
+} from "../../../../../vk/types/attachment";
 import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
@@ -107,6 +107,7 @@ function imageDiv(type: string, dataGraffiti: AttachmentPhoto, showFullWidth: bo
     if (showFullWidth) {
         return (
             <img
+                alt=""
                 className="item__hero-picture"
                 srcSet={buildSrcSet(dataGraffiti)}
                 src={dataGraffiti.photo_604}
@@ -118,6 +119,7 @@ function imageDiv(type: string, dataGraffiti: AttachmentPhoto, showFullWidth: bo
         return (
             <div className={`item__attachment item__attachment_type_${type}`}>
                 <img
+                    alt=""
                     className="item__picture"
                     srcSet={buildSrcSet(dataGraffiti)}
                     src={dataGraffiti.photo_604}
@@ -218,6 +220,18 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
                     { attachmentsDivM(wall.attachments)}
                 </div>
             );
+        case "gift":
+            const gift = data as AttachmentGift;
+            return (
+                <img
+                    alt=""
+                    className="item__hero-picture"
+                    srcSet={buildSrcSetGift(gift)}
+                    src={gift.thumb_256}
+                    onClick={_ => BrowserPu.createTab(giftViewPath(gift))}
+                />
+            );
+
         default:
             console.warn("Unknown attachment", type, data);
             return null;

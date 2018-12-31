@@ -1,4 +1,4 @@
-import {AttachmentContainer, CanPostable, PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
+import {CanPostable, PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
 import {UserLikesObj} from "../../../vk/types/objects";
 import {
     CommentFromNews,
@@ -10,6 +10,7 @@ import {
     TopicItem, VideoCommentN,
     WithFromId, WithLikes, WithUserLikes
 } from "../../../vk/types/feedback";
+import {AttachmentContainer} from "../../../vk/types/attachment";
 
 
 export interface NewsLikesObj extends UserLikesObj {

@@ -1,8 +1,9 @@
 import {GroupProfile, UserProfile} from "../../vkfox/back/users/types";
-import {Attachment, AttachmentPhoto, media, PhotoItem, PostItem, VideoItem} from "./newsfeed";
+import {media, PhotoItem, PostItem, VideoItem} from "./newsfeed";
 import {LikesObj, UserLikesObj} from "./objects";
 import {GenericRS} from "./index";
 import {NewsLikesObj} from "../../vkfox/common/feedbacks/types";
+import {Attachment} from "./attachment";
 
 export type ZeroOne = 0 | 1;
 

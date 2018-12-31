@@ -9,7 +9,8 @@ import "../../../../../sass/vkfox/popup.scss"
 import "emoji/lib/emoji.css"
 import Resizer from "../components/resize/Resizer";
 
-const Popup: React.StatelessComponent = () => {
+
+const Popup: React.FunctionComponent = () => {
     return (
         <div className="fullpage">
             <MainNavigation/>
