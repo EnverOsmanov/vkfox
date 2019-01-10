@@ -1,4 +1,4 @@
-import {PuChatUserProfile} from "../../../common/chat/collections/ProfilesColl";
+import {PuChatUserProfile} from "../../../back/chat/collections/ProfilesColl";
 import {FoxUserProfileI} from "../../../common/chat/types";
 import {UserProfile} from "../../../back/users/types";
 import {Message} from "../../../../vk/types";

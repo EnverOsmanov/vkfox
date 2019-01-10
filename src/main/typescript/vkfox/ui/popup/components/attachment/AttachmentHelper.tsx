@@ -3,8 +3,10 @@ import {CSSProperties} from "react"
 import Browser, {default as BrowserPu} from "../../../../browser/browser.pu"
 import Request from "../request/request.pu"
 import {
-    buildSrcSet, buildSrcSetGift,
-    docViewPath, giftViewPath,
+    buildSrcSet,
+    buildSrcSetGift,
+    docViewPath,
+    giftViewPath,
     imageViewPath,
     imageViewPathByUrl,
     stickerImageUrl,
@@ -16,10 +18,11 @@ import {VideoGetUserVideosResponse} from "../../../../../vk/types";
 import {
     Attachment,
     AttachmentAudio,
-    AttachmentDoc, AttachmentGift,
+    AttachmentDoc,
+    AttachmentDocType,
+    AttachmentGift,
     AttachmentLink,
     AttachmentNote,
-    AttachmentPhoto,
     AttachmentPoll,
     AttachmentSticker,
     AttachmentVideo,
@@ -28,6 +31,7 @@ import {
 import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
+import {media} from "../../../../../vk/types/newsfeed";
 
 
 function imageProperties(src: string): CSSProperties {
@@ -54,7 +58,7 @@ function onVideoClick(dataVideo: AttachmentVideo): Promise<void> {
 
 function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
     switch (dataDoc.type) {
-        case 3: {
+        case AttachmentDocType.Gif: {
             const previewUrl = dataDoc.preview.photo.sizes.sort( (a, b) => b.width - a.width)
                 .find(p => p.width <= 604)
                 .src;
@@ -75,7 +79,7 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
             )
         }
 
-        case 5: {
+        case AttachmentDocType.Audio: {
             const {audio_msg} = dataDoc.preview;
 
             return (
@@ -102,7 +106,7 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
 
 }
 
-function imageDiv(type: string, dataGraffiti: AttachmentPhoto, showFullWidth: boolean): JSX.Element {
+function imageDiv(type: string, dataGraffiti: media.Photo, showFullWidth: boolean): JSX.Element {
 
     if (showFullWidth) {
         return (
@@ -166,20 +170,33 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
 
         case "link":
             const dataLink = data as AttachmentLink;
+
+            const image = dataLink.button ?
+                <img
+                    alt=""
+                    className="item__picture"
+                    srcSet={buildSrcSet(dataLink.photo)}
+                    src={dataLink.photo.photo_604}
+                />
+                : null;
+
             return (
-                <a
-                    className="item__link"
-                    onClick={_ => BrowserPu.createTab(dataLink.url)}>
-                    <i className="fa fa-share"/>
-                    {dataLink.url}
-                </a>
+                <div>
+                    {image}
+                    <a
+                        className="item__text_link"
+                        onClick={_ => BrowserPu.createTab(dataLink.url)}>
+                        <i className="fa fa-share"/>
+                        {dataLink.title}
+                    </a>
+                </div>
             );
 
 
         case "graffiti":
         case "photo":
         case "posted_photo":
-            return imageDiv(type, data as AttachmentPhoto, showFullWidth);
+            return imageDiv(type, data as media.Photo, showFullWidth);
 
         case "video":
             const dataVideo = data as AttachmentVideo;

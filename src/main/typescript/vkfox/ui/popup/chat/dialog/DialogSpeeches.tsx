@@ -6,7 +6,7 @@ import {GroupProfile, UserProfile} from "../../../../back/users/types";
 import {Message, MessageWithAction} from "../../../../../vk/types";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import I18N from "../../../../common/i18n/i18n";
-import {PuChatUserProfile} from "../../../../common/chat/collections/ProfilesColl";
+import {PuChatUserProfile} from "../../../../back/chat/collections/ProfilesColl";
 import {Collection} from "backbone";
 import {profilePhotoPath} from "../../components/item/item.pu";
 import {attachmentsDivM} from "./helpers/dialog.pu";

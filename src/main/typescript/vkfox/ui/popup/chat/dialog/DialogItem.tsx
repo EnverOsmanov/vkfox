@@ -5,7 +5,7 @@ import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../helpers/chat.pu";
 import Request from "../../components/request/request.pu"
 import {timeAgo} from "../../components/filters/filters.pu";
-import {PuChatUserProfile} from "../../../../common/chat/collections/ProfilesColl";
+import {PuChatUserProfile} from "../../../../back/chat/collections/ProfilesColl";
 import {Collection} from "backbone";
 import {DialogI, ReplyI} from "../types";
 import {UserProfile} from "../../../../back/users/types";

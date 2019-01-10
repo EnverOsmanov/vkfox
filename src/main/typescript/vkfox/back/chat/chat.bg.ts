@@ -9,7 +9,7 @@ import I18N from "../../common/i18n/i18n"
 import Notifications from "../notifications/notifications.bg"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import {Msg} from "../../mediator/messages"
-import {Dialog, DialogColl} from "../../common/chat/collections/DialogColl";
+import {Dialog, DialogColl} from "./collections/DialogColl";
 import {NotifType} from "../notifications/VKNotification";
 import {LPMessage} from "../longpoll/types";
 import {BBCollectionOps, ChatUserProfileColl} from "../../common/profiles-collection/profiles-collection.bg";
@@ -28,7 +28,7 @@ import {html2text} from "../../rectify/helpers";
 
 const MAX_HISTORY_COUNT = 10;
 
-let persistentModel,
+let persistentModel: PersistentModel,
     userId: number;
 const dialogColl = new DialogColl();
 const profilesColl = new ChatUserProfileColl();
@@ -155,7 +155,7 @@ function removeReadMessages(dialog: Dialog): Dialog {
     const result = [lastMessage];
     const originalOut = lastMessage.out;
 
-    messages.reverse().some(function (message) {
+    messages.reverse().some( (message) => {
         if (message.out === originalOut && message.read_state === 0) {
             result.unshift(message);
         }
@@ -433,7 +433,7 @@ function onLatestMessageIdChange() {
 
     // don't notify on first run,
     // when there is no previous value
-    if (!this._previousAttributes.hasOwnProperty("latestMessageId")) {
+    if (!persistentModel.get("latestMessageId")) {
         return;
     }
 

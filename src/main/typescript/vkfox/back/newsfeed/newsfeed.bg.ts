@@ -8,7 +8,7 @@ import {ItemDulpColl, ItemsColl, } from "./helper/models";
 import {AccessTokenError} from "../request/models";
 import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
 import {
-    ItemObj,
+    ItemObj, media,
     NewsfeedRequestParams,
     NewsfeedResp,
     PostItem,
@@ -16,7 +16,7 @@ import {
     WallPhotoItem
 } from "../../../vk/types/newsfeed";
 import {LikesChanged} from "./types";
-import {AttachmentPhoto, AttachmentPhotoContainer} from "../../../vk/types/attachment";
+import {AttachmentPhotoContainer} from "../../../vk/types/attachment";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -52,7 +52,6 @@ export function idMaker(item: ItemObj): string {
  * For example new wall_photos will be merged with existing for the user
  */
 function processRawItem(item: ItemObj) {
-    let collisionItem;
     const typeToPropertyMap = {
         "wall_photo": "photos",
         "photo"     : "photos",
@@ -61,31 +60,25 @@ function processRawItem(item: ItemObj) {
         "friend"    : "friends"
     };
 
-    // used to eliminate duplicate items during merge
-    const collection = new ItemDulpColl();
-
 
     item.id = idMaker(item);
 
-    if (item.source_id > 0) {
-        collisionItem = friendItemsColl.get(item.id);
-        friendItemsColl.remove(collisionItem);
-    }
-    else {
-        collisionItem = groupItemsColl.get(item.id);
-        groupItemsColl.remove(collisionItem);
-    }
+    const collisionItem = item.source_id > 0
+        ? friendItemsColl.get(item.id)
+        : groupItemsColl.get(item.id);
 
     if (collisionItem) {
-        collisionItem = collisionItem.toJSON();
+        const collisionItemJS = collisionItem.toJSON();
 
-        const propertyName = typeToPropertyMap[collisionItem.type];
+        const propertyName = typeToPropertyMap[collisionItemJS.type];
 
         if (propertyName) {
             // type "photo" item has "photos" property; note - notes etc
+            // used to eliminate duplicate items during merge
+            const collection = new ItemDulpColl();
 
             collection.add(item[propertyName].items, BBCollectionOps.addOptions);
-            collection.add(collisionItem[propertyName].items, BBCollectionOps.addOptions);
+            collection.add(collisionItemJS[propertyName].items, BBCollectionOps.addOptions);
 
             item[propertyName] = {
                 count: collection.size(),
@@ -94,8 +87,14 @@ function processRawItem(item: ItemObj) {
         }
     }
 
-    if (item.source_id > 0) friendItemsColl.add(item);
-    else groupItemsColl.add(item);
+    if (item.source_id > 0) {
+        friendItemsColl.remove(collisionItem);
+        friendItemsColl.add(item);
+    }
+    else {
+        groupItemsColl.remove(collisionItem);
+        groupItemsColl.add(item);
+    }
 }
 
 /**
@@ -106,7 +105,7 @@ function processRawItem(item: ItemObj) {
  */
 function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
     return items.filter( item => {
-        let wallPhotos: AttachmentPhoto[];
+        let wallPhotos: media.Photo[];
 
         if (item.type === "wall_photo") {
             const wallPhotoItem = item as WallPhotoItem;
@@ -118,7 +117,7 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
                 source_id: item.source_id
             };
 
-            function takePhotos(attachedPhotos: AttachmentPhoto[], post: PostItem): AttachmentPhoto[] {
+            function takePhotos(attachedPhotos: media.Photo[], post: PostItem): media.Photo[] {
                 if (post.attachments) {
                     const curPhotos = _
                         .where(post.attachments, { type: "photo" })

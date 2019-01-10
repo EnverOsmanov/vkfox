@@ -32,6 +32,9 @@
     @include text-truncate();
     max-width: 100%;
 }
+.item__text_link {
+    cursor: pointer;
+}
 .item__picture {
     display: flex;
     vertical-align: top;

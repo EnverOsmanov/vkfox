@@ -6,13 +6,9 @@ export interface AttachmentContainer {
     type: "photo" | "audio" | "video" | "wall" | "note" | "doc" | "poll" | "graffiti"
 }
 
-export interface AttachmentPhoto extends Attachment, media.Photo {}
-
-
-
 export interface AttachmentPhotoContainer extends AttachmentContainer {
     type : "photo"
-    photo: AttachmentPhoto
+    photo: media.Photo
 }
 
 export interface AttachmentAudio extends Attachment {
@@ -36,15 +32,18 @@ export interface AttachmentNoteContainer extends AttachmentContainer {
     note: AttachmentNote
 }
 
-type AttachmentDocType =
-    1 | // text document
-    2 | // archive
-    3 | // gif
-    4 | // image
-    5 | // audio
-    6 | // video
-    7 | // e-book
-    8   // unknown
+
+
+declare const enum AttachmentDocType {
+    Text = 1, // text document
+    Archive, // archive
+    Gif, // gif
+    Image, // image
+    Audio, // audio
+    Video, // video
+    Ebook, // e-book
+    Unknown   // unknown
+}
 
 
 export interface AttachmentDoc extends Attachment {
@@ -74,7 +73,13 @@ export interface AttachmentPollContainer extends AttachmentContainer {
 }
 
 export interface AttachmentLink extends Attachment {
-    url: string
+    type: "link"
+    url         : string
+    title       : string
+    description : string
+    photo       ?: media.Photo
+    button      ?: LinkButton
+    caption     ?: string
 }
 
 export interface AttachmentAudioContainer extends AttachmentContainer {
@@ -151,4 +156,12 @@ export interface AttachmentGift extends Attachment {
     thumb_48    : string
     thumb_96    : string
     thumb_256   : string
+}
+
+export interface LinkButton {
+    title: string
+    action: {
+        type: string
+        url: string
+    }
 }

@@ -23,7 +23,7 @@ class VKfoxAudio {
 
 
     static async readTextInVoice(text: string, sex: Sex) {
-        const speaker = sex === 1
+        const speaker = sex === Sex.Female
             ? "oksana"
             : "zahar";
 

@@ -1,7 +1,7 @@
 import * as React from "react"
 import Mediator from "../../../mediator/mediator.pu"
 
-import {PuChatUserProfile, PuChatUserProfilesColl} from "../../../common/chat/collections/ProfilesColl"
+import {PuChatUserProfile, PuChatUserProfilesColl} from "../../../back/chat/collections/ProfilesColl"
 import {Collection} from "backbone"
 import {Msg} from "../../../mediator/messages";
 import I18N from "../../../common/i18n/i18n";

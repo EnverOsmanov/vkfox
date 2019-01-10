@@ -4,7 +4,7 @@
     "module"        : "commonjs",
     "sourceMap"     : true,
     "jsx"           : "react",
-    "lib"       : ["ES2017", "dom"],
+    "lib"       : ["es2017", "dom"],
     "typeRoots" : ["node_modules/web-ext-types", "node_modules/@types"],
     "resolveJsonModule": true
   }

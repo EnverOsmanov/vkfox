@@ -10,7 +10,7 @@ class ItemAddOptions implements AddOptions {
 }
 
 
-export class Item extends Model {
+export class FeedItem extends Model {
 
     get date(): number {
         return super.get("date")
@@ -39,13 +39,13 @@ export class Item extends Model {
 
 }
 
-export class ItemColl extends Collection<Item> {
-    model = Item;
+export class ItemColl extends Collection<FeedItem> {
+    model = FeedItem;
 
-    constructor(models?: Item[] | Object[], options?: any) {
+    constructor(models?: FeedItem[] | Object[], options?: any) {
         super(models, options);
 
-        this.comparator = (model: Item) => -model.date
+        this.comparator = (model: FeedItem) => -model.date
     }
 
     static addOptions = new ItemAddOptions()

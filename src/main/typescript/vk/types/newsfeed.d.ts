@@ -1,7 +1,7 @@
 import {ProfileI, UserProfile} from "../../vkfox/back/users/types";
 import {GenericRS} from "./index";
 import {WithUserLikes, ZeroOne} from "./feedback";
-import {AttachmentContainer, AttachmentPhoto} from "./attachment";
+import {AttachmentContainer} from "./attachment";
 
 
 export interface ItemObj {
@@ -31,13 +31,13 @@ export interface PhotoItem extends ItemObj {
 }
 
 export interface PhotoTagItem extends ItemObj {
-    photo_tags: GenericRS<AttachmentPhoto>
+    photo_tags: GenericRS<media.Photo>
 }
 
 export interface WallPhotoItem extends ItemObj {
     // type = "wall_photo"
 
-    photos: GenericRS<AttachmentPhoto>
+    photos: GenericRS<media.Photo>
 }
 
 export interface FriendItem extends ItemObj {
@@ -91,6 +91,7 @@ interface WidgetSource extends PostSource {
 
 interface ApiSource extends PostSource {
     type: "api"
+    platform: "ipad"
 }
 
 interface VkSource extends PostSource {

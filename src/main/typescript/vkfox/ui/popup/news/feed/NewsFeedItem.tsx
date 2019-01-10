@@ -13,7 +13,7 @@ import {UserProfile} from "../../../../back/users/types";
 import {
     AudioItem,
     FriendItem,
-    ItemObj,
+    ItemObj, media,
     PhotoTagItem,
     PostItem,
     UserId,
@@ -26,7 +26,7 @@ import ReplyMessage from "../../components/reply/ReplyMessage";
 import {SendMessageI} from "../../../../common/feedbacks/types";
 import BrowserPu from "../../../../browser/browser.pu";
 import ItemHero from "../../components/item/ItemHero";
-import {AttachmentContainer, AttachmentPhoto} from "../../../../../vk/types/attachment";
+import {AttachmentContainer} from "../../../../../vk/types/attachment";
 
 
 interface NewsFeedItemProps {
@@ -144,8 +144,8 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
             : null
     };
 
-    photoAttachmentElms = (photos: AttachmentPhoto[]) => {
-        const singleAttachment = (photo: AttachmentPhoto, i: number) => (
+    photoAttachmentElms = (photos: media.Photo[]) => {
+        const singleAttachment = (photo: media.Photo, i: number) => (
             <AttachmentC
                 key={i}
                 type="photo"

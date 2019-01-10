@@ -9,7 +9,7 @@ import I18N from "../../common/i18n/i18n"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import Notifications from "../notifications/notifications.bg"
 import {BBCollectionOps, Profiles} from "../../common/profiles-collection/profiles-collection.bg";
-import {Item, ItemColl} from "../../common/feedbacks/collections/ItemColl";
+import {FeedItem, ItemColl} from "../../common/feedbacks/collections/ItemColl";
 import {NotifType} from "../notifications/VKNotification";
 import {FeedbacksCollection} from "../../common/feedbacks/collections/FeedBacksCollection";
 import {Msg} from "../../mediator/messages";
@@ -122,9 +122,8 @@ function onChangeUser(data: AuthModelI): void {
     profilesColl.reset();
 
     persistentModel = new PersistentModel({}, {
-        name: ['feedbacks', 'background', userId].join(':')
+        name: `feedbacks:background:${userId}`
     });
-    persistentModel.on("change:latestFeedbackId", tryNotification);
 }
 
 export default function init() {
@@ -169,6 +168,8 @@ function onFeedbackUnsubcribe(params: FeedbackUnsubOptions): void {
     function handleResponse(response) {
         if (response) {
             itemsColl.remove(itemsColl.get(unsubscribeFromId));
+            updateLatestFeedbackId(true);
+            publishData();
         }
     }
 
@@ -183,7 +184,7 @@ function onFeedbackUnsubcribe(params: FeedbackUnsubOptions): void {
  * Updates "latestFeedbackId" with current last item(parentId+feedbackId)
  * Should be called on every change
  */
-function updateLatestFeedbackId() {
+function updateLatestFeedbackId(silent: boolean = false) {
     let identifier;
     const firstModel = itemsColl.first();
 
@@ -193,7 +194,12 @@ function updateLatestFeedbackId() {
         if (firstModel.has('feedbacks')) {
             identifier += ':' + firstModel.feedbacks.last().id;
         }
-        persistentModel.set('latestFeedbackId', identifier);
+        const oldLatestFeedbackId = persistentModel.get("latestFeedbackId");
+        persistentModel.set("latestFeedbackId", identifier);
+
+        if (oldLatestFeedbackId && oldLatestFeedbackId != identifier && !silent) {
+            tryNotification()
+        }
     }
 }
 
@@ -261,7 +267,7 @@ function generateFeedbackItemID(type: string, parent: CommentsNewsItemPar): stri
 }
 
 
-function createItemModelIfNotExistComm(parentType: string, parent: CommentsNewsItemPar, date: number): Item {
+function createItemModelIfNotExistComm(parentType: string, parent: CommentsNewsItemPar, date: number): FeedItem {
     const itemID = generateFeedbackItemID(parentType, parent);
     const itemModel = itemsColl.get(itemID);
 
@@ -279,16 +285,16 @@ function createItemModelIfNotExistComm(parentType: string, parent: CommentsNewsI
  *
  * @return {Object}
  */
-function createItemModel(type: string, parent: ParentObj, id: string, date: number): Item {
+function createItemModel(type: string, parent: ParentObj, id: string, date: number): FeedItem {
     // converted to `FeedbackObj` when sending to front end
     const feedbacks: any = new FeedbacksCollection();
 
     const item: FeedbackItemObj = {parent, type, id, feedbacks, date};
 
-    return new Item(item);
+    return new FeedItem(item);
 }
 
-function createItemModelWithNewId(type: string, parent: PostWithOwnerId | FWithFromIdAndOwnerId, date: number): Item {
+function createItemModelWithNewId(type: string, parent: PostWithOwnerId | FWithFromIdAndOwnerId, date: number): FeedItem {
     const itemID = generateItemID(type, parent);
 
     return createItemModel(type, parent, itemID, date)
@@ -351,7 +357,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
 }
 
 
-function createItemModelIfNotExistFeed(parentType: string, p: ParentWithOwnerId, date: number): Item {
+function createItemModelIfNotExistFeed(parentType: string, p: ParentWithOwnerId, date: number): FeedItem {
     const itemID = generateItemID(parentType, p);
     const itemModel = itemsColl.get(itemID);
 
@@ -379,7 +385,7 @@ function createFeedbackWithFromId(type: string, date: number, f: FeedbackComment
     };
 }
 
-function createItemWithOwnerId(type: string, date: number, f: PorFPostItem | WithFromId): Item {
+function createItemWithOwnerId(type: string, date: number, f: PorFPostItem | WithFromId): FeedItem {
     const fWithOwnerId: PostWithOwnerId | FWithFromIdAndOwnerId = {
         ...f,
         owner_id: f.from_id
@@ -512,7 +518,7 @@ function fetchFeedbacks(): Promise<void> {
         const { notifications } = response;
         let newsAboutComments: CommentsNews;
 
-        if (response.comments === false) console.debug("CommentsNews", response.comments);
+        if (response.comments === false) console.debug("CommentsNews", response);
         else {
             newsAboutComments = <CommentsNews>response.comments
         }
@@ -558,7 +564,6 @@ function tryNotification(): void {
 
     // don't notify on first run,
     // when there is no previous value
-    if (!this._previousAttributes.hasOwnProperty('latestFeedbackId')) return;
 
     if (itemModel.has('feedbacks')) {
         // notification has parent, e.g. comment to post, like to video etc
@@ -652,7 +657,7 @@ function tryNotification(): void {
 function initialize(readyPromise: Promise<void>): void {
 
     readyPromise.then( () => {
-        itemsColl.on('add change remove', _.debounce( () => {
+        itemsColl.on('add change', _.debounce( () => {
             itemsColl.sort();
             updateLatestFeedbackId();
             publishData();

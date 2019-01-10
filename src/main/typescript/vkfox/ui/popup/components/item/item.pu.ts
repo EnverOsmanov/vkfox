@@ -1,7 +1,8 @@
 "use strict";
 
-import {AttachmentDoc, AttachmentGift, AttachmentPhoto, AttachmentSticker} from "../../../../../vk/types/attachment";
+import {AttachmentDoc, AttachmentGift, AttachmentSticker} from "../../../../../vk/types/attachment";
 import {ProfileI} from "../../../../back/users/types";
+import {media} from "../../../../../vk/types/newsfeed";
 
 
 const VIDEO_VIEW_URL = "/pages/video.html";
@@ -60,7 +61,7 @@ export function videoViewPathByUrl(url: string): string {
     return `${VIDEO_VIEW_URL}#${btoa(url)}`;
 }
 
-export function imageViewPath(photo: AttachmentPhoto): string | null {
+export function imageViewPath(photo: media.Photo): string | null {
 
     if (photo) {
         for (const i in photoSizes) {
@@ -107,7 +108,7 @@ export function stickerImageUrl(sticker: AttachmentSticker): string {
         : ""
 }
 
-export function buildSrcSet(photo: AttachmentPhoto): string {
+export function buildSrcSet(photo: media.Photo): string {
     const arr: string[] = [];
 
     if (photo.photo_75) arr.push(`${photo.photo_75} 75w`);

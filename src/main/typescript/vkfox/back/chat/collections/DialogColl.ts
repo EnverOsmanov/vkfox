@@ -1,5 +1,5 @@
 import {Collection, Model} from "backbone";
-import {BBCollectionOps} from "../../profiles-collection/profiles-collection.bg";
+import {BBCollectionOps} from "../../../common/profiles-collection/profiles-collection.bg";
 import {Message} from "../../../../vk/types";
 
 

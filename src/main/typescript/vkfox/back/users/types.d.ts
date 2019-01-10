@@ -2,7 +2,7 @@ import {NameSurname, OnlyName } from "../../common/chat/types";
 
 
 type IsOnline = 0 | 1;
-export type Sex = 0 | 1 | 2
+export const enum Sex { Male, Female, Unknown }
 
 export interface ProfileI {
     id      : number
