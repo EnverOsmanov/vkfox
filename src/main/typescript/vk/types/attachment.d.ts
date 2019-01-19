@@ -2,23 +2,38 @@ import {AttachPreviewI, media, PostItem} from "./newsfeed";
 
 export interface Attachment {}
 
+export type AttachmentT =
+    "photo" |
+    "audio" |
+    "video" |
+    "wall" |
+    "note" |
+    "doc" |
+    "poll" |
+    "graffiti" |
+    "podcast" |
+    "link" |
+    "posted_photo" |
+    "sticker" |
+    "gift"
+
 export interface AttachmentContainer {
-    type: "photo" | "audio" | "video" | "wall" | "note" | "doc" | "poll" | "graffiti"
+    type: AttachmentT
 }
 
 export interface AttachmentPhotoContainer extends AttachmentContainer {
     type : "photo"
     photo: media.Photo
 }
-
+/*
 export interface AttachmentAudio extends Attachment {
     artist  : string
     title   : string
-}
+}*/
 
 export interface AttachmentAudioContainer extends AttachmentContainer {
     type : "audio"
-    audio: AttachmentAudio
+    audio: media.Audio
 }
 
 export interface AttachmentNote extends Attachment {
@@ -64,7 +79,14 @@ export interface AttachmentDocContainer extends AttachmentContainer {
 }
 
 export interface AttachmentPoll extends Attachment {
-    question: string
+    anonymouse  : number
+    answer_id   : number
+    answers     : PollAnswer[]
+    created     : number
+    id          : number
+    owner_id    : number
+    question    : string
+    votes       : number
 }
 
 export interface AttachmentPollContainer extends AttachmentContainer {
@@ -98,7 +120,7 @@ export interface AttachmentGraffitiContainer extends AttachmentContainer {
 }
 
 
-export interface AttachmentVideo extends Attachment {
+/*export interface AttachmentVideo extends Attachment {
     owner_id    : number
     id          : number
     access_key  : string
@@ -106,11 +128,11 @@ export interface AttachmentVideo extends Attachment {
     photo_320   : string
     title       : string
     duration    : number
-}
+}*/
 
 export interface AttachmentVideoContainer extends AttachmentContainer {
     type: "video"
-    video: AttachmentVideo
+    video: media.Video
 }
 
 export interface AttachmentWallContainer extends AttachmentContainer {
@@ -164,4 +186,11 @@ export interface LinkButton {
         type: string
         url: string
     }
+}
+
+export interface PollAnswer {
+    id      : number
+    rate    : number
+    text    : string
+    votes   : number
 }

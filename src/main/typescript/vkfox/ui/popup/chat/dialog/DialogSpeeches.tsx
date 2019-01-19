@@ -1,6 +1,6 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import {addVKBase, profile2Name} from "../../components/filters/filters.pu";
+import {buildVkLink, profile2Name} from "../../components/filters/filters.pu";
 import {Speech} from "../types";
 import {GroupProfile, UserProfile} from "../../../../back/users/types";
 import {Message, MessageWithAction} from "../../../../../vk/types";
@@ -93,7 +93,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                         <div className="item__title">
                         <div
                             style={cssProps}
-                            onClick={_ => BrowserPu.createTab(addVKBase(anchor))}
+                            onClick={_ => BrowserPu.createTab(buildVkLink(anchor))}
                             className="item__img media-object float-left"
                         />
 

@@ -6,7 +6,7 @@ import ItemActionLike from "../../components/itemActions/ItemActionLike";
 import ItemActionComment from "../../components/itemActions/ItemActionComment";
 import ItemAction from "../../components/itemActions/ItemAction";
 import ItemActions from "../../components/itemActions/ItemActions";
-import {addVKBase, profile2Name} from "../../components/filters/filters.pu";
+import {buildVkLink, profile2Name} from "../../components/filters/filters.pu";
 import AttachmentC from "../../components/attachment/AttachmentC";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {UserProfile} from "../../../../back/users/types";
@@ -131,7 +131,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                         key={i}
                         type={attachment.type}
                         data={attachment[attachment.type]}
-                        showFullWidth={counted[attachment.type] === 1}
+                        showFullWidth={i == 0 && counted[attachment.type] % 2 != 0}
                     />
                 );
             }
@@ -173,7 +173,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 <span key={friend.user_id}>
                     <a
                         className="data-anchor"
-                        onClick={_ => BrowserPu.createTab(addVKBase(`/id${friend.user_id}`))}>
+                        onClick={_ => BrowserPu.createTab(buildVkLink(`/id${friend.user_id}`))}>
                         {profile2Name(profile)}
 
                         {comma}
@@ -187,16 +187,17 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
 
     static repostsElm(itemPost: PostItem): JSX.Element[] {
-        function repostElm(originP: PostItem, i: number): JSX.Element {
-            if (originP.text || originP.attachments) {
+        function repostElm(repost: PostItem, i: number): JSX.Element {
+            if (repost.text || repost.attachments) {
                 return (
-                    <div key={i}>
+                    <div key={i} className="item__attachment__wide">
                         <i className="news__post_repost fa fa-bullhorn"/>
+                        <div className="item__post">
+                            <RectifyPu text={repost.text} hasEmoji={false}/>
 
-                        <RectifyPu text={originP.text} hasEmoji={false}/>
-
-                        {NewsFeedItem.postAttachmentElms(originP)}
-                        {NewsFeedItem.postSourceElm(originP)}
+                            {NewsFeedItem.postAttachmentElms(repost)}
+                            {NewsFeedItem.postSourceElm(repost)}
+                        </div>
                     </div>
                 )
             }
@@ -211,7 +212,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     postElm = (itemPost: PostItem) => {
 
         return (
-            <div>
+            <div className="item__post">
                 <RectifyPu text={itemPost.text} hasEmoji={false}/>
 
                 {NewsFeedItem.repostsElm(itemPost)}

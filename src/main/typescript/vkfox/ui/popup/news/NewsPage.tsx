@@ -58,7 +58,7 @@ class NewsPage extends React.Component<ChatProps, SettingsState> {
 
 
     render() {
-        const match = this.props.match;
+        const {match} = this.props;
 
         return (
             <div className="news">

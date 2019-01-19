@@ -23,6 +23,8 @@
 }
 .chat__messages_out {
     text-align: right;
+    float: right;
+    width: 96%;
 
     .chat__fwd {
         margin-left: 5px;
@@ -30,6 +32,9 @@
 }
 
 .chat__messages_in {
+    float: left;
+    width: 96%;
+
     .chat__fwd {
         margin-left: -5p
     }

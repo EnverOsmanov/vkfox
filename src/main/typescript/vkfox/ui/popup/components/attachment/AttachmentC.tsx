@@ -1,9 +1,10 @@
 import * as React from "react"
-import {attachmentDiv} from "./AttachmentHelper";
-import {Attachment} from "../../../../../vk/types/attachment";
+import attachmentDiv from "./AttachmentHelper";
+import {Attachment, AttachmentT} from "../../../../../vk/types/attachment";
+
 
 interface AttachmentProps<A extends Attachment> {
-    type: string
+    type: AttachmentT
     data: A
 
     showFullWidth: boolean

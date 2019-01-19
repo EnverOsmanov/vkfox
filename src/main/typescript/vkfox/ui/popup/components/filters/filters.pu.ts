@@ -47,7 +47,7 @@ export function timeAgo(timestamp: number): string {
         return moment(timestamp).fromNow();
 }
 
-export function addVKBase(path: string): string {
+export function buildVkLink(path: string): string {
     if (path.indexOf(Config.VK_BASE) === -1) {
         if (path.charAt(0) === '/') path = path.substr(1);
 

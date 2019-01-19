@@ -17,15 +17,13 @@ import {duration} from "../filters/filters.pu";
 import {VideoGetUserVideosResponse} from "../../../../../vk/types";
 import {
     Attachment,
-    AttachmentAudio,
     AttachmentDoc,
     AttachmentDocType,
     AttachmentGift,
     AttachmentLink,
     AttachmentNote,
     AttachmentPoll,
-    AttachmentSticker,
-    AttachmentVideo,
+    AttachmentSticker, AttachmentT,
     AttachmentWall
 } from "../../../../../vk/types/attachment";
 import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
@@ -40,7 +38,7 @@ function imageProperties(src: string): CSSProperties {
     }
 }
 
-function onVideoClick(dataVideo: AttachmentVideo): Promise<void> {
+function onVideoClick(dataVideo: media.Video): Promise<void> {
     const videos = `${dataVideo.owner_id}_${dataVideo.id}_${dataVideo.access_key}`;
 
     const params = {videos};
@@ -64,16 +62,15 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
                 .src;
 
             return (
-                <div className={`item__attachment item__attachment_type_photo`}>
-                    <div
-                        className={`item__picture`}
-                        style={imageProperties(previewUrl)}
-                        onClick={_ => BrowserPu.createTab(imageViewPathByUrl(dataDoc.url))}>
-
-                        <div className="item__video-desc">
-                            <div className="item__video-title">{"GIF"}</div>
-                        </div>
-
+                <div className="item__attachment item__attachment_type_photo item__attachment__wide">
+                    <img
+                        alt=""
+                        className="item__picture"
+                        src={previewUrl}
+                        onClick={_ => BrowserPu.createTab(imageViewPathByUrl(dataDoc.url))}
+                    />
+                    <div className="item__video-desc">
+                        <div className="item__video-duration">{"GIF"}</div>
                     </div>
                 </div>
             )
@@ -107,41 +104,56 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
 }
 
 function imageDiv(type: string, dataGraffiti: media.Photo, showFullWidth: boolean): JSX.Element {
+    const image = (
+        <img
+            alt=""
+            className="item__picture"
+            srcSet={buildSrcSet(dataGraffiti)}
+            src={dataGraffiti.photo_604}
+            onClick={_ => BrowserPu.createTab(imageViewPath(dataGraffiti))}
+        />
+    );
 
-    if (showFullWidth) {
-        return (
-            <img
-                alt=""
-                className="item__hero-picture"
-                srcSet={buildSrcSet(dataGraffiti)}
-                src={dataGraffiti.photo_604}
-                onClick={_ => BrowserPu.createTab(imageViewPath(dataGraffiti))}
-            />
-        )
-    }
-    else {
-        return (
-            <div className={`item__attachment item__attachment_type_${type}`}>
-                <img
-                    alt=""
-                    className="item__picture"
-                    srcSet={buildSrcSet(dataGraffiti)}
-                    src={dataGraffiti.photo_604}
-                    onClick={_ => BrowserPu.createTab(imageViewPath(dataGraffiti))}
-                />
+
+    return showFullWidth
+        ? (
+            <div className="item__attachment__wide">
+                {image}
             </div>
-        );
-    }
+        )
+        : image
 }
 
-export function attachmentDiv(type: string, data: Attachment, showFullWidth: boolean): JSX.Element | null {
+function videoDiv(dataVideo: media.Video, showFullWidth: boolean): JSX.Element {
+    const wideClassName = showFullWidth
+        ? "item__attachment__wide"
+        : "";
+
+    return (
+        <div className={`item__attachment item__attachment_type_video ${wideClassName}`}>
+            <img
+                alt=""
+                className="item__video__poster"
+                src={dataVideo.photo_320}
+                onClick={() => onVideoClick(dataVideo)}
+            />
+            <div className="item__video-desc">
+                <div className="item__video-title">{dataVideo.title}</div>
+                <div className="item__video-duration">{duration(dataVideo.duration)}</div>
+            </div>
+        </div>
+    );
+}
+
+export default function attachmentDiv(type: AttachmentT, data: Attachment, showFullWidth: boolean): JSX.Element | null {
     switch (type) {
         /*            case "app":
                         return <img src={data as Att.src}/>;*/
+        case "podcast":
         case "audio":
-            const dataAudio = data as AttachmentAudio;
+            const dataAudio = data as media.Audio | media.Podcast;
             return (
-                <div>
+                <div className="item__attachment__wide">
                     <i className="fa fa-music"/>
                     {dataAudio.artist} - {dataAudio.title}
                 </div>
@@ -161,14 +173,22 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
 
         case "poll":
             const dataPoll = data as AttachmentPoll;
+
+            const answers = dataPoll.answers.map( answer => (
+                <li key={answer.id} className="poll__answer">
+                    {answer.text}
+                </li>
+            ));
+
             return (
-                <div>
+                <ul className="poll">
                     <i className="fa fa-list-alt"/>
                     {dataPoll.question}
-                </div>
+                    {answers}
+                </ul>
             );
 
-        case "link":
+        case "link": {
             const dataLink = data as AttachmentLink;
 
             const image = dataLink.button ?
@@ -181,7 +201,7 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
                 : null;
 
             return (
-                <div>
+                <div className="item__attachment__wide">
                     {image}
                     <a
                         className="item__text_link"
@@ -191,7 +211,7 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
                     </a>
                 </div>
             );
-
+        }
 
         case "graffiti":
         case "photo":
@@ -199,23 +219,8 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
             return imageDiv(type, data as media.Photo, showFullWidth);
 
         case "video":
-            const dataVideo = data as AttachmentVideo;
-            return (
-                <div className={`item__attachment item__attachment_type_${type}`}>
-                    <div
-                        className="item__video"
-                        style={imageProperties(dataVideo.photo_320)}
-                        onClick={() => onVideoClick(dataVideo)}
-                        >
+            return videoDiv(data as media.Video, showFullWidth);
 
-                        <div className="item__video-desc">
-                            <div className="item__video-title">{dataVideo.title}</div>
-                            <div className="item__video-duration">{duration(dataVideo.duration)}</div>
-                        </div>
-
-                    </div>
-                </div>
-            );
         case "sticker":
             const sticker = data as AttachmentSticker;
             return (
@@ -242,7 +247,7 @@ export function attachmentDiv(type: string, data: Attachment, showFullWidth: boo
             return (
                 <img
                     alt=""
-                    className="item__hero-picture"
+                    className="item__picture"
                     srcSet={buildSrcSetGift(gift)}
                     src={gift.thumb_256}
                     onClick={_ => BrowserPu.createTab(giftViewPath(gift))}

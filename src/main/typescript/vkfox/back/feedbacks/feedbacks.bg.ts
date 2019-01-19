@@ -516,27 +516,25 @@ function fetchFeedbacks(): Promise<void> {
 
     function feedbackHandler(response: FeedbackRS) {
         const { notifications } = response;
-        let newsAboutComments: CommentsNews;
-
-        if (response.comments === false) console.debug("CommentsNews", response);
-        else {
-            newsAboutComments = <CommentsNews>response.comments
-        }
 
         autoUpdateNotificationsParams.start_time = autoUpdateCommentsParams.start_time = response.time;
 
-        if (
-            (notifications.items && notifications.items.length) ||
-            (newsAboutComments.items && newsAboutComments.items.length)
-        ) {
-            profilesColl.add(newsAboutComments.profiles, BBCollectionOps.addOptions);
-            profilesColl.add(newsAboutComments.groups, BBCollectionOps.addOptions);
-            profilesColl.add(notifications.profiles, BBCollectionOps.addOptions);
-            profilesColl.add(notifications.groups, BBCollectionOps.addOptions);
+        if (response.comments) {
+            const newsAboutComments = <CommentsNews>response.comments;
 
-            notifications.items.forEach(addRawNotificationsItemV2);
-            newsAboutComments.items.forEach(addRawCommentsItem);
-            itemsColl.sort();
+            if (
+                (notifications.items && notifications.items.length) ||
+                (newsAboutComments.items && newsAboutComments.items.length)
+            ) {
+                profilesColl.add(newsAboutComments.profiles, BBCollectionOps.addOptions);
+                profilesColl.add(newsAboutComments.groups, BBCollectionOps.addOptions);
+                profilesColl.add(notifications.profiles, BBCollectionOps.addOptions);
+                profilesColl.add(notifications.groups, BBCollectionOps.addOptions);
+
+                notifications.items.forEach(addRawNotificationsItemV2);
+                newsAboutComments.items.forEach(addRawCommentsItem);
+                itemsColl.sort();
+            }
         }
     }
 

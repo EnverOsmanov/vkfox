@@ -3,7 +3,7 @@ import {Redirect, withRouter} from "react-router"
 import * as React from "react"
 import ChatPage from "../chat/ChatPage";
 import BuddiesPage from "../buddy/Buddies";
-import {addVKBase} from "../components/filters/filters.pu";
+import {buildVkLink} from "../components/filters/filters.pu";
 import SettingsPage from "../settings/SettingsPage";
 import I18N from "../../../common/i18n/i18n";
 import PersistentModel from "../../../common/persistent-model/persistent-model";
@@ -54,7 +54,7 @@ class MainNavigation extends React.Component {
                         {this.tabLinks}
 
                         <div className="navigation__actions">
-                            <div onClick={_ => BrowserPu.createTab(addVKBase("/vkfoxy"))}
+                            <div onClick={_ => BrowserPu.createTab(buildVkLink("/vkfoxy"))}
                                   className="navigation__action navigation__help">
                                 <i className="fa fa-bug"/>
                             </div>

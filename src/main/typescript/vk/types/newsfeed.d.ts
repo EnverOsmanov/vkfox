@@ -151,8 +151,52 @@ declare namespace media {
         album_id    : number
         access_key  : string
     }
+
+    interface Audio {
+        artist: string
+        date: number
+        duration: number
+        genre_id: number
+        id: number
+        is_hq: boolean
+        owner_id: number
+        title: string
+        url: string
+    }
+
+    interface Podcast {
+        artist: string
+        date: number
+        duration: number
+        id: number
+        is_explicit: boolean
+        is_hq: boolean
+        lyrics_id: number
+        no_search: number
+        owner_id: number
+        podcast_info: PodcastInfo
+        title: string
+        url: string
+    }
 }
 
+interface PodcastInfo {
+    cover       : Cover
+    description : string
+    is_favorite : boolean
+    plays       : number
+}
+
+interface Cover {
+    sizes: CoverType[]
+}
+
+interface CoverType {
+    height  : number
+    type    : string
+    url     : string
+    width   : number
+}
 
 
 

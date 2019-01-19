@@ -1,6 +1,6 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import {addVKBase, profile2Name} from "../filters/filters.pu";
+import {buildVkLink, profile2Name} from "../filters/filters.pu";
 import {GroupProfile, ProfileI, UserProfile} from "../../../../back/users/types";
 import BrowserPu from "../../../../browser/browser.pu";
 import {profilePhotoPath} from "./item.pu";
@@ -38,7 +38,7 @@ class ItemHero extends React.Component<ItemHeroProps> {
             return (
                 <div
                     style={cssProps}
-                    onClick={_ => BrowserPu.createTab(addVKBase(anchor))}
+                    onClick={_ => BrowserPu.createTab(buildVkLink(anchor))}
                     className={ownerClass}>
                 </div>
             );
