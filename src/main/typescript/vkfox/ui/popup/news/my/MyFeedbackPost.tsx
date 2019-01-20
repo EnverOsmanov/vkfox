@@ -63,7 +63,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
             <RectifyPu text={postParent.text} hasEmoji={false}/>;
 
         return (
-            <div>
+            <div className="item__post">
                 {text}
                 {MyFeedbackPost.repostsElm(postParent)}
                 {attachments}
