@@ -181,7 +181,7 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
             ));
 
             return (
-                <ul className="poll">
+                <ul className="poll item__attachment__wide">
                     <i className="fa fa-list-alt"/>
                     {dataPoll.question}
                     {answers}

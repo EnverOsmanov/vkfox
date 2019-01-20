@@ -26,6 +26,7 @@ import {
 import {DialogI} from "../../ui/popup/chat/types";
 import {html2text} from "../../rectify/helpers";
 
+
 const MAX_HISTORY_COUNT = 10;
 
 let persistentModel: PersistentModel,
@@ -433,7 +434,7 @@ function onLatestMessageIdChange() {
 
     // don't notify on first run,
     // when there is no previous value
-    if (!persistentModel.get("latestMessageId")) {
+    if (!this._previousAttributes.hasOwnProperty("latestMessageId")) {
         return;
     }
 

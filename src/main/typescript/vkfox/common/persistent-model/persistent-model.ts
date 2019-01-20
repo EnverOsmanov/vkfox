@@ -2,6 +2,7 @@
 import {Model} from "backbone";
 import {BBCollectionOps} from "../profiles-collection/profiles-collection.bg";
 
+
 export default class PersistentModel extends Model {
     _name: string;
 
@@ -13,7 +14,7 @@ export default class PersistentModel extends Model {
     * @param {Object} options
     * @param {String} options.name
     */
-    initialize(attributes, options) {
+    initialize(attributes, options: {name: string}) {
         this._name = options.name;
         const item = localStorage.getItem(this._name);
 

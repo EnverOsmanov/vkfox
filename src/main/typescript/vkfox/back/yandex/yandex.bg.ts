@@ -10,14 +10,14 @@ const storageModel = new PersistentModel({
     enabled: false,
     //show or not install dialog
     dialog: true
-}, {name: 'yandexSettings'});
+}, {name: "yandexSettings"});
 
 export default function init() {
-    Mediator.sub(Msg.YandexDialogClose, () => Browser.closeTabs('pages/install.html') );
+    Mediator.sub(Msg.YandexDialogClose, () => Browser.closeTabs("pages/install.html") );
 
     // Show install dialog only once, don't bother
-    if (storageModel.get('dialog')) {
-        storageModel.set('dialog', false);
+    if (storageModel.get("dialog")) {
+        storageModel.set("dialog", false);
         return Browser.createTab("/pages/install.html");
     }
     else {

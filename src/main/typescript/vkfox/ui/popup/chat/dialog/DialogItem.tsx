@@ -15,6 +15,7 @@ import ReplyMessage from "../../components/reply/ReplyMessage";
 import {Description} from "../../components/item/ItemDescription";
 import ItemHero from "../../components/item/ItemHero";
 
+
 interface DialogItemProps {
     dialog      : DialogI
     profilesColl: Collection<PuChatUserProfile>
@@ -30,9 +31,13 @@ interface DialogItemState {
 
 class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
-    public readonly state = DialogItemCpn.initialState;
+    public readonly state = DialogItemCpn.initialState(this.props);
 
     handleMessageChange = (message: string) => {
+        const {dialog} = this.props;
+
+        localStorage.setItem(`chatDraft:${dialog.id}`, message);
+
         this.setState(prevState => {
             return {
                 ...prevState,
@@ -152,8 +157,13 @@ class DialogItemCpn {
         visible: false
     };
 
-    static initialState = {
-        message : "",
-        reply   : DialogItemCpn.reply
+    static initialState(props: DialogItemProps) {
+        const {dialog} = props;
+        const message = localStorage.getItem(`chatDraft:${dialog.id}`);
+
+        return {
+            message,
+            reply   : DialogItemCpn.reply
+        }
     };
 }
