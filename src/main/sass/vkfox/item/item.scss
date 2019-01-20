@@ -171,6 +171,7 @@ $itemPadding: 0.75em;
   opacity: 1;
 }
 
+.item__photos-only,
 .item__post {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

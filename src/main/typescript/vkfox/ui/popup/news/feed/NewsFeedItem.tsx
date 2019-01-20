@@ -150,11 +150,15 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 key={i}
                 type="photo"
                 data={photo}
-                showFullWidth={photos.length === 1}
+                showFullWidth={i == 0 && photos.length % 2 != 0}
             />
         );
 
-        return photos.map(singleAttachment)
+        return (
+            <div className="item__photos-only">
+                {photos.map(singleAttachment)}
+            </div>
+        )
     };
 
     friendsElms = (friends: GenericRS<UserId>) => {
