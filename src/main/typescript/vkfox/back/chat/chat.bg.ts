@@ -132,10 +132,10 @@ function initialize(readyPromise: Promise<void>) {
 
 
     persistentModel = new PersistentModel({}, {
-        name: ["chat", "background", userId].join(':')
+        name: `chat:background:${userId}`
     });
 
-    persistentModel.on('change:latestMessageId', onLatestMessageIdChange);
+    persistentModel.on("change:latestMessageId", onLatestMessageIdChange);
 
 
     readyPromise.then( () => {

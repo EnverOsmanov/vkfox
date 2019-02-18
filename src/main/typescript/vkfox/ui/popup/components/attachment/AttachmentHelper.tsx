@@ -107,9 +107,9 @@ function imageDiv(type: string, dataGraffiti: media.Photo, showFullWidth: boolea
     const image = (
         <img
             alt=""
-            className="item__picture"
-            srcSet={buildSrcSet(dataGraffiti)}
-            src={dataGraffiti.photo_604}
+            className="item__picture lazyload"
+            data-srcset={buildSrcSet(dataGraffiti)}
+            data-src={dataGraffiti.photo_604}
             onClick={_ => BrowserPu.createTab(imageViewPath(dataGraffiti))}
         />
     );
@@ -133,8 +133,8 @@ function videoDiv(dataVideo: media.Video, showFullWidth: boolean): JSX.Element {
         <div className={`item__attachment item__attachment_type_video ${wideClassName}`}>
             <img
                 alt=""
-                className="item__video__poster"
-                src={dataVideo.photo_320}
+                className="item__video__poster lazyload"
+                data-src={dataVideo.photo_320}
                 onClick={() => onVideoClick(dataVideo)}
             />
             <div className="item__video-desc">

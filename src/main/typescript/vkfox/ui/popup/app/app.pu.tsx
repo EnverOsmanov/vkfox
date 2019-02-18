@@ -6,6 +6,7 @@ import anchor from "../components/anchor/anchor.pu"
 import MainNavigation from "../navigation/MainNavigation";
 
 import "../../../../../sass/vkfox/popup.scss"
+import "lazysizes"
 import "emoji/lib/emoji.css"
 import Resizer from "../components/resize/Resizer";
 
