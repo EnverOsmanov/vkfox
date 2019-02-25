@@ -161,10 +161,19 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     </small>
                     : null;
 
+
+                const onSpeechClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    const isButton = (event.target as HTMLElement).classList.contains("btn");
+
+                    if (!isButton && array.length === i + 1) {
+                        this.props.showReply();
+                    }
+                };
+
                 return (
                     <blockquote
                         key={i}
-                        onClick={_ => (array.length !== i + 1) || this.props.showReply()}
+                        onClick={onSpeechClick}
                         className="chat__item-content">
 
                         <div className={isOutClassName}>

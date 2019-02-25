@@ -159,7 +159,7 @@ class DialogItemCpn {
 
     static initialState(props: DialogItemProps) {
         const {dialog} = props;
-        const message = localStorage.getItem(`chatDraft:${dialog.id}`);
+        const message = localStorage.getItem(`chatDraft:${dialog.id}`) || "";
 
         return {
             message,
