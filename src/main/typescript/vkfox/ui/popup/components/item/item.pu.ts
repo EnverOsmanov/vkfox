@@ -100,7 +100,7 @@ export function stickerViewPath(photo: AttachmentSticker): string {
 }
 
 export function stickerImageUrl(sticker: AttachmentSticker): string {
-    const maybeImage = sticker.images_with_background
+    const maybeImage = sticker.images
         .sort((a, b) => b.height - a.height)[0];
 
     return maybeImage

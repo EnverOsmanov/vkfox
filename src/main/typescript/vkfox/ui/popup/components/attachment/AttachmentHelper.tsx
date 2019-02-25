@@ -224,12 +224,13 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
         case "sticker":
             const sticker = data as AttachmentSticker;
             return (
-                <div
+                <img
+                    alt=""
                     className="item__sticker"
-                    style={imageProperties(stickerImageUrl(sticker))}
-                    onClick={_ => BrowserPu.createTab(stickerViewPath(sticker))}>
+                    src={stickerImageUrl(sticker)}
+                    onClick={_ => BrowserPu.createTab(stickerViewPath(sticker))}
+                />
 
-                </div>
             );
         case "wall":
             const wall = data as AttachmentWall;
