@@ -20,7 +20,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
         function repostElm(originP: ParentObjPost, i: number): JSX.Element {
             if (originP.text || originP.attachments) {
                 return (
-                    <div key={i}>
+                    <div key={i} className="item__attachment__wide">
                         <i className="news__post_repost fa fa-bullhorn"/>
 
                         <RectifyPu text={originP.text} hasEmoji={false}/>
