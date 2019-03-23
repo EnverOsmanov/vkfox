@@ -4,7 +4,7 @@ import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import Users from "../users/users.bg"
 import I18N from "../../common/i18n/i18n"
-import Notifications from "../notifications/notifications.bg"
+import VKfoxNotifications from "../notifications/notifications.bg"
 import PersistentSet from "../persistent-set/persistent-set.bg"
 import {Msg} from "../../mediator/messages"
 import buddiesColl, {Buddy} from "./buddiesColl";
@@ -53,7 +53,7 @@ export default function initialize() {
                     I18N.getWithGender(rawText, profile.sex)
                 ].join(" ");
 
-                Notifications.notify({
+                VKfoxNotifications.notify({
                     title,
                     image  : model.photo,
                     type   : NotifType.BUDDIES,

@@ -6,7 +6,7 @@ import Users from "../users/users.bg"
 import Router from "../router/router.bg"
 import Browser from "../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
-import Notifications from "../notifications/notifications.bg"
+import VKfoxNotifications from "../notifications/notifications.bg"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import {Msg} from "../../mediator/messages"
 import {Dialog, DialogColl} from "./collections/DialogColl";
@@ -418,7 +418,7 @@ function onLatestMessageIdChange() {
 
         const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
 
-        Notifications.notify({
+        VKfoxNotifications.notify({
             title,
             type   : NotifType.CHAT,
             message: sanitizedMessage,

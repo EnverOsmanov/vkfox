@@ -1,26 +1,28 @@
 VKfox
 =========
-VKfox is a browser extension targeted for Firefox, <del>Google Chrome and Opera Chromium</del>.
+VKfox is a browser extension targeted for Firefox and Chromium-based browsers (Google Chrome, Opera, etc.).
 
-Available for download here: [Firefox](https://addons.mozilla.org/ru/firefox/addon/vkfoxx/)
+Available for download:
+ [Firefox](https://addons.mozilla.org/ru/firefox/addon/vkfoxx/),
+ [Google Chrome](https://chrome.google.com/webstore/detail/vkfoxx/jiopicfpmajlonjbckpdejadefhgmakc).
 
 Our group in VK - [vkfoxy](https://vk.com/vkfoxy).
 
 
 ## For developers
-1) First of all you need bundle source code to unpacked extension.
+1) First of all you need to bundle source code to unpacked extension.
 
-* If you want just bundle extension - run:
+* To bundle extension:
 
 ```
 npm install
 npm run bundleProd
 ````
-Now look to `target/firefox` directory.
+Look to `target/firefox` directory.
 
 <hr>
 
-* If you want to bundle in **developer** mode (with *hot-reload* etc...) use:
+* To bundle in **developer** mode (with *hot-reload* etc...):
 ```
 npm install
 npm run bundle
@@ -28,7 +30,7 @@ npm run bundle
 
 ---
 
-2) After that if you want to start unpacked extension in Firefox Developer Edition:
+2) To run unpacked extension in Firefox Developer Edition:
 ````
 npm run ffoxMac
 ````

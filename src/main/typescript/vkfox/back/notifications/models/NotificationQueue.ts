@@ -1,5 +1,5 @@
 import * as Backbone from "backbone";
-import Notifications from "../notifications.bg";
+import VKfoxNotifications from "../notifications.bg";
 import Mediator from "../../../mediator/mediator.bg";
 import {Msg} from "../../../mediator/messages";
 import {Message} from "../../../../vk/types";
@@ -13,15 +13,15 @@ export class NotificationQueue extends Backbone.Collection<VKNotification> {
         const self = this;
 
         self.on('add remove reset', () => {
-            Notifications.setBadge(
+            VKfoxNotifications.setBadge(
                 self.filter(model => !model.noBadge)
                     .length
             );
         })
             .on('add', (model: VKNotification) => {
-                if (!model.get('noPopup')) Notifications.createPopup(model.toJSON());
+                if (!model.get('noPopup')) VKfoxNotifications.createPopup(model.toJSON());
 
-                if (!model.get('noSound')) Notifications.playSound(model.toJSON());
+                if (!model.get('noSound')) VKfoxNotifications.playSound(model.toJSON());
             });
 
         Mediator.sub(Msg.AuthUser, () => self.reset());

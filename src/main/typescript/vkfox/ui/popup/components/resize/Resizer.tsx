@@ -1,10 +1,13 @@
 import * as React from "react"
 import PersistentModel from "../../../../common/persistent-model/persistent-model";
+import DimensionConf from "./DimensionConf";
 
 
-const DEFAULT_WIDTH   = 320,
-    DEFAULT_HEIGHT    = 480,
-    DEFAULT_FONT_SIZE = 12;
+const {
+    DEFAULT_WIDTH,
+    DEFAULT_HEIGHT,
+    DEFAULT_FONT_SIZE
+} = DimensionConf;
 
 
 const model = new PersistentModel({

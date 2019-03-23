@@ -11,7 +11,7 @@ import LongpollBg from "../longpoll/longpoll.bg";
 import InstallPageOrLogin from "../yandex/yandex.bg";
 import Auth from "../auth/auth.bg";
 import Users from "../users/users.bg";
-import Notifications from "../notifications/notifications.bg";
+import VKfoxNotifications from "../notifications/notifications.bg";
 
 
 Browser.init();
@@ -20,7 +20,7 @@ Buddies();
 Users.init();
 ChatBg();
 NewsfeedBg();
-Notifications.init();
+VKfoxNotifications.init();
 FeedbacksBg();
 RouterBg.init();
 LikesBg();

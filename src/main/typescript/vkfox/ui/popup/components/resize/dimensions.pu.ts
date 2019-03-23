@@ -1,12 +1,15 @@
 "use strict";
 import {CSSProperties} from "react";
+import DimensionConf from "./DimensionConf";
 // Inits width and height of the popup,
 // Runs first, therefore without any external dependencies
 
-const MIN_WIDTH         = 230,
-    MIN_HEIGHT        = 375,
-    DEFAULT_WIDTH   = 320,
-    DEFAULT_HEIGHT    = 480;
+const {
+    MIN_WIDTH,
+    MIN_HEIGHT,
+    DEFAULT_WIDTH,
+    DEFAULT_HEIGHT
+} = DimensionConf;
 
 export default function init() {
     let css: CSSProperties;

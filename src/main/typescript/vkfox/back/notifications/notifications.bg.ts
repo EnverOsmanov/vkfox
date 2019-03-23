@@ -1,11 +1,12 @@
 "use strict";
+import {browser, Notifications} from "webextension-polyfill-ts"
 import * as _ from "underscore"
 import Browser from "../browser/browser.bg"
 import {NotifType, VKNotification} from "./VKNotification";
 import {NotificationsSettingsI, VKNotificationI} from "../../common/notifications/types";
 import VKfoxAudio from "../../common/notifications/VKfoxAudio";
 import {html2text} from "../../rectify/helpers";
-import NotificationOptions = browser.notifications.NotificationOptions;
+import NotificationOptions = Notifications.CreateNotificationOptions;
 import {NotificationQueue} from "./models/NotificationQueue";
 import {NotificationsSettings} from "./models/NotificationSettings";
 import VKfoxSignal from "../../common/notifications/VKfoxSignal";
@@ -62,7 +63,7 @@ function isChat(noti: VKNotificationI): boolean {
     return noti.type === NotifType.CHAT
 }
 
-export default class Notifications {
+export default class VKfoxNotifications {
 
     static init() {
 
@@ -72,7 +73,7 @@ export default class Notifications {
                 ? notificationQueue.size()
                 : '';
 
-            Notifications.setBadge(count, true);
+            VKfoxNotifications.setBadge(count, true);
         });
     }
 

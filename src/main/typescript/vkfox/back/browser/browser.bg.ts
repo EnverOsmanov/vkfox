@@ -1,6 +1,7 @@
 "use strict";
+import {browser, Tabs} from "webextension-polyfill-ts"
 import ProxyMethods from '../../proxy-methods/proxy-methods.bg';
-import Tab = browser.tabs.Tab;
+type Tab = Tabs.Tab;
 import {ProxyNames} from "../../mediator/messages";
 
 const BADGE_COLOR: [number, number, number, number] = [231, 76, 60, 255],
@@ -47,7 +48,7 @@ class Browser {
     /**
      * @param {String|Number} text
      */
-    static setBadgeText(text: string | number): void {
+    static setBadgeText(text: string | number): Promise<void> {
         return browser.browserAction.setBadgeText({ text: String(text) })
     }
 
@@ -81,7 +82,7 @@ class Browser {
     static getOrCreate(url: string): Promise<Tab> {
         function findOrCreate(tabs: Tab[]): Promise<Tab> {
             const found = tabs.find( tab => tab.url.includes(url));
-            if (found && !found.selected) browser.tabs.update(found.id, {active: true});
+            if (found && !found.active) browser.tabs.update(found.id, {active: true});
 
             return found
                 ? Promise.resolve(found)

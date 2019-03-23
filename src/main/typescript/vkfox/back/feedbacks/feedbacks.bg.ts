@@ -7,7 +7,7 @@ import Router from "../router/router.bg"
 import Browser from "../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
 import PersistentModel from "../../common/persistent-model/persistent-model"
-import Notifications from "../notifications/notifications.bg"
+import VKfoxNotifications from "../notifications/notifications.bg"
 import {BBCollectionOps, Profiles} from "../../common/profiles-collection/profiles-collection.bg";
 import {FeedItem, ItemColl} from "../../common/feedbacks/collections/ItemColl";
 import {NotifType} from "../notifications/VKNotification";
@@ -631,7 +631,7 @@ function tryNotification(): void {
                 const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
 
                 if (!active) {
-                    Notifications.notify({
+                    VKfoxNotifications.notify({
                         type   : NotifType.NEWS,
                         title,
                         message,

@@ -1,8 +1,10 @@
 "use strict";
+import {browser, Runtime} from "webextension-polyfill-ts"
 import Dispatcher from './dispatcher';
+import Port = Runtime.Port;
 
 const mediator: { pub; sub; once; unsub } = Object.create(Dispatcher);
-const activePort: browser.runtime.Port = browser.runtime.connect();
+const activePort: Port = browser.runtime.connect();
 
 activePort.onMessage.addListener( (messageData) => {
     Dispatcher.pub.apply(Dispatcher, messageData);
