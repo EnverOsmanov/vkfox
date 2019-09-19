@@ -1,12 +1,12 @@
 "use strict";
 import {Sex} from "../../back/users/types";
 
-const DEFAULT_LANGUAGE = 'en';
-
-const i18n: any = {
-    ...require('./ru.js'),
-    ...require('./uk.js'),
-    ...require('./en.js')
+const DEFAULT_LANGUAGE = "en";
+const i18n = {
+    ru: require("../../../../json/i18n/ru.json"),
+    en: require("../../../../json/i18n/en.json"),
+    uk: require("../../../../json/i18n/uk.json"),
+    be: null
 };
 
 let language: string,

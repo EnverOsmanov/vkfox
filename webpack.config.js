@@ -93,6 +93,20 @@ module.exports = {
                 })
         },
         {
+            test: /.*(:?ru|en|uk)\.(json)$/,
+            type: 'javascript/auto', // required by Webpack 4
+            loader: require.resolve('messageformat-loader'),
+            options: {
+                biDiSupport: false,
+                convert: false,
+                disablePluralKeyChecks: false,
+                formatters: null,
+                intlSupport: false,
+                locale: ["en", "ru", "uk"],
+                strictNumberSign: false
+            }
+        },
+        {
             test: /\.(ttf|eot|woff|woff2|svg|otf|gif|png)$/,
             loader: "file-loader"
         }

@@ -7,7 +7,6 @@ const gulp                 = require("gulp"),
     rename                 = require("gulp-rename"),
     del                    = require("del"),
     notifier               = require("node-notifier"),
-    messageFormat          = require("gulp-messageformat"),
     webpack                = require("webpack");
 
 const Locales     = ["en", "ru", "uk"];
@@ -101,24 +100,13 @@ gulp.task("webpack", callback => {
     });
 });
 
-function i18n(locale) {
-  gulp.task(`i18n-${locale}`, () => {
-    return gulp.src(`${__srcDir}/vkfox/common/i18n/${locale}/*.json`)
-      .pipe(messageFormat({ locale }))
-      .pipe(gulp.dest(`${__srcDir}/vkfox/common/i18n`))
-  });
-}
-
-Locales.forEach(i18n);
-
 ////
 // Tasks for public use
 
 gulp.task("production",
         gulp.series(
             gulp.parallel("env:version", "env:firefox", "clean:firefox"),
-            gulp.parallel(["assets", "preprocess:manifest"]
-                .concat(Locales.map( locale => `i18n-${locale}`))),
+            gulp.parallel(["assets", "preprocess:manifest"]),
             gulp.parallel( "webpack", "copy:firefoxSrc", "copy:firefoxResources")
         )
 );
@@ -126,8 +114,7 @@ gulp.task("production",
 gulp.task("default",
         gulp.series(
             gulp.parallel("env:version", "env:firefox", "env:development", "clean:firefox"),
-            gulp.parallel(["assets", "preprocess:manifest"]
-                .concat(Locales.map( locale => `i18n-${locale}`))),
+            gulp.parallel(["assets", "preprocess:manifest"]),
             gulp.parallel("webpack", "copy:firefoxSrc", "copy:firefoxResources")
 
         )
