@@ -20,7 +20,7 @@ class BuddiesPage extends React.Component<object, BuddiesState> {
 
     public readonly state = BuddiesPageCpn.initialState;
 
-    componentWillMount() {
+    componentDidMount() {
         Mediator.sub(Msg.BuddiesData, this.onBuddiesData);
         Mediator.pub(Msg.BuddiesDataGet);
     }

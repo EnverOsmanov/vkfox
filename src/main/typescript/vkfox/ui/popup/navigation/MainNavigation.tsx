@@ -45,7 +45,6 @@ class MainNavigation extends React.Component {
     render() {
         const lastPath = MainNavigation.model.get('lastPath');
 
-
         return (
             <Router>
                 <div className="fullpage">
@@ -80,6 +79,18 @@ class MainNavigation extends React.Component {
 
 export default MainNavigation
 
+const notificationsPromise: Promise<VKNotificationI[]> = new Promise(resolve => Mediator.sub(Msg.NotificationsQueue, resolve));
+const authPromise: Promise<AuthState> = new Promise( resolve => {
+    Mediator.sub(Msg.AuthState, resolve)
+} );
+
+authPromise.then((state) => {
+    if (state !== AuthState.READY) {
+        Mediator.pub(Msg.AuthOauth);
+        Browser.closePopup();
+    }
+});
+
 const NotificationRouter = withRouter(props => {
 
         props.history.listen(location => {
@@ -89,10 +100,6 @@ const NotificationRouter = withRouter(props => {
                 MainNavigation.model.set("lastPath", location.pathname);
             }
         });
-
-        const  notificationsPromise: Promise<VKNotificationI[]> = new Promise(resolve => Mediator.sub(Msg.NotificationsQueue, resolve));
-        const authPromise: Promise<AuthState> = new Promise( resolve => Mediator.sub(Msg.AuthState, resolve) );
-
 
         Promise.all([notificationsPromise, authPromise])
             .then(([queue, state]) => {
@@ -110,12 +117,6 @@ const NotificationRouter = withRouter(props => {
                 }
             });
 
-        authPromise.then((state) => {
-            if (state !== AuthState.READY) {
-                Mediator.pub(Msg.AuthOauth);
-                Browser.closePopup();
-            }
-        });
         return null
     }
 );

@@ -17,7 +17,7 @@ class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
     };
 
 
-    componentWillMount() {
+    componentDidMount() {
         Mediator.sub(Msg.FeedbacksData, this.onFeedbacksData);
         Mediator.pub(Msg.FeedbacksDataGet);
     }

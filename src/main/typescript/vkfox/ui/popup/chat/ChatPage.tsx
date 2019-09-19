@@ -20,7 +20,7 @@ class ChatPage extends React.Component<object, ChatState> {
 
     public readonly state = ChatPageCpn.initialState;
 
-    componentWillMount() {
+    componentDidMount() {
         Mediator.sub(Msg.ChatData, this.onChatData);
         Mediator.pub(Msg.ChatDataGet);
     }

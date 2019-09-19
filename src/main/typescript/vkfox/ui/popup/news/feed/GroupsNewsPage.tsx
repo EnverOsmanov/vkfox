@@ -16,7 +16,7 @@ class GroupNewsPage extends React.Component<ChatProps, ChatState> {
 
     public readonly state = GroupsNewsPageCpn.initialState;
 
-    componentWillMount() {
+    componentDidMount() {
         Mediator.sub(Msg.NewsfeedGroups, this.onNewsfeedData);
         Mediator.pub(Msg.NewsfeedGroupsGet);
     }

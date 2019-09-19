@@ -20,7 +20,7 @@ class FriendNewsPage extends React.Component<ChatProps, ChatState> {
         items: []
     };
 
-    componentWillMount() {
+    componentDidMount() {
         Mediator.sub(Msg.NewsfeedFriends, this.setState.bind(this));
         Mediator.pub(Msg.NewsfeedFriendsGet);
     }

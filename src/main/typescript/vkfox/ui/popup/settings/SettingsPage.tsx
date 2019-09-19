@@ -26,7 +26,7 @@ class SettingsPage extends React.Component<object, SettingsState> {
     public readonly state = defaultState;
 
 
-    componentWillMount() {
+    componentDidMount() {
         Mediator.sub(Msg.ForceOnlineSettings, this.onForceOnlineSettings);
         Mediator.sub(Msg.NotificationsSettings, this.onNotificationsSettings);
 
