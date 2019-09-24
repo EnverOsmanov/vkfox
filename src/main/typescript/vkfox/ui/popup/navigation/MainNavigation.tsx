@@ -79,7 +79,6 @@ class MainNavigation extends React.Component {
 
 export default MainNavigation
 
-const notificationsPromise: Promise<VKNotificationI[]> = new Promise(resolve => Mediator.sub(Msg.NotificationsQueue, resolve));
 const authPromise: Promise<AuthState> = new Promise( resolve => {
     Mediator.sub(Msg.AuthState, resolve)
 } );
@@ -100,6 +99,8 @@ const NotificationRouter = withRouter(props => {
                 MainNavigation.model.set("lastPath", location.pathname);
             }
         });
+
+        const  notificationsPromise: Promise<VKNotificationI[]> = new Promise(resolve => Mediator.sub(Msg.NotificationsQueue, resolve));
 
         Promise.all([notificationsPromise, authPromise])
             .then(([queue, state]) => {

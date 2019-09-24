@@ -9,7 +9,6 @@ const gulp                 = require("gulp"),
     notifier               = require("node-notifier"),
     webpack                = require("webpack");
 
-const Locales     = ["en", "ru", "uk"];
 const __srcDir = "./src/main/typescript";
 const __resources = "./src/main/resources";
 
@@ -106,7 +105,7 @@ gulp.task("webpack", callback => {
 gulp.task("production",
         gulp.series(
             gulp.parallel("env:version", "env:firefox", "clean:firefox"),
-            gulp.parallel(["assets", "preprocess:manifest"]),
+            gulp.parallel("assets", "preprocess:manifest"),
             gulp.parallel( "webpack", "copy:firefoxSrc", "copy:firefoxResources")
         )
 );
@@ -114,7 +113,7 @@ gulp.task("production",
 gulp.task("default",
         gulp.series(
             gulp.parallel("env:version", "env:firefox", "env:development", "clean:firefox"),
-            gulp.parallel(["assets", "preprocess:manifest"]),
+            gulp.parallel("assets", "preprocess:manifest"),
             gulp.parallel("webpack", "copy:firefoxSrc", "copy:firefoxResources")
 
         )
