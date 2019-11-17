@@ -17,14 +17,14 @@ const apiQueriesQueue: ApiQuery[] = [];
 const API_DOMAIN              = 'https://api.vk.com';
 const API_QUERIES_PER_REQUEST = 15;
 const API_REQUESTS_DEBOUNCE   = 400;
-const REAUTH_DEBOUNCE         = 2000;
+const REAUTH_DEBOUNCE         = 20000;
 const networkErrorMessage = "NetworkError when attempting to fetch resource.";
 
 
 
 
-function wait(): Promise<any> {
-    return new Promise( (resolve) => setTimeout(resolve, REAUTH_DEBOUNCE))
+function wait(time: number = REAUTH_DEBOUNCE): Promise<any> {
+    return new Promise( (resolve) => setTimeout(resolve, time))
 }
 
 /**
@@ -111,15 +111,28 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
                 RequestBg._processApiQueries();
             }
             else if (data.error && data.error.error_msg) {
-                if (data.error.error_code == 5) {
-                    console.debug("[R]... Retrying", data.error.error_msg);
-                    Auth.login(true)
-                        .then(() => processingSmallPart(queriesToProcess));
-                }
-                else {
-                    console.debug("[R]", data.error);
-                    Auth.login(true)
-                        .then(rejectAll)
+                switch(data.error.error_code) {
+                    case 5: { // auth failed
+                        console.debug("[R]... Retrying", data.error);
+                        return Auth.login(true)
+                            .then(() => processingSmallPart(queriesToProcess));
+                    }
+
+                    case 3: { // invalid method
+                        console.debug("[R]... Rejecting", data.error);
+                        return Promise.reject(rejectAll());
+                    }
+
+                    case 10: { // server error
+                        console.debug("[R]... Retrying", data.error);
+                        return wait(60 * 1000).then( () => Promise.reject(rejectAll()));
+                    }
+
+                    default: {
+                        console.debug("[R]", data.error);
+                        return wait(20 * 1000)
+                            .then(rejectAll);
+                    }
                 }
             }
             else {
@@ -131,13 +144,13 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
             queriesToProcess.forEach( query => query.reject(e))
         }
 
+        const method = "execute";
         const params = {
-            method      : 'execute',
+            method,
             code        : executeCode,
             access_token: accessToken,
             v           : API_VERSION
         };
-        const method = "execute";
 
         return RequestBg
             .post(`${API_DOMAIN}/method/${method}`, params)

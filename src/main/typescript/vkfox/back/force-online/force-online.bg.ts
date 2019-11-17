@@ -1,5 +1,5 @@
 "use strict";
-import RequestBg from '../request/request.bg';
+import RequestBg from "../request/request.bg";
 import Mediator from "../../mediator/mediator.bg"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import {Msg} from "../../mediator/messages";
@@ -12,7 +12,7 @@ let timeoutId: number;
 
 const settings = new PersistentModel(
     {enabled: false },
-    {name: 'forceOnline'}
+    {name: "forceOnline"}
     );
 
 export default function init() {
@@ -27,23 +27,37 @@ export default function init() {
 
     markAsOfflineIfModeOn();
 
-    settings.on('change:enabled',  (event, enabled: boolean) => {
-        if (enabled) clearTimeout(timeoutId);
-        else markAsOffline();
+    settings.on("change:enabled",  (event, enabled: boolean) => {
+        if (enabled) updateStatusConstantly(markAsOnlineOnce);
+        else updateStatusConstantly(markAsOfflineOnce);
     });
 }
 
-function markAsOffline(): Promise<number> {
+function markAsOfflineOnce(): Promise<number> {
+    return RequestBg.api<number>({code: "return API.account.setOffline();"})
+}
+
+function markAsOnlineOnce(): Promise<number> {
+    return RequestBg.api<number>({code: "return API.account.setOnline();"})
+}
+
+function updateStatusConstantly(updateStatusOnce: () => Promise<number>): Promise<number> {
     clearTimeout(timeoutId);
 
-    return RequestBg.api<number>({code: 'return API.account.setOffline();'})
-        .then(() => timeoutId = window.setTimeout(markAsOffline, MARK_PERIOD))
+    return updateStatusOnce()
+        .then(() => timeoutId = window.setTimeout(updateStatusOnce, MARK_PERIOD))
+}
+
+export function markAsOfflineIfModeOnOnce(): Promise<number | void> {
+    // forceOnline enabled
+    return settings.get("enabled")
+        ? Promise.resolve()
+        : markAsOfflineOnce();
 }
 
 export function markAsOfflineIfModeOn(): Promise<number | void> {
-    // forceOnline not enabled
-    if (!settings.get('enabled'))
-        return markAsOffline();
-    else
-        return Promise.resolve()
+    // forceOnline enabled
+    return settings.get("enabled")
+        ? Promise.resolve()
+        : updateStatusConstantly(markAsOfflineOnce);
 }

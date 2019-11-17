@@ -6,7 +6,7 @@ import {Msg} from "../../mediator/messages"
 import {Profiles, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
 import {ItemDulpColl, ItemsColl, } from "./helper/models";
 import {AccessTokenError} from "../request/models";
-import {markAsOfflineIfModeOn} from "../force-online/force-online.bg";
+import {markAsOfflineIfModeOnOnce} from "../force-online/force-online.bg";
 import {
     ItemObj, media,
     NewsfeedRequestParams,
@@ -203,7 +203,7 @@ function fetchNewsfeed(): Promise<number | void> {
         if (newsfeed.items.length) freeSpace();
 
         setTimeout(fetchNewsfeed, UPDATE_PERIOD);
-        return markAsOfflineIfModeOn();
+        return markAsOfflineIfModeOnOnce();
     }
 
     function handleError(e: Error) {
