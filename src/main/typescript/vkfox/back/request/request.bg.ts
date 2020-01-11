@@ -17,7 +17,7 @@ const apiQueriesQueue: ApiQuery[] = [];
 const API_DOMAIN              = 'https://api.vk.com';
 const API_QUERIES_PER_REQUEST = 15;
 const API_REQUESTS_DEBOUNCE   = 400;
-const REAUTH_DEBOUNCE         = 20000;
+const REAUTH_DEBOUNCE         = 20 * 1000;
 const networkErrorMessage = "NetworkError when attempting to fetch resource.";
 
 
