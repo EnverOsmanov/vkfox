@@ -191,7 +191,7 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
         case "link": {
             const dataLink = data as AttachmentLink;
 
-            const image = dataLink.button ?
+            const image = dataLink.button && dataLink.photo.photo_604 ?
                 <img
                     alt=""
                     className="item__picture"

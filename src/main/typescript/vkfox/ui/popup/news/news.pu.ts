@@ -111,9 +111,10 @@ export function getActionsData(type: string, parent: ParentObj): SendMessageI | 
     }
 }
 
-export function getSourceLink(type: string, parent: ParentObj): string {
+export function getSourceLink(type: string, parent: ParentObj): string | null {
 
     switch (type) {
+        case "follow": return null;
         // case 'mention':
         case 'wall':
         case 'post': {
