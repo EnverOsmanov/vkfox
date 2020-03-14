@@ -17,6 +17,7 @@
     "zip": "web-ext build -s target/firefox/ --overwrite-dest"
   },
   "dependencies": {
+    "aws-sdk": "^2.639.0",
     "backbone": "^1.4.0",
     "bootstrap": "^4.4.1",
     "emoji": "^0.3.2",
