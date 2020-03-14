@@ -62,8 +62,7 @@ gulp.task("copy:firefoxSrc", () => {
 
 gulp.task("assets", () => {
     return gulp.src([
-        __resources + "/assets/**",
-        "./node_modules/emoji/lib/emoji.png",
+        __resources + "/assets/**"
     ])
       .pipe(gulp.dest("./target/firefox/assets"))
 });

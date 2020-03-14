@@ -31,7 +31,7 @@
     "react-dom": "^16.13.0",
     "react-lazy-images": "^1.1.0",
     "react-router-dom": "^5.1.2",
-    "roboto-fontface": "^0.9.0",
+    "roboto-fontface": "^0.10.0",
     "sanitize-html": "^1.22.1",
     "underscore": "^1.9.2"
   },
