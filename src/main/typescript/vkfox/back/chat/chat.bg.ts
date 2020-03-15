@@ -87,8 +87,7 @@ function fetchProfiles(dialogs: Dialog[]): Promise<void> {
         const allDialogUids = dialog.messages.map( message => message.user_id);
 
         const uids = accUids
-            .concat(allDialogUids, dialog.uid)
-            .filter(uid => uid > 0);
+            .concat(allDialogUids, dialog.uid);
 
         if (dialog.chat_active) return uids.concat(dialog.chat_active);
         else return uids;
@@ -212,7 +211,15 @@ function getDialogs(): Promise<Dialog[]> {
         if (response && response.count) {
             return response
                 .items
-                .filter( item => item.message.user_id > 0)
+                .filter( item => {
+                    // only dialogs from users
+                    return item.message.user_id > 0 && (
+                        // only chat participants users
+                    item.message.chat_active
+                        ? item.message.chat_active.every(m => m > 0)
+                        : true
+                    );
+                })
                 .map(toDialog)
         }
         else return []
