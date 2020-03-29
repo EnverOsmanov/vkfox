@@ -1,5 +1,5 @@
 "use strict";
-import {Sex} from "../../back/users/types";
+import {Sex} from "../users/types";
 
 const DEFAULT_LANGUAGE = "en";
 const i18n = {

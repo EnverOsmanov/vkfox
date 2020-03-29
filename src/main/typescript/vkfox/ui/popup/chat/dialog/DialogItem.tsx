@@ -1,24 +1,22 @@
 import * as React from "react"
-import {SendMessageParams} from "../types";
+import {DialogI, ReplyI, SendMessageParams} from "../types";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../helpers/chat.pu";
 import Request from "../../components/request/request.pu"
 import {timeAgo} from "../../components/filters/filters.pu";
-import {PuChatUserProfile} from "../../../../back/chat/collections/ProfilesColl";
-import {Collection} from "backbone";
-import {DialogI, ReplyI} from "../types";
-import {UserProfile} from "../../../../back/users/types";
+import {UserProfile} from "../../../../common/users/types";
 import {Message} from "../../../../../vk/types";
 import DialogSpeeches from "./DialogSpeeches";
 import ReplyMessage from "../../components/reply/ReplyMessage";
 import {Description} from "../../components/item/ItemDescription";
 import ItemHero from "../../components/item/ItemHero";
+import {ChatUserProfileI} from "../../../../common/chat/types";
 
 
 interface DialogItemProps {
     dialog      : DialogI
-    profilesColl: Collection<PuChatUserProfile>
+    profilesColl: ChatUserProfileI[]
 
     addToProfilesColl(profiles: UserProfile[]): void
     addToMessages(dialogId: string, messages: Message[]): void
@@ -85,10 +83,10 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         const {profilesColl} = this.props;
 
         if (dialog.chat_id) {
-            return dialog.chat_active.map(uid => profilesColl.get(uid).toJSON())
+            return dialog.chat_active.map(uid => profilesColl.find(e => e.id == uid))
         }
         else {
-            return profilesColl.get(dialog.uid).toJSON();
+            return profilesColl.find(e => e.id == dialog.uid);
         }
 
     };
@@ -104,6 +102,9 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         const {dialog, profilesColl} = this.props;
 
         const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
+        if (!_(foldedMessages).last().author) {
+            debugger;
+        }
         const out = _(foldedMessages).last().author.isSelf;
         const lastMessage = dialog.messages.slice(-1)[0];
 

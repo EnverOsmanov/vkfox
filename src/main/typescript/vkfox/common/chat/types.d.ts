@@ -1,4 +1,4 @@
-import {UserProfile} from "../../back/users/types";
+import {UserProfile} from "../users/types";
 
 export interface GetHistoryParams {
     offset  : number
@@ -15,6 +15,10 @@ export interface OnlyName {
 export interface NameSurname {
     first_name  : string
     last_name   : string
+}
+
+export interface ChatUserProfileI extends UserProfile {
+    isSelf              ?: boolean
 }
 
 

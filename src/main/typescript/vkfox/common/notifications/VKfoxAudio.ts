@@ -1,7 +1,7 @@
 import Settings from "./VKfoxSignal"
 import {SoundSetting} from "./types";
 import Request from "../request/Request"
-import {Sex} from "../../back/users/types";
+import {Sex} from "../users/types";
 import {SPEECH_KEY, SPEECH_ID_POLLY, SPEECH_KEY_POLLY} from "../config/config";
 import * as Polly from 'aws-sdk/clients/polly';
 

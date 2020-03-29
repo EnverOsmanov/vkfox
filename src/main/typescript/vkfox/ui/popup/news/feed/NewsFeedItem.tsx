@@ -1,6 +1,5 @@
 import * as React from "react"
 import {ReplyI} from "../../chat/types";
-import * as _ from "underscore"
 import I18N from "../../../../common/i18n/i18n";
 import ItemActionLike from "../../components/itemActions/ItemActionLike";
 import ItemActionComment from "../../components/itemActions/ItemActionComment";
@@ -9,7 +8,7 @@ import ItemActions from "../../components/itemActions/ItemActions";
 import {buildVkLink, profile2Name} from "../../components/filters/filters.pu";
 import AttachmentC from "../../components/attachment/AttachmentC";
 import RectifyPu from "../../../../rectify/RectifyPu";
-import {UserProfile} from "../../../../back/users/types";
+import {ProfileI, UserProfile} from "../../../../common/users/types";
 import {
     AudioItem,
     FriendItem,
@@ -26,12 +25,12 @@ import ReplyMessage from "../../components/reply/ReplyMessage";
 import {SendMessageI} from "../../../../common/feedbacks/types";
 import BrowserPu from "../../../../browser/browser.pu";
 import ItemHero from "../../components/item/ItemHero";
-import {AttachmentContainer} from "../../../../../vk/types/attachment";
+import {postAttachmentsO} from "../../components/attachment/AttachmentHelper";
 
 
 interface NewsFeedItemProps {
     item    : ItemObj
-    profiles: UserProfile[]
+    profiles: Map<number, ProfileI>
 }
 
 interface NewsFeedItemState {
@@ -121,27 +120,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     }
 
     static postAttachmentElms(itemPost: PostItem): JSX.Element[] {
-        function postAttachments(attachments: AttachmentContainer[]) {
-            const counted: _.Dictionary<number> = _.countBy(attachments, it => it.type);
-
-            function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
-
-                return (
-                    <AttachmentC
-                        key={i}
-                        type={attachment.type}
-                        data={attachment[attachment.type]}
-                        showFullWidth={i == 0 && counted[attachment.type] % 2 != 0}
-                    />
-                );
-            }
-
-            return attachments.map(singleAttachment)
-        }
-
-        return itemPost.attachments
-            ? postAttachments(itemPost.attachments)
-            : null
+        return postAttachmentsO(itemPost.attachments)
     };
 
     photoAttachmentElms = (photos: media.Photo[]) => {
@@ -166,8 +145,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
 
         const singleFrined = (friend: UserId, i: number) => {
 
-            const profile = this.props.profiles
-                .find(profile => profile.id === friend.user_id);
+            const profile = this.props.profiles.get(friend.user_id) as UserProfile;
 
             const comma = i === lastIndex
                 ? null
@@ -331,7 +309,7 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
     render() {
         const {item, profiles} = this.props;
 
-        const owner = profiles.find(profile => profile.id === Math.abs(item.source_id));
+        const owner = profiles.get(Math.abs(item.source_id)) as UserProfile;
 
         if (owner) {
             return (

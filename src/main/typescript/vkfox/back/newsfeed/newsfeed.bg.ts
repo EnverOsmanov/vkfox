@@ -3,12 +3,14 @@ import RequestBg from "../request/request.bg";
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import {Msg} from "../../mediator/messages"
-import {Profiles, BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
-import {ItemDulpColl, ItemsColl, } from "./helper/models";
+import {BBCollectionOps, GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
+import {ItemDulpColl, ItemsColl,} from "./helper/models";
 import {AccessTokenError} from "../request/models";
 import {markAsOfflineIfModeOnOnce} from "../force-online/force-online.bg";
 import {
-    ItemObj, media,
+    ItemObj,
+    media,
+    Newsfeed,
     NewsfeedRequestParams,
     NewsfeedResp,
     PostItem,
@@ -17,6 +19,7 @@ import {
 } from "../../../vk/types/newsfeed";
 import {LikesChanged} from "./types";
 import {AttachmentPhotoContainer} from "../../../vk/types/attachment";
+import {ProfileI, UserProfile} from "../../common/users/types";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -28,7 +31,7 @@ const MAX_ITEMS_COUNT = 50,
     UPDATE_PERIOD     = 10000; //ms
 
 
-const profilesColl = new Profiles();
+const profilesColl: Map<number, ProfileI> = new Map();
 const groupItemsColl = new ItemsColl();
 const friendItemsColl = new ItemsColl();
 
@@ -41,7 +44,9 @@ const autoUpdateParams: NewsfeedRequestParams = {
 //Functions
 
 export function idMaker(item: ItemObj): string {
-    const post_id = "post_id" in item ? (item as PostItem).post_id : "";
+    const post_id = "post_id" in item
+        ? (item as PostItem).post_id
+        : "";
 
     return [item.source_id, post_id, item.type].join(":");
 }
@@ -178,9 +183,9 @@ function freeSpace() {
             friendItemsColl.map(fi => fi.source_id)
         )).uniq();
 
-        profilesColl.reset(profilesColl.filter(
-            model => required_uids.indexOf(model.id) !== -1
-        ));
+        profilesColl.forEach(p => {
+            if (!required_uids.includes(p.id)) profilesColl.delete(p.id)
+        });
     }
 }
 
@@ -192,18 +197,22 @@ function fetchNewsfeed(): Promise<number | void> {
     function responseHandler(response: NewsfeedResp) {
         const {newsfeed, time} = response;
 
-        autoUpdateParams.start_time = time;
+        if (newsfeed) {
+            const newsfeedObj = newsfeed as Newsfeed;
+            autoUpdateParams.start_time = time;
 
-        profilesColl.add(newsfeed.profiles, BBCollectionOps.addOptions);
-        profilesColl.add(newsfeed.groups, BBCollectionOps.addOptions);
+            newsfeedObj.profiles.forEach(p => profilesColl.set(p.id, p));
+            newsfeedObj.groups.forEach(p => profilesColl.set(p.id, p));
 
-        discardOddWallPhotos(newsfeed.items).forEach(processRawItem);
+            discardOddWallPhotos(newsfeedObj.items).forEach(processRawItem);
 
-        // try to remove old items, if new were inserted
-        if (newsfeed.items.length) freeSpace();
+            // try to remove old items, if new were inserted
+            if (newsfeedObj.items.length) freeSpace();
 
-        setTimeout(fetchNewsfeed, UPDATE_PERIOD);
-        return markAsOfflineIfModeOnOnce();
+            setTimeout(fetchNewsfeed, UPDATE_PERIOD);
+            return markAsOfflineIfModeOnOnce();
+        }
+        else return Promise.resolve()
     }
 
     function handleError(e: Error) {
@@ -237,7 +246,7 @@ function onLikesChanged(params: LikesChanged): void {
 }
 
 function onChangeUser(): void {
-    profilesColl.reset();
+    profilesColl.clear();
     groupItemsColl.reset();
     friendItemsColl.reset();
 }
@@ -248,6 +257,8 @@ function onChangeUser(): void {
 */
 
 export default function initialize() {
+    GProfileCollCmpn.subscribeForLpUpdates(profilesColl as Map<number, UserProfile>);
+
     Mediator.sub(Msg.AuthUser, onChangeUser);
 
     const readyPromise = fetchNewsfeed();
@@ -268,14 +279,14 @@ export default function initialize() {
 
 function publishNewsfeedFriends() {
     Mediator.pub(Msg.NewsfeedFriends, {
-        profiles: profilesColl.toJSON(),
+        profiles: profilesColl,
         items   : friendItemsColl.toJSON()
     });
 }
 
 function publishNewsfeedGroups() {
     Mediator.pub(Msg.NewsfeedGroups, {
-        profiles: profilesColl.toJSON(),
+        profiles: profilesColl,
         items   : groupItemsColl.toJSON()
     });
 }

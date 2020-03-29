@@ -1,4 +1,4 @@
-import {ProfileI, UserProfile} from "../../vkfox/back/users/types";
+import {ProfileI, UserProfile} from "../../vkfox/common/users/types";
 import {GenericRS} from "./index";
 import {WithUserLikes, ZeroOne} from "./feedback";
 import {AttachmentContainer} from "./attachment";
@@ -62,7 +62,7 @@ export interface VideoItem extends ItemObj {
 
 
 export interface NewsfeedData {
-    profiles: UserProfile[]
+    profiles: Map<number, ProfileI>
     items: ItemObj[]
 }
 
@@ -228,8 +228,10 @@ interface Newsfeed {
     next_from ?: string
 }
 
+export type NewsfeedI = Newsfeed | boolean
+
 export interface NewsfeedResp {
-    newsfeed: Newsfeed
+    newsfeed: NewsfeedI
 
     time    : number
 }

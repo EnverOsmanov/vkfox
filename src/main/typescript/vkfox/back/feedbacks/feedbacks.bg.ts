@@ -8,7 +8,6 @@ import Browser from "../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
 import PersistentModel from "../../common/persistent-model/persistent-model"
 import VKfoxNotifications from "../notifications/notifications.bg"
-import {BBCollectionOps, Profiles} from "../../common/profiles-collection/profiles-collection.bg";
 import {FeedItem, ItemColl} from "../../common/feedbacks/collections/ItemColl";
 import {NotifType} from "../notifications/VKNotification";
 import {FeedbacksCollection} from "../../common/feedbacks/collections/FeedBacksCollection";
@@ -46,7 +45,7 @@ import {
     LikeCommentPhotoNoti,
     LikeCommentTopicNoti,
     LikeCommentVideoNoti,
-    MentionCommentPhotoNoti,
+    MentionCommentPhotoNoti, MentionCommentVideoNoti,
     MentionNoti,
     NotificationObj,
     ParentComment,
@@ -55,7 +54,8 @@ import {
     WithFromId
 } from "../../../vk/types/feedback";
 import {PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
-import {UserProfile} from "../users/types";
+import {GroupProfile, UserProfile} from "../../common/users/types";
+import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
 
 /**
  * Responsible for "News -> My" page
@@ -72,7 +72,7 @@ let persistentModel: PersistentModel,
     userId: number;
 
 const itemsColl = new ItemColl();
-const profilesColl = new Profiles();
+const profilesColl: Map<number, UserProfile| GroupProfile> = new Map();
 
 
 const autoUpdateNotificationsParams: NotificationsRequest = {
@@ -101,7 +101,7 @@ function publishData() {
     }
 
     Mediator.pub(Msg.FeedbacksData, {
-        profiles: profilesColl.toJSON(),
+        profiles: profilesColl,
         items   : itemsCollJS()
     });
 }
@@ -119,7 +119,7 @@ function fetchFeedbacksDebounced() {
 function onChangeUser(data: AuthModelI): void {
     userId = data.userId;
     itemsColl.reset();
-    profilesColl.reset();
+    profilesColl.clear();
 
     persistentModel = new PersistentModel({}, {
         name: `feedbacks:background:${userId}`
@@ -127,7 +127,7 @@ function onChangeUser(data: AuthModelI): void {
 }
 
 export default function init() {
-
+    GProfileCollCmpn.subscribeForLpUpdates(profilesColl as Map<number, UserProfile>);
     const readyPromise = fetchFeedbacks();
     // entry point
     initialize(readyPromise);
@@ -464,7 +464,7 @@ function addRawNotificationsItemV2(item: NotificationObj): void {
         case "mention_comment_video": {
             const noti = item as
                 CommentPhotoNoti | MentionCommentPhotoNoti
-                | CommentVideoNoti | MentionCommentPhotoNoti;
+                | CommentVideoNoti | MentionCommentVideoNoti;
 
             const typeTokens = item.type
                 .replace("mention_", "")
@@ -526,14 +526,15 @@ function fetchFeedbacks(): Promise<void> {
                 (notifications.items && notifications.items.length) ||
                 (newsAboutComments.items && newsAboutComments.items.length)
             ) {
-                profilesColl.add(newsAboutComments.profiles, BBCollectionOps.addOptions);
-                profilesColl.add(newsAboutComments.groups, BBCollectionOps.addOptions);
-                profilesColl.add(notifications.profiles, BBCollectionOps.addOptions);
-                profilesColl.add(notifications.groups, BBCollectionOps.addOptions);
+                newsAboutComments.profiles.forEach(p => profilesColl.set(p.id, p));
+                newsAboutComments.groups.forEach(p => profilesColl.set(p.id, p));
+                notifications.profiles.forEach(p => profilesColl.set(p.id, p));
+                notifications.groups.forEach(p => profilesColl.set(p.id, p));
 
                 notifications.items.forEach(addRawNotificationsItemV2);
                 newsAboutComments.items.forEach(addRawCommentsItem);
                 itemsColl.sort();
+                publishData();
             }
         }
     }
@@ -584,7 +585,7 @@ function tryNotification(): void {
 
     // Don't show self messages
     if (ownerId !== userId) {
-        const profile: UserProfile = profilesColl.get(Math.abs(ownerId)).toJSON();
+        const profile = profilesColl.get(Math.abs(ownerId)) as UserProfile;
         const name = User.getName(profile);
         const gender = profile.sex === 1 ? "female" : "male";
 
@@ -660,7 +661,6 @@ function initialize(readyPromise: Promise<void>): void {
             updateLatestFeedbackId();
             publishData();
         }, 1));
-        profilesColl.on('change', publishData);
 
         updateLatestFeedbackId();
         publishData();

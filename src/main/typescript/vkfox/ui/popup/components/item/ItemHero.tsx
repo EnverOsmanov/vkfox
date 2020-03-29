@@ -1,7 +1,7 @@
 import * as React from "react"
 import {CSSProperties} from "react"
 import {buildVkLink, profile2Name} from "../filters/filters.pu";
-import {GroupProfile, ProfileI, UserProfile} from "../../../../back/users/types";
+import {GroupProfile, ProfileI, UserProfile} from "../../../../common/users/types";
 import BrowserPu from "../../../../browser/browser.pu";
 import {profilePhotoPath} from "./item.pu";
 

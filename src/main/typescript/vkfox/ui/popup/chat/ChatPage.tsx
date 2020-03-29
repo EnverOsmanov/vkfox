@@ -1,19 +1,17 @@
 import * as React from "react"
 import Mediator from "../../../mediator/mediator.pu"
-
-import {PuChatUserProfile, PuChatUserProfilesColl} from "../../../back/chat/collections/ProfilesColl"
-import {Collection} from "backbone"
 import {Msg} from "../../../mediator/messages";
 import I18N from "../../../common/i18n/i18n";
 import DialogItem from "./dialog/DialogItem";
 import {ChatDataI, DialogI} from "./types";
-import {UserProfile} from "../../../back/users/types";
+import {UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
+import {ChatUserProfileI} from "../../../common/chat/types";
 
 
 interface ChatState {
     dialogs     : DialogI[]
-    profilesColl: Collection<PuChatUserProfile>
+    profilesColl: ChatUserProfileI[]
 }
 
 class ChatPage extends React.Component<object, ChatState> {
@@ -57,10 +55,7 @@ class ChatPage extends React.Component<object, ChatState> {
 
                 const mergedDialogs = dialogs.map(mergeDialogs);
 
-                const mergedProfiles: PuChatUserProfile[] = prevState.profilesColl.toArray().concat(profiles);
-
-                const profilesColl: Collection<PuChatUserProfile> =
-                    new Collection(mergedProfiles, {model: PuChatUserProfile});
+                const profilesColl: UserProfile[] = prevState.profilesColl.concat(profiles);
 
                 return {
                     profilesColl,
@@ -74,7 +69,7 @@ class ChatPage extends React.Component<object, ChatState> {
     private addToProfilesColl = (profiles: UserProfile[]) => {
 
         this.setState(prevState => {
-            prevState.profilesColl.add(profiles);
+            prevState.profilesColl.concat(profiles);
 
             return prevState
         })
@@ -138,10 +133,9 @@ class ChatPage extends React.Component<object, ChatState> {
 export default ChatPage
 
 class ChatPageCpn {
-    private static profilesColl = new PuChatUserProfilesColl();
 
     static initialState = {
         dialogs     : [],
-        profilesColl: ChatPageCpn.profilesColl
+        profilesColl: []
     };
 }

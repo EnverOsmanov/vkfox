@@ -1,5 +1,5 @@
 import * as Backbone from "backbone";
-import {Sex} from "../users/types";
+import {Sex} from "../../common/users/types";
 
 
 export class NotifType {

@@ -128,6 +128,11 @@ function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
                         return wait(60 * 1000).then( () => Promise.reject(rejectAll()));
                     }
 
+                    case 12: {
+                        console.debug("[R]", data.error);
+                        return Promise.reject(rejectAll());
+                    }
+
                     default: {
                         console.debug("[R]", data.error);
                         return wait(20 * 1000)

@@ -47,7 +47,7 @@ export default GroupNewsPage
 class GroupsNewsPageCpn {
 
     private static data: NewsfeedData = {
-        profiles: [],
+        profiles: new Map(),
         items: []
     };
 

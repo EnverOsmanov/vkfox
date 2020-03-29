@@ -1,6 +1,6 @@
 "use strict";
 import ProxyMethods from '../../../../proxy-methods/proxy-methods.pu';
-import {UserProfile} from "../../../../back/users/types";
+import {UserProfile} from "../../../../common/users/types";
 import {ProxyNames} from "../../../../mediator/messages";
 
 

@@ -1,11 +1,9 @@
 "use strict";
 import Request from "../../components/request/request.pu";
 import Users from "../../components/users/users.pu";
-import {Collection} from "backbone"
-import {PuChatUserProfile} from "../../../../back/chat/collections/ProfilesColl"
-import {GetHistoryParams} from "../../../../common/chat/types";
+import {ChatUserProfileI, GetHistoryParams} from "../../../../common/chat/types";
 import {DialogI, MessageHistoryI, Speech} from "../types";
-import {UserProfile} from "../../../../back/users/types";
+import {UserProfile} from "../../../../common/users/types";
 import {Message, MessagesGetHistoryResponse} from "../../../../../vk/types";
 
 function getProfiles(dialog: DialogI, messages: Message[]): Promise<UserProfile[]> {
@@ -55,16 +53,15 @@ export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
  *
  * @returns {Array}
  */
-export function foldMessagesByAuthor(messages: Message[], profilesColl: Collection<PuChatUserProfile>) {
-    const selfProfile: UserProfile = profilesColl.findWhere({isSelf: true}).toJSON();
+export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUserProfileI[]) {
+    const selfProfile: UserProfile = profilesColl.find(e => e.isSelf);
 
     function messageReducer(speeches: Speech[], message: Message): Speech[] {
         const lastItem = speeches[speeches.length - 1];
 
         function getProfile(): UserProfile {
 
-            return profilesColl.get(message.user_id)
-                .toJSON()
+            return profilesColl.find(e => e.id == message.user_id)
         }
 
         const author: UserProfile = message.out

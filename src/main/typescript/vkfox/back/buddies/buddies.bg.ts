@@ -11,7 +11,6 @@ import buddiesColl, {Buddy} from "./buddiesColl";
 import {NotifType} from "../notifications/VKNotification"
 import {BBCollectionOps} from "../../common/profiles-collection/profiles-collection.bg";
 
-import {UserProfile} from "../users/types";
 import {FaveGetUsersResponse} from "../../../vk/types";
 import {FoxUserProfileI} from "../../common/chat/types";
 
@@ -107,23 +106,18 @@ function saveOriginalBuddiesOrder() {
  *
  * @returns [jQuery.Deferred]
  */
-function getFavouriteUsers(): Promise<UserProfile[]> {
-    return RequestBg
-        .api<FaveGetUsersResponse>({ code: "return API.fave.getUsers()" })
-        .then( response => {
-            const uids = response
-                .items
-                .map((u: UserProfile) => u.id);
+async function getFavouriteUsers(): Promise<FoxUserProfileI[]> {
+    const response = await RequestBg
+        .api<FaveGetUsersResponse>({code: "return API.fave.getUsers()"});
 
-            return Users
-                .getProfilesById(uids)
-                .then( profiles => {
-                    return profiles.map( profile => {
-                        profile.isFave = true;
+    return response
+        .items
+        .map(user => {
 
-                        return profile
-                    } );
-                });
+            return {
+                ...user,
+                isFave: true
+            }
         });
 }
 

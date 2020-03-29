@@ -1,4 +1,4 @@
-import {GroupProfile, UserProfile} from "../../vkfox/back/users/types";
+import {GroupProfile, UserProfile} from "../../vkfox/common/users/types";
 import {media, PhotoItem, PostItem, VideoItem} from "./newsfeed";
 import {LikesObj, UserLikesObj} from "./objects";
 import {GenericRS} from "./index";

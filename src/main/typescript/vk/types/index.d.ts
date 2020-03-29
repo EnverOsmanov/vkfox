@@ -1,4 +1,4 @@
-import {UserProfile} from "../../vkfox/back/users/types";
+import {UserProfile} from "../../vkfox/common/users/types";
 import {LPMessage} from "../../vkfox/back/longpoll/types";
 import {AttachmentContainer} from "./attachment";
 

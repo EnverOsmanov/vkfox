@@ -7,7 +7,7 @@ import RectifyPu from "../../../../rectify/RectifyPu";
 import {ParentObjPost, TopicParFromComm} from "../../../../common/feedbacks/types";
 import {FeedbackItemObj} from "../types";
 import {WithCopyHistory} from "../../../../../vk/types/newsfeed";
-import {AttachmentContainer} from "../../../../../vk/types/attachment";
+import {postAttachmentsO} from "../../components/attachment/AttachmentHelper";
 
 
 interface MyFeedbackPostProps {
@@ -23,9 +23,11 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
                     <div key={i} className="item__attachment__wide">
                         <i className="news__post_repost fa fa-bullhorn"/>
 
-                        <RectifyPu text={originP.text} hasEmoji={false}/>
+                        <div className="item__post">
+                            <RectifyPu text={originP.text} hasEmoji={false}/>
 
-                        {MyFeedbackPost.postAttachmentElms(originP)}
+                            {MyFeedbackPost.postAttachmentElms(originP)}
+                        </div>
                     </div>
                 )
             }
@@ -38,21 +40,7 @@ class MyFeedbackPost extends React.Component<MyFeedbackPostProps, object> {
     };
 
     static postAttachmentElms(postParent: ParentObjPost): JSX.Element[] | null {
-        function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
-
-            return (
-                <AttachmentC
-                    key={i}
-                    type={attachment.type}
-                    data={attachment[attachment.type]}
-                    showFullWidth={postParent.attachments.length === 1}
-                />
-            )
-        }
-
-        return postParent.attachments
-            ? postParent.attachments.map(singleAttachment)
-            : null;
+        return postAttachmentsO(postParent.attachments)
     }
 
     static postCommentOrWallElm(item: FeedbackItemObj): JSX.Element {

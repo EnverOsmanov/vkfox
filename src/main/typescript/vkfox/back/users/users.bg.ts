@@ -4,9 +4,9 @@ import ProxyMethods from '../../proxy-methods/proxy-methods.bg'
 import Mediator from "../../mediator/mediator.bg"
 import * as _ from "underscore"
 import {Msg, ProxyNames} from "../../mediator/messages"
-import {UserProfileColl} from "../../common/profiles-collection/profiles-collection.bg";
 import {NameSurname, OnlyName} from "../../common/chat/types";
-import {FriendProfile, UserProfile, UsersGetElem} from "./types";
+import {UsersGetElem} from "./types";
+import {FriendProfile, UserProfile} from "../../common/users/types";
 import {FriendsRequest} from "../../../vk/types";
 
 
@@ -17,11 +17,18 @@ let inProgress: boolean,
     usersGetQueue: UsersGetElem[],
     friendsProfilesDefer: Promise<FriendProfile[]>;
 
-const usersColl = new UserProfileColl();
+const usersColl: Map<number, UserProfile> = new Map();
 
 const dropOldNonFriendsProfiles = _.debounce(function () {
     if (!inProgress) {
-        usersColl.remove(usersColl.filter( model => !model.get('isFriend') ));
+        usersColl.forEach(user => {
+            if ("isFriend" in user) {
+                const friendProfile: FriendProfile = user;
+                if (!friendProfile.isFriend) {
+                    usersColl.delete(friendProfile.id)
+                }
+            }
+        });
     }
     dropOldNonFriendsProfiles();
 }, DROP_PROFILES_INTERVAL);
@@ -42,7 +49,7 @@ function publishUids(queue: UsersGetElem[]) {
             console.debug("[publish] NOT FOUND", uid)
         }
 
-        return userM ? userM.toJSON() : userM;
+        return userM;
     }
 
     while (queue.length) {
@@ -61,7 +68,7 @@ const processGetUsersQueue = _.debounce( (processedQueue: UsersGetElem[]) => {
         .map(uge => uge.uids)
         .flatten()
         .unique()
-        .difference(usersColl.map(u => u.id))
+        .difference([...usersColl.keys()])
         .value();
 
 
@@ -78,7 +85,7 @@ const processGetUsersQueue = _.debounce( (processedQueue: UsersGetElem[]) => {
             })
             .then( (response) => {
                 if (response && response.length) {
-                    usersColl.add(response);
+                    response.forEach(u => usersColl.set(u.id, u));
                     publishUids(processedQueue);
                     inProgress = false;
                 }
@@ -89,7 +96,7 @@ const processGetUsersQueue = _.debounce( (processedQueue: UsersGetElem[]) => {
 
 function onUserChange(): void {
     inProgress = false;
-    usersColl.reset();
+    usersColl.clear();
     usersGetQueue = [];
     friendsProfilesDefer = null;
     dropOldNonFriendsProfiles()
@@ -121,7 +128,7 @@ class Users {
                                 }
                             });
 
-                    usersColl.add(friendProfiles);
+                    friendProfiles.forEach(f => usersColl.set(f.id, f));
 
                     return friendProfiles
                 }

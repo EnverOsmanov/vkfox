@@ -4,7 +4,7 @@ import AttachmentC from "../../components/attachment/AttachmentC";
 import I18N from "../../../../common/i18n/i18n";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {FeedbackObj, ReplyFeedback} from "../../../../common/feedbacks/types";
-import {GroupProfile, UserProfile} from "../../../../back/users/types";
+import {GroupProfile, UserProfile} from "../../../../common/users/types";
 import ItemHero from "../../components/item/ItemHero";
 
 

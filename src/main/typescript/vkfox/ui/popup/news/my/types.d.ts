@@ -1,7 +1,7 @@
-import {UserProfile} from "../../../../back/users/types";
+import {GroupProfile, UserProfile} from "../../../../common/users/types";
 import {FeedbackItemObj} from "../types";
 
 export interface FeedbacksData {
-    profiles: UserProfile[],
+    profiles: Map<number, UserProfile| GroupProfile>,
     items   : FeedbackItemObj[]
 }

@@ -5,7 +5,7 @@ import MyFeedbackPost from "./MyFeedbackPost";
 import MyFeedbackActions from "./MyFeedbackActions";
 import FeedbackOfFeedback from "./FeedbackOfFeedback";
 import {FeedbackObj, SendMessageI,} from "../../../../common/feedbacks/types";
-import {GroupProfile, UserProfile} from "../../../../back/users/types";
+import {GroupProfile, UserProfile} from "../../../../common/users/types";
 import {FeedbackItemObj} from "../types";
 import {getActionsData, onReply} from "../news.pu";
 import ReplyMessage from "../../components/reply/ReplyMessage";
@@ -15,7 +15,7 @@ import ItemHero from "../../components/item/ItemHero";
 interface FeedbackItemProps {
     item        : FeedbackItemObj
     itemProfile : UserProfile | GroupProfile
-    profiles    : UserProfile[]
+    profiles    : Map<number, UserProfile| GroupProfile>
 }
 
 interface FeedbackItemState {
@@ -95,7 +95,7 @@ class FeedbackItem extends React.Component<FeedbackItemProps, FeedbackItemState>
         const sliceI = this.state.showAllFeedbacks ? 0 : -3;
 
         const singleFeedback = (feedback: FeedbackObj) => {
-            const owner = this.props.profiles.find(profile => profile.id === Math.abs(feedback.feedback.owner_id));
+            const owner = this.props.profiles.get(Math.abs(feedback.feedback.owner_id));
 
             return (
                 <FeedbackOfFeedback

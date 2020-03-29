@@ -1,8 +1,8 @@
 "use strict";
-/*import Users from '../back/users/users.bg'*/
 import Mediator from '../../mediator/mediator.bg'
 import {AddOptions, Collection, Model, Silenceable} from "backbone";
 import {Msg} from "../../mediator/messages";
+import {UserProfile} from "../users/types";
 
 
 const UPDATE_NON_FRIENDS_PERIOD = 10000;
@@ -10,24 +10,6 @@ const UPDATE_NON_FRIENDS_PERIOD = 10000;
 
 export abstract class GProfile extends Model {}
 
-class Profile extends GProfile {
-
-/*    parse(profile: ProfileI) {
-        if (profile.gid) profile.id = -profile.gid;
-        else profile.id = profile.id;
-
-        return profile;
-    }*/
-}
-
-class UProfileM extends GProfile {
-}
-
-class ChatUserProfile extends UProfileM {
-    set isSelf(value: boolean) {
-        super.set("isSelf", value)
-    }
-}
 
 
 
@@ -73,7 +55,7 @@ export default class GProfileColl<P extends GProfile> extends Collection<P> {
 
 }
 
-class GProfileCollCmpn {
+export class GProfileCollCmpn {
 
     /**
      * @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
@@ -96,41 +78,33 @@ class GProfileCollCmpn {
             }
         });
     }
-}
 
-class GUserProfileColl<P extends UProfileM> extends Collection<P> {
+    private static _onUserUpdates<P extends UserProfile>(self: Map<number, P>, updates: number[][]): void {
 
-    initialize() {
-        super.initialize();
+        updates.forEach( update => {
+            const type = update[0],
+                userId = Math.abs(update[1]);
 
-        this.subscribeForLpUpdates();
+            // 8,-$user_id,0 -- друг $user_id стал онлайн
+            // 9,-$user_id,$flags -- друг $user_id стал оффлайн
+            // ($flags равен 0, если пользователь покинул сайт (например, нажал выход) и 1,
+            // если оффлайн по таймауту (например, статус away))
+            if (type === 9 || type === 8) {
+                const model = self.get(Number(userId));
+
+                if (model) model.online = (type === 8) ? 1 : 0;
+            }
+        });
     }
 
-    subscribeForLpUpdates(): void {
+    static subscribeForLpUpdates<P extends UserProfile>(users: Map<number, P>): void {
         Mediator.sub(
             Msg.LongpollUpdates,
-            (updates: number[][]) => GProfileCollCmpn._onFriendUpdates(this, updates)
+            (updates: number[][]) => GProfileCollCmpn._onUserUpdates(users, updates)
         );
     }
 }
 
-export class ChatUserProfileColl extends GUserProfileColl<ChatUserProfile> {
-    model = ChatUserProfile;
-}
-
-export class UserProfileColl extends GUserProfileColl<UProfileM> {
-    model = UProfileM;
-}
-
-/*export class GroupOrUserProfileColl extends GUserProfileColl<GroupOrUserProfile> {
-    model = GroupOrUserProfile
-}*/
-
-
-export class Profiles extends GProfileColl<Profile> {
-    model = Profile;
-    namme = "RealProfilesColl";
-}
 
 class ProfilesAddOptions implements AddOptions {
     parse = true;

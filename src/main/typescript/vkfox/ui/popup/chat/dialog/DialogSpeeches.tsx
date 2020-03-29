@@ -2,21 +2,20 @@ import * as React from "react"
 import {CSSProperties} from "react"
 import {buildVkLink, profile2Name} from "../../components/filters/filters.pu";
 import {Speech} from "../types";
-import {GroupProfile, UserProfile} from "../../../../back/users/types";
+import {GroupProfile, UserProfile} from "../../../../common/users/types";
 import {Message, MessageWithAction} from "../../../../../vk/types";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import I18N from "../../../../common/i18n/i18n";
-import {PuChatUserProfile} from "../../../../back/chat/collections/ProfilesColl";
-import {Collection} from "backbone";
 import {profilePhotoPath} from "../../components/item/item.pu";
 import {attachmentsDivM} from "./helpers/dialog.pu";
 import BrowserPu from "../../../../browser/browser.pu";
+import {ChatUserProfileI} from "../../../../common/chat/types";
 
 
 interface DialogSpeechesProps {
     speeches    : Speech[],
     owners      : UserProfile | UserProfile[]
-    profilesColl: Collection<PuChatUserProfile>
+    profilesColl: ChatUserProfileI[]
     showReply(): void
 }
 
@@ -31,13 +30,12 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
             switch (messageWithAction.action) {
                 case "chat_kick_user": {
 
-                    const profileO = profilesColl.get(messageWithAction.action_mid);
+                    const profile = profilesColl.find(e => e.id == messageWithAction.action_mid);
 
-                    if (!profileO) {
+                    if (!profile) {
                         console.warn("Profile not found in message with action", messageWithAction.action_mid);
                         return undefined;
                     }
-                    const profile = profileO.toJSON();
 
                     const rawM = speech.author.id === messageWithAction.action_mid
                         ? "Chat leave user"
@@ -71,14 +69,14 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                         return undefined;
                     }
 
-                    const profileO = profilesColl.get(fwdMessage.user_id);
+                    const profileO = profilesColl.find(e => e.id == fwdMessage.user_id);
 
                     if (!profileO) {
                         console.warn("Profile not found in forwarded message", fwdMessage.user_id);
                         return undefined;
                     }
 
-                    const owner = profileO.toJSON() as GroupProfile | UserProfile;
+                    const owner = profileO as GroupProfile | UserProfile;
                     const photo = profilePhotoPath(owner);
 
                     const anchor = "type" in owner

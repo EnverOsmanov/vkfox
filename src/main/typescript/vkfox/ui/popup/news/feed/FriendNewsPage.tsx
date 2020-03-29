@@ -16,7 +16,7 @@ interface ChatProps extends RouteComponentProps<any> {
 class FriendNewsPage extends React.Component<ChatProps, ChatState> {
 
     public readonly state = {
-        profiles: [],
+        profiles: new Map(),
         items: []
     };
 

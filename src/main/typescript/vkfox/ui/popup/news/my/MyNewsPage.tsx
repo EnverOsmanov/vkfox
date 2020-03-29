@@ -12,7 +12,7 @@ interface MyNewsProps extends RouteComponentProps<any> {}
 class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
 
     public readonly state = {
-        profiles: [],
+        profiles: new Map(),
         items   : []
     };
 
@@ -35,7 +35,7 @@ class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
 
         const singleNewsItem = (item: FeedbackItemObj) => {
 
-            const itemProfile = profiles.find(profile => profile.id === Math.abs(item.parent.owner_id));
+            const itemProfile = profiles.get(Math.abs(item.parent.owner_id));
 
             return (
                 <FeedbackItem

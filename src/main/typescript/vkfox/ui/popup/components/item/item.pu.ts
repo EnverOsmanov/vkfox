@@ -1,7 +1,7 @@
 "use strict";
 
 import {AttachmentDoc, AttachmentGift, AttachmentSticker} from "../../../../../vk/types/attachment";
-import {ProfileI} from "../../../../back/users/types";
+import {ProfileI} from "../../../../common/users/types";
 import {media} from "../../../../../vk/types/newsfeed";
 
 

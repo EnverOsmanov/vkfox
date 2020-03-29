@@ -7,7 +7,7 @@ import ItemActions from "../../components/itemActions/ItemActions";
 import {getHistory, markAsRead} from "../helpers/chat.pu";
 import * as _ from "underscore"
 import {DialogI, MessageHistoryI, Speech} from "../types";
-import {UserProfile} from "../../../../back/users/types";
+import {UserProfile} from "../../../../common/users/types";
 import {Message} from "../../../../../vk/types";
 import BrowserPu from "../../../../browser/browser.pu";
 

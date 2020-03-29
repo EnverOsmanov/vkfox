@@ -1,5 +1,5 @@
 import {NotifType} from "../../back/notifications/VKNotification";
-import {Sex} from "../../back/users/types";
+import {Sex} from "../users/types";
 
 export interface PopupSetting {
     enabled : boolean;

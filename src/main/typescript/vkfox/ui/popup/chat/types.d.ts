@@ -1,6 +1,5 @@
-import {PuChatUserProfile} from "../../../back/chat/collections/ProfilesColl";
-import {FoxUserProfileI} from "../../../common/chat/types";
-import {UserProfile} from "../../../back/users/types";
+import {ChatUserProfileI, FoxUserProfileI} from "../../../common/chat/types";
+import {UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
 
 export interface Speech {
@@ -26,7 +25,7 @@ export interface DialogI {
 
 export interface ChatDataI {
     dialogs : DialogI[]
-    profiles: PuChatUserProfile[]
+    profiles: ChatUserProfileI[]
 }
 
 

@@ -1,5 +1,7 @@
 import * as React from "react"
 import {CSSProperties} from "react"
+import * as _ from "underscore"
+
 import Browser, {default as BrowserPu} from "../../../../browser/browser.pu"
 import Request from "../request/request.pu"
 import {
@@ -16,7 +18,7 @@ import {
 import {duration} from "../filters/filters.pu";
 import {VideoGetUserVideosResponse} from "../../../../../vk/types";
 import {
-    Attachment,
+    Attachment, AttachmentContainer,
     AttachmentDoc,
     AttachmentDocType,
     AttachmentGift,
@@ -30,6 +32,7 @@ import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
 import {media} from "../../../../../vk/types/newsfeed";
+import AttachmentC from "./AttachmentC";
 
 
 function imageProperties(src: string): CSSProperties {
@@ -259,4 +262,22 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
             console.warn("Unknown attachment", type, data);
             return null;
     }
+}
+
+export function postAttachmentsO(attachments?: AttachmentContainer[]): JSX.Element[] | null {
+    const counted: _.Dictionary<number> = _.countBy(attachments, it => it.type);
+
+    function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
+
+        return (
+            <AttachmentC
+                key={i}
+                type={attachment.type}
+                data={attachment[attachment.type]}
+                showFullWidth={i == 0 && counted[attachment.type] % 2 != 0}
+            />
+        );
+    }
+
+    return attachments?.map(singleAttachment)
 }
