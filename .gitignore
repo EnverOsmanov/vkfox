@@ -1,7 +1,7 @@
 .DS_Store
 src/main/typescript/vkfox/**/*.js
 src/main/typescript/vkfox/**/*.js.map
-!src/main/typescript/vkfox/auth/oauth.vk.com.js
+!src/main/typescript/vkfox/common/auth/oauth.vk.com.js
 web-ext-artifacts
 
 node_modules
