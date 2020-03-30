@@ -10,6 +10,7 @@ const gulp                 = require("gulp"),
     webpack                = require("webpack");
 
 const __srcDir = "./src/main/typescript";
+const __srcDirJS = "./src/main/javascript/";
 const __resources = "./src/main/resources";
 
 const APP_VERSION = process.env.npm_package_version;
@@ -54,7 +55,7 @@ gulp.task("copy:firefoxResources", () => {
 
 gulp.task("copy:firefoxSrc", () => {
     return gulp.src([
-        __srcDir + "/vkfox/common/auth/oauth.vk.com.js"
+        __srcDirJS + "vkfox/common/auth/oauth.vk.com.js"
     ], {base: __srcDir })
         .pipe(gulp.dest("./target/firefox"))
 });
