@@ -27,6 +27,10 @@ function wait(time: number = REAUTH_DEBOUNCE): Promise<any> {
     return new Promise( (resolve) => setTimeout(resolve, time))
 }
 
+function rejectAll(queriesToProcess: ApiQuery[], data: ExecuteResponse): void {
+    queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
+}
+
 /**
  * Make HTTP RequestBg
  *
@@ -82,86 +86,82 @@ function xhrMy(type: string, url: string, data: string | object, networkIssues: 
         .then(handleResponse, handleError);
 }
 
-function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
-    const executeCodeTokens = queriesToProcess.map( query => query.params.code.replace(/^return\s*|;$/g, ''));
+async function processingSmallPart(queriesToProcess: ApiQuery[]): Promise<void> {
+    const executeCodeTokens = queriesToProcess.map(query => query.params.code.replace(/^return\s*|;$/g, ''));
 
     const executeCode = `return [${executeCodeTokens}];`;
 
-    return Auth.getAccessToken().then( (accessToken) => {
-        function handleSuccess(data: ExecuteResponse) {
-            function rejectAll() {
-                queriesToProcess.forEach(query => query.reject(new AccessTokenError(`VK: ${data.error.error_msg}`)))
-            }
+    const accessToken = await Auth.getAccessToken();
 
-            if (data.execute_errors) {
-                const notServerErrors = data.execute_errors.filter( error => error.error_code != 10);
+    async function handleSuccess(data: ExecuteResponse): Promise<void> {
+        if (data.execute_errors) {
+            const notServerErrors = data.execute_errors.filter(error => error.error_code != 10);
 
-                function haveAllResponses() {
-                    return data.response.length != queriesToProcess.length
-                }
-
-                if (notServerErrors.length > 0 && haveAllResponses()) console.warn("APIquery", executeCode, data);
-            }
-
-            const { response } = data;
-            if (Array.isArray(response)) {
-                for (let i = 0; i < response.length; i++) {
-                    queriesToProcess[i].resolve(response[i]);
-                }
-                RequestBg._processApiQueries();
-            }
-            else if (data.error && data.error.error_msg) {
-                switch(data.error.error_code) {
-                    case 5: { // auth failed
-                        console.debug("[R]... Retrying", data.error);
-                        return Auth.login(true)
-                            .then(() => processingSmallPart(queriesToProcess));
-                    }
-
-                    case 3: { // invalid method
-                        console.debug("[R]... Rejecting", data.error);
-                        return Promise.reject(rejectAll());
-                    }
-
-                    case 10: { // server error
-                        console.debug("[R]... Retrying", data.error);
-                        return wait(60 * 1000).then( () => Promise.reject(rejectAll()));
-                    }
-
-                    case 12: {
-                        console.debug("[R]", data.error);
-                        return Promise.reject(rejectAll());
-                    }
-
-                    default: {
-                        console.debug("[R]", data.error);
-                        return wait(20 * 1000)
-                            .then(rejectAll);
-                    }
-                }
-            }
-            else {
-                console.error(`response is not array`, data);
-            }
+            if (notServerErrors.length > 0) console.warn("APIquery", executeCode, data);
         }
 
-        function handleFailure(e) {
-            queriesToProcess.forEach( query => query.reject(e))
+        const {response} = data;
+        if (Array.isArray(response)) {
+            for (let i = 0; i < response.length; i++) {
+                queriesToProcess[i].resolve(response[i]);
+            }
+        } else if (data.error && data.error.error_msg) {
+            switch (data.error.error_code) {
+                case 5: { // auth failed
+                    console.debug("[R]... Retrying", data.error);
+
+                    await Auth.login(true)
+                    apiQueriesQueue.push(...queriesToProcess)
+                    RequestBg._processApiQueries();
+                    return Promise.resolve();
+                }
+
+                case 3: { // invalid method
+                    console.debug("[R]... Rejecting", data.error);
+                    return rejectAll(queriesToProcess, data);
+                }
+
+                case 10: { // server error
+                    console.debug("[R]... Retrying", data.error);
+
+                    await wait(60 * 1000)
+                    return rejectAll(queriesToProcess, data);
+                }
+
+                case 12: {
+                    console.debug("[R]", data.error);
+                    return rejectAll(queriesToProcess, data);
+                }
+
+                default: {
+                    console.debug("[R]", data.error);
+
+                    await wait(20 * 1000)
+                    return rejectAll(queriesToProcess, data);
+                }
+            }
+        } else {
+            console.error(`response is not array`, data);
         }
+    }
 
-        const method = "execute";
-        const params = {
-            method,
-            code        : executeCode,
-            access_token: accessToken,
-            v           : API_VERSION
-        };
+    function handleFailure(e: Error) {
+        queriesToProcess.forEach(query => query.reject(e))
+    }
 
-        return RequestBg
-            .post(`${API_DOMAIN}/method/${method}`, params)
-            .then(handleSuccess)
-            .catch(handleFailure);
-    });
+    const method = "execute";
+    const params = {
+        method,
+        code        : executeCode,
+        access_token: accessToken,
+        v           : API_VERSION
+    };
+    try {
+        const data = await RequestBg.post(`${API_DOMAIN}/method/${method}`, params);
+        return handleSuccess(data);
+    } catch (e) {
+        return handleFailure(e);
+    }
 }
 
 

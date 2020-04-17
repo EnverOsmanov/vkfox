@@ -167,21 +167,21 @@ function freeSpace() {
         groupItemsColl.reset(groupItemsColl.slice(0, MAX_ITEMS_COUNT));
 
         // gather required profiles' ids from new friends
-        required_uids = _(
+        required_uids = _.chain(
             friendItemsColl
                 .where({ type: "friend" })
                 // first element contains quantity
                 .map( model => (model.friends.items || []) )
-        ).chain()
+        )
             .flatten()
             .map((f: UserId) => f.user_id)
             .value();
 
         // gather required profiles from source_ids
-        required_uids = _(required_uids.concat(
+        required_uids = _.uniq(required_uids.concat(
             groupItemsColl.map(gi => Math.abs(gi.source_id)),
             friendItemsColl.map(fi => fi.source_id)
-        )).uniq();
+        ));
 
         profilesColl.forEach(p => {
             if (!required_uids.includes(p.id)) profilesColl.delete(p.id)

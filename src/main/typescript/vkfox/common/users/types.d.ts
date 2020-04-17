@@ -1,7 +1,6 @@
 import {NameSurname, OnlyName } from "../chat/types";
+import {IsOnline} from "../../../vk/types";
 
-
-type IsOnline = 0 | 1;
 export const enum Sex { Male, Female, Unknown }
 
 export interface ProfileI {
@@ -11,6 +10,10 @@ export interface ProfileI {
     photo_100   ?: string
     photo_50    ?: string
     photo       ?: string
+}
+
+export interface FaveUser extends NameSurname {
+    id: number
 }
 
 export interface UserProfile extends NameSurname, ProfileI {

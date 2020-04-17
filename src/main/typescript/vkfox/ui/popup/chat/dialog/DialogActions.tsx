@@ -65,7 +65,7 @@ class DialogActions extends React.Component<DialogActionsProps> {
         const {dialog} = this.props;
         const messageURL = `http://vk.com/im?sel=${(dialog.chat_id ? 'c' + dialog.chat_id:dialog.uid)}`;
 
-        const unread = _(dialog.messages).last().read_state === 0;
+        const unread = _.last(dialog.messages).read_state === 0;
 
 
         return (

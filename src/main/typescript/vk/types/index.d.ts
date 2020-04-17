@@ -1,4 +1,4 @@
-import {UserProfile} from "../../vkfox/common/users/types";
+import {FaveUser, UserProfile} from "../../vkfox/common/users/types";
 import {LPMessage} from "../../vkfox/back/longpoll/types";
 import {AttachmentContainer} from "./attachment";
 
@@ -114,7 +114,7 @@ export interface FaveGetUsersResponse {
      * Total number
      */
     count?: number;
-    items?: UserProfile[];
+    items?: FaveUser[];
 }
 
 export interface LikesGenereicResponse {
@@ -220,9 +220,10 @@ export interface MessagesGetDialogsResponse extends GenericRS<VkDialog>{
 
 }
 
+export type IsOnline = 0 | 1;
 
 interface MessagesLastActivityResponse {
-    online  : number // 0 or 1
+    online  : IsOnline
     time    : number
 }
 

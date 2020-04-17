@@ -1,6 +1,6 @@
 "use strict";
 
-const constructor = function (name) {
+const constructor = function (name: string) {
     const item = localStorage.getItem(name);
 
     this._set = item

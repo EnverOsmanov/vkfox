@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ChangeEvent } from 'react';
 import I18N from "../../../../common/i18n/i18n";
 import {NotificationsSettingsI} from "../../../../common/notifications/types";
 
@@ -6,7 +7,7 @@ import {NotificationsSettingsI} from "../../../../common/notifications/types";
 interface Props {
     notifications: NotificationsSettingsI
 
-    onVolumeChange(event)
+    onVolumeChange(event: ChangeEvent<HTMLInputElement>): void
 }
 
 class NotificationsVolumeSetting extends React.Component<Props, object> {

@@ -27,7 +27,8 @@ export interface FoxUserProfileI extends UserProfile {
 
     // Properties added by Vkfox
     isSelf              ?: boolean
-    isWatched           ?: boolean
+    isWatched           : boolean
+    originalIndex       ?: number
     lastActivityTime    ?: number
     description         ?: string
 }

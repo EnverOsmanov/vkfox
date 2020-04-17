@@ -121,7 +121,8 @@ function fetchProfiles(dialogs: DialogI[]): Promise<void> {
         .difference(cachesUids)
         .value();
 
-    _(cachesUids).difference(requiredUids)
+    cachesUids
+        .filter(id => !requiredUids.includes(id))
         .forEach( id => profilesColl.delete(id));
 
     if (missingUids.length) {
@@ -340,7 +341,7 @@ function addNewMessage(update: LPMessage) {
     let messageDeferred: Promise<MessagesGetByIdResponse>;
 
     // For messages from chat attachment contains "from" property
-    if (_(attachment).isEmpty()) {
+    if (_.isEmpty(attachment)) {
         // mimic response from server
         const message: Message = {
             body      : update[6],
@@ -402,7 +403,7 @@ function addNewMessage(update: LPMessage) {
             : Promise.reject(new Error("VK response sucks, maybe I used incorrect parameters :("))
     }
 
-    messageDeferred
+    return messageDeferred
         .then(handleResponse)
         .catch(e => console.error(`Error during AddNewMessage`, e));
 }

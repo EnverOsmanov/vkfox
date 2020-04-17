@@ -1,4 +1,5 @@
 import * as React from "react"
+import { ChangeEvent } from 'react';
 import iassign from "immutable-assign";
 import Mediator from "../../../mediator/mediator.pu"
 import {Msg} from "../../../mediator/messages"
@@ -138,12 +139,12 @@ class SettingsPage extends React.Component<object, SettingsState> {
         })
     };
 
-    onVolumeChange = (event) => {
+    onVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
 
-        const volume = event.target.value;
+        const volume = Number(event.target.value);
         this.setState(prevState => {
 
-            const newState = iassign(prevState,
+            const newState: SettingsState = iassign(prevState,
                 s => s.notifications.sound.volume,
                 () => volume
             );

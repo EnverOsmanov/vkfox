@@ -4,6 +4,7 @@
     "module"        : "commonjs",
     "sourceMap"     : true,
     "jsx"           : "react",
+    "outDir"    : "target/classes",
     "lib"       : ["es2018", "dom"],
     "typeRoots" : ["node_modules/web-ext-types", "node_modules/@types"],
     "resolveJsonModule": true

@@ -102,10 +102,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         const {dialog, profilesColl} = this.props;
 
         const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
-        if (!_(foldedMessages).last().author) {
-            debugger;
-        }
-        const out = _(foldedMessages).last().author.isSelf;
+        const out = _.last(foldedMessages).author.isSelf;
         const lastMessage = dialog.messages.slice(-1)[0];
 
         const owners = this.getOwners(dialog);

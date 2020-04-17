@@ -34,7 +34,7 @@ export class NotificationsSettings extends PersistentModel {
         // TODO remove in v5.0.7
         // support legacy signal values (i.g. standart.mp3)
         sound = self.get('sound');
-        ['standart', 'original'].some(function (type) {
+        ['standart', 'original'].some( type => {
             if (sound.signal.indexOf(type) > 0) {
                 sound.signal = type;
                 return true;

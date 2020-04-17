@@ -1,11 +1,11 @@
-import {ChatUserProfileI, FoxUserProfileI} from "../../../common/chat/types";
+import {ChatUserProfileI} from "../../../common/chat/types";
 import {UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
 
 export interface Speech {
     items   : Message[]
     out     : boolean
-    author  : FoxUserProfileI
+    author  : ChatUserProfileI
 }
 
 
