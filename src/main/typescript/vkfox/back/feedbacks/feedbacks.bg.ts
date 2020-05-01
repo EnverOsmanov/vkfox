@@ -53,9 +53,10 @@ import {
     PostCommentN,
     WithFromId
 } from "../../../vk/types/feedback";
-import {PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
+import {ItemObj, PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
 import {GroupProfile, UserProfile} from "../../common/users/types";
 import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
+import {idMaker} from "../../common/feedbacks/id";
 
 /**
  * Responsible for "News -> My" page
@@ -240,7 +241,7 @@ function generateFeedbackID(type: string, p: PhotoItem | VideoItem | ParentComme
             ? "post"
             : type;
 
-        const s = p.id;
+        const s = idMaker(p as ItemObj);
 
         return `${f}:${s}:user:${feedback.owner_id}`;
     }

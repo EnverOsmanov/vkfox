@@ -1,12 +1,11 @@
-import {ProfileI, UserProfile} from "../../vkfox/common/users/types";
+import {ProfileI} from "../../vkfox/common/users/types";
 import {GenericRS} from "./index";
 import {WithUserLikes, ZeroOne} from "./feedback";
 import {AttachmentContainer} from "./attachment";
 
 
-export interface ItemObj {
-    id      ?: string;
-    type     : string;
+export interface ItemLike {
+    type: string
     date     : number
     source_id: number;
 }
@@ -16,7 +15,8 @@ export interface WithCopyHistory {
 }
 
 
-export interface PostItem extends ItemObj, WithUserLikes, WithCopyHistory {
+export interface PostItem extends ItemLike, WithUserLikes, WithCopyHistory {
+    type        : "post"
     text       ?: string
     attachments?: AttachmentContainer[]
     comments    : CanPostable
@@ -26,40 +26,58 @@ export interface PostItem extends ItemObj, WithUserLikes, WithCopyHistory {
     post_source : PostSource
 }
 
-export interface PhotoItem extends ItemObj {
+export interface PhotoItem extends ItemLike {
+    type: "photo"
     owner_id: number // added for notifications.get (parent)
+    photos: GenericRS<media.Photo>
 }
 
-export interface PhotoTagItem extends ItemObj {
+export interface PhotoTagItem extends ItemLike {
+    type: "photo_tag"
     photo_tags: GenericRS<media.Photo>
 }
 
-export interface WallPhotoItem extends ItemObj {
-    // type = "wall_photo"
+export interface WallPhotoItem extends ItemLike {
+    type: "wall_photo"
 
     photos: GenericRS<media.Photo>
 }
 
-export interface FriendItem extends ItemObj {
-    // type = "friend"
+export interface FriendItem extends ItemLike {
+    type: "friend"
 
     friends?: GenericRS<UserId>
 }
 
-export interface AudioItem extends ItemObj {
-    // type = "audio";
+export interface AudioItem extends ItemLike {
+    type: "audio";
 
     audio: GenericRS<AudioAudio>
 }
 
-export interface VideoItem extends ItemObj {
-    // type = "video";
+export interface VideoItem extends ItemLike {
+    type: "video";
 
     video: GenericRS<VideoVideo>
 
     owner_id: number // added for notifications.get (parent)
 }
 
+export interface NoteItem extends ItemLike {
+    type: "note"
+
+    notes: GenericRS<object>
+}
+
+type ItemObj =
+    VideoItem |
+    AudioItem |
+    FriendItem |
+    WallPhotoItem |
+    PhotoTagItem |
+    PhotoItem |
+    PostItem |
+    NoteItem
 
 export interface NewsfeedData {
     profiles: Map<number, ProfileI>

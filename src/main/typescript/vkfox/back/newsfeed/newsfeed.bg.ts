@@ -3,11 +3,11 @@ import RequestBg from "../request/request.bg";
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import {Msg} from "../../mediator/messages"
-import {BBCollectionOps, GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
-import {ItemDulpColl, ItemsColl,} from "./helper/models";
+import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
 import {AccessTokenError} from "../request/models";
 import {markAsOfflineIfModeOnOnce} from "../force-online/force-online.bg";
 import {
+    FriendItem,
     ItemObj,
     media,
     Newsfeed,
@@ -20,6 +20,7 @@ import {
 import {LikesChanged} from "./types";
 import {AttachmentPhotoContainer} from "../../../vk/types/attachment";
 import {ProfileI, UserProfile} from "../../common/users/types";
+import {idMaker} from "../../common/feedbacks/id";
 
 /**
  * Responsible for "News -> Friends", "News -> Groups" pages
@@ -32,8 +33,8 @@ const MAX_ITEMS_COUNT = 50,
 
 
 const profilesColl: Map<number, ProfileI> = new Map();
-const groupItemsColl = new ItemsColl();
-const friendItemsColl = new ItemsColl();
+const groupItemsColl: ItemObj[] = [];
+const friendItemsColl: ItemObj[] = [];
 
 const autoUpdateParams: NewsfeedRequestParams = {
     count: MAX_ITEMS_COUNT
@@ -42,14 +43,20 @@ const autoUpdateParams: NewsfeedRequestParams = {
 //
 //
 //Functions
-
-export function idMaker(item: ItemObj): string {
-    const post_id = "post_id" in item
-        ? (item as PostItem).post_id
-        : "";
-
-    return [item.source_id, post_id, item.type].join(":");
-}
+/*function extractItems(item: ItemObj): ItemObj[] {
+    switch (item.type) {
+        case "wall_photo":
+            return item.photos.items
+        case "photo":
+            return item.photos.items
+        case "photo_tag":
+            return item.photo_tags.items
+        case "note":
+            return item.notes.items
+        case "friend":
+            return item.friends.items
+    }
+}*/
 
 /**
  * Generates unique id for every item,
@@ -65,41 +72,35 @@ function processRawItem(item: ItemObj) {
         "friend"    : "friends"
     };
 
+    const itemId = idMaker(item);
 
-    item.id = idMaker(item);
+    const itemsColl = item.source_id > 0
+        ? friendItemsColl
+        : groupItemsColl;
 
-    const collisionItem = item.source_id > 0
-        ? friendItemsColl.get(item.id)
-        : groupItemsColl.get(item.id);
+    const collisionItem = itemsColl.find(el => idMaker(el) == itemId);
 
     if (collisionItem) {
-        const collisionItemJS = collisionItem.toJSON();
-
-        const propertyName = typeToPropertyMap[collisionItemJS.type];
+        const propertyName = typeToPropertyMap[collisionItem.type];
 
         if (propertyName) {
             // type "photo" item has "photos" property; note - notes etc
             // used to eliminate duplicate items during merge
-            const collection = new ItemDulpColl();
+            const collection: ItemObj[] = [];
 
-            collection.add(item[propertyName].items, BBCollectionOps.addOptions);
-            collection.add(collisionItemJS[propertyName].items, BBCollectionOps.addOptions);
+            collection.push(item[propertyName].items);
+            collection.push(collisionItem[propertyName].items);
 
             item[propertyName] = {
-                count: collection.size(),
-                items: collection.toJSON()
+                count: collection.length,
+                items: collection
             }
         }
+
+        itemsColl.splice(itemsColl.indexOf(collisionItem), 1);
     }
 
-    if (item.source_id > 0) {
-        friendItemsColl.remove(collisionItem);
-        friendItemsColl.add(item);
-    }
-    else {
-        groupItemsColl.remove(collisionItem);
-        groupItemsColl.add(item);
-    }
+    itemsColl.push(item);
 }
 
 /**
@@ -158,20 +159,20 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
  * Also removes unnecessary profiles after that
  */
 function freeSpace() {
-    if (friendItemsColl.size() > MAX_ITEMS_COUNT || groupItemsColl.size() > MAX_ITEMS_COUNT) {
+    if (friendItemsColl.length > MAX_ITEMS_COUNT || groupItemsColl.length > MAX_ITEMS_COUNT) {
 
         let required_uids: number[];
 
         // slice items
-        friendItemsColl.reset(friendItemsColl.slice(0, MAX_ITEMS_COUNT));
-        groupItemsColl.reset(groupItemsColl.slice(0, MAX_ITEMS_COUNT));
+        friendItemsColl.length = MAX_ITEMS_COUNT;
+        groupItemsColl.length = MAX_ITEMS_COUNT;
 
         // gather required profiles' ids from new friends
         required_uids = _.chain(
             friendItemsColl
-                .where({ type: "friend" })
+                .filter( el => el.type == "friend")
                 // first element contains quantity
-                .map( model => (model.friends.items || []) )
+                .map( model => (model as FriendItem).friends.items || [])
         )
             .flatten()
             .map((f: UserId) => f.user_id)
@@ -189,7 +190,7 @@ function freeSpace() {
     }
 }
 
-function fetchNewsfeed(): Promise<number | void> {
+function fetchNewsfeed(): Promise<number | object> {
     const code = "return {" +
         `newsfeed: API.newsfeed.get(${ JSON.stringify(autoUpdateParams) }),` +
         "time: API.utils.getServerTime() };";
@@ -209,7 +210,9 @@ function fetchNewsfeed(): Promise<number | void> {
             // try to remove old items, if new were inserted
             if (newsfeedObj.items.length) freeSpace();
 
-            setTimeout(fetchNewsfeed, UPDATE_PERIOD);
+            friendItemsColl.sort(itemObjSorter)
+            groupItemsColl.sort(itemObjSorter)
+
             return markAsOfflineIfModeOnOnce();
         }
         else return Promise.resolve()
@@ -220,35 +223,37 @@ function fetchNewsfeed(): Promise<number | void> {
             console.error("Fetch newsfeed failed... Retrying", e.message)
         }
         else console.error("Fetch newsfeed failed... Retrying", e);
-
-        setTimeout(fetchNewsfeed, UPDATE_PERIOD);
     }
 
     return RequestBg
         .api<NewsfeedResp>({ code })
         .then(responseHandler)
-        .catch(handleError);
+        .catch(handleError)
+        .then( () => setTimeout(fetchNewsfeed, UPDATE_PERIOD));
 }
 
 function onLikesChanged(params: LikesChanged): void {
 
-    const whereClause = {
-        type     : params.type,
-        source_id: params.owner_id,
-        post_id  : params.item_id
-    };
+    function whereClause(el: PostItem): boolean {
+        return el.type     == params.type &&
+        el.source_id == params.owner_id &&
+        el.post_id  == params.item_id
+    }
 
     const model = params.owner_id > 0
-        ? friendItemsColl.findWhere(whereClause)
-        : groupItemsColl.findWhere(whereClause);
+        ? friendItemsColl.find(whereClause)
+        : groupItemsColl.find(whereClause);
 
-    if (model) model.likes = params.likes;
+    if (model) (model as PostItem).likes = params.likes;
+
+    if (params.owner_id > 0) publishNewsfeedFriends()
+    else publishNewsfeedGroups()
 }
 
 function onChangeUser(): void {
     profilesColl.clear();
-    groupItemsColl.reset();
-    friendItemsColl.reset();
+    groupItemsColl.length = 0;
+    friendItemsColl.length = 0;
 }
 
 
@@ -270,9 +275,6 @@ export default function initialize() {
 
     readyPromise.then( () => {
         Mediator.sub(Msg.LikesChanged, onLikesChanged);
-
-        groupItemsColl.on("change add", _.debounce(publishNewsfeedGroups, 0), 0);
-        friendItemsColl.on("change add", _.debounce(publishNewsfeedFriends, 0), 0);
     });
 
 }
@@ -280,13 +282,18 @@ export default function initialize() {
 function publishNewsfeedFriends() {
     Mediator.pub(Msg.NewsfeedFriends, {
         profiles: profilesColl,
-        items   : friendItemsColl.toJSON()
+        items   : friendItemsColl
     });
 }
 
 function publishNewsfeedGroups() {
     Mediator.pub(Msg.NewsfeedGroups, {
         profiles: profilesColl,
-        items   : groupItemsColl.toJSON()
+        items   : groupItemsColl
     });
+}
+
+
+function itemObjSorter(a: ItemObj, b: ItemObj): number {
+    return b.date - a.date;
 }

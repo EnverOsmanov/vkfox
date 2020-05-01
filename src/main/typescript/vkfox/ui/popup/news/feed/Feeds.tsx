@@ -1,6 +1,7 @@
 import * as React from "react"
 import NewsFeedItem from "./NewsFeedItem";
 import {ItemObj, NewsfeedData} from "../../../../../vk/types/newsfeed";
+import {idMaker} from "../../../../common/feedbacks/id";
 
 interface FeedsProps {
     data: NewsfeedData
@@ -16,7 +17,7 @@ class Feeds extends React.Component<FeedsProps, object> {
 
             return (
                 <NewsFeedItem
-                    key={item.id}
+                    key={idMaker(item)}
                     item={item}
                     profiles={profiles}
                 />
