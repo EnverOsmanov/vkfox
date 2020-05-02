@@ -174,11 +174,12 @@ export interface GenericRS<I> {
 
 export interface Message {
     id          : number
-    user_id     : number
+    from_id     : number
+    peer_id     : number
     read_state  : number;
     date        : number;
     out         : number;
-    body        : string
+    text        : string
     title       : string
     attachments?: AttachmentContainer[]
 
@@ -190,11 +191,13 @@ export interface Message {
 }
 
 interface FwdMessage {
-    user_id : number
-    date    : number
-    body    : string
-
     attachments?: AttachmentContainer[]
+    conversation_message_id: number
+    date    : number
+    from_id: number
+    id: number
+    peer_id : number
+    text    : string
 }
 
 type MessageActionT =
@@ -202,10 +205,14 @@ type MessageActionT =
     "chat_invite_user" |
     "chat_create"
 
-export interface MessageWithAction extends Message {
-    action: MessageActionT
+interface Action {
+    member_id: number
+    type: MessageActionT
+}
 
-    action_mid  : number
+export interface MessageWithAction extends Message {
+    action: Action
+
     action_email: string
     action_text : string
 }
@@ -216,8 +223,49 @@ export interface VkDialog {
     message : Message
 }
 
-export interface MessagesGetDialogsResponse extends GenericRS<VkDialog>{
+export interface Peer {
+    id: number
+    local_id: number
+    type: "user" | "chat" | "group" | "email"
+}
 
+export interface CanWrite {
+    allowed: boolean
+}
+
+export interface VkConversation {
+    can_write: CanWrite
+    id: number
+    in_read: number
+    last_message_id: number
+    out_read: number
+    peer: Peer
+}
+
+export interface ChatSettings {
+    acl: object
+    active_ids: number[]
+    admin_ids: number[]
+    members_count: number
+    owner_id: number
+    photo: object
+    state: "in"
+    title: string
+}
+
+export interface VkConversationChat extends VkConversation {
+    chat_settings: ChatSettings
+
+}
+
+export interface VkConversationCnt {
+    conversation: VkConversation
+    last_message: Message
+}
+
+export type MessagesGetDialogsResponse = GenericRS<VkDialog>
+export interface MessagesGetConversationsResponse extends GenericRS<VkConversationCnt> {
+    unread_count: number
 }
 
 export type IsOnline = 0 | 1;

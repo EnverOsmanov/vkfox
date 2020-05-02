@@ -1,5 +1,5 @@
 import {ChatUserProfileI} from "../../../common/chat/types";
-import {UserProfile} from "../../../common/users/types";
+import {GroupProfile, UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
 
 export interface Speech {
@@ -15,8 +15,8 @@ export interface MessageHistoryI {
 }
 
 export interface DialogI {
-    id      : string
-    uid     : number
+    id      : number
+    //uid     : number
     messages: Message[]
 
     chat_active ?: number[]
@@ -26,6 +26,7 @@ export interface DialogI {
 export interface ChatDataI {
     dialogs : DialogI[]
     profiles: ChatUserProfileI[]
+    groups: GroupProfile[]
 }
 
 

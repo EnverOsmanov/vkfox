@@ -5,7 +5,7 @@ import * as _ from "underscore"
 import {foldMessagesByAuthor} from "../helpers/chat.pu";
 import Request from "../../components/request/request.pu"
 import {timeAgo} from "../../components/filters/filters.pu";
-import {UserProfile} from "../../../../common/users/types";
+import {GroupProfile, ProfileI, UserProfile} from "../../../../common/users/types";
 import {Message} from "../../../../../vk/types";
 import DialogSpeeches from "./DialogSpeeches";
 import ReplyMessage from "../../components/reply/ReplyMessage";
@@ -17,9 +17,10 @@ import {ChatUserProfileI} from "../../../../common/chat/types";
 interface DialogItemProps {
     dialog      : DialogI
     profilesColl: ChatUserProfileI[]
+    groupsColl: GroupProfile[]
 
     addToProfilesColl(profiles: UserProfile[]): void
-    addToMessages(dialogId: string, messages: Message[]): void
+    addToMessages(dialogId: number, messages: Message[]): void
 }
 
 interface DialogItemState {
@@ -80,13 +81,16 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
 
     getOwners = (dialog: DialogI): UserProfile | UserProfile[] =>{
-        const {profilesColl} = this.props;
+        const {profilesColl, groupsColl} = this.props;
 
         if (dialog.chat_id) {
             return dialog.chat_active.map(uid => profilesColl.find(e => e.id == uid))
         }
         else {
-            return profilesColl.find(e => e.id == dialog.uid);
+            const profiles: ProfileI[] = dialog.id > 0 ? profilesColl : groupsColl
+            const found = profiles.find(e => e.id == Math.abs(dialog.id));
+
+            return found as UserProfile
         }
 
     };
@@ -99,9 +103,9 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
 
     render(): React.ReactNode {
-        const {dialog, profilesColl} = this.props;
+        const {dialog, profilesColl, groupsColl} = this.props;
 
-        const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
+        const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl, groupsColl);
         const out = _.last(foldedMessages).author.isSelf;
         const lastMessage = dialog.messages.slice(-1)[0];
 
@@ -123,6 +127,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                         speeches={foldedMessages}
                         owners={owners}
                         profilesColl={profilesColl}
+                        groupsColl={groupsColl}
                         showReply={this.showOrHideReply}
                     />
 
@@ -139,7 +144,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                 <ReplyMessage
                     reply={this.state.reply}
                     message={this.state.message}
-                    sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
+                    sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.id)}
                     handleMessageChange={this.handleMessageChange}
                 />
 

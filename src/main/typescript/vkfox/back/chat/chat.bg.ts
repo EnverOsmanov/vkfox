@@ -12,13 +12,13 @@ import {Msg} from "../../mediator/messages"
 import {NotifType} from "../notifications/VKNotification";
 import {LPMessage} from "../longpoll/types";
 import {AuthModelI} from "../auth/types";
-import {UserProfile} from "../../common/users/types";
+import {GroupProfile, UserProfile} from "../../common/users/types";
 import {
     GenericRS,
     Message,
-    MessagesGetByIdResponse,
+    MessagesGetByIdResponse, MessagesGetConversationsResponse,
     MessagesGetDialogsResponse,
-    MessagesGetHistoryResponse,
+    MessagesGetHistoryResponse, VkConversation, VkConversationCnt,
     VkDialog
 } from "../../../vk/types";
 import {DialogI} from "../../ui/popup/chat/types";
@@ -34,6 +34,7 @@ let persistentModel: PersistentModel,
     userId: number;
 
 const profilesColl: Map<number, ChatUserProfileI> = new Map();
+const groupsColl: Map<number, GroupProfile> = new Map();
 
 /**
  * Notifies about current state of module.
@@ -43,7 +44,8 @@ const publishData = _.debounce( () => {
 
     Mediator.pub(Msg.ChatData, {
         dialogs: dialogColl,
-        profiles: [...profilesColl.values()]
+        profiles: [...profilesColl.values()],
+        groups: [...groupsColl.values()]
     });
 }, 0);
 
@@ -84,18 +86,41 @@ function updateLatestMessageId(): void {
     }
 }
 
-function fetchProfiles(dialogs: DialogI[]): Promise<void> {
+async function fetchProfiles(dialogs: DialogI[]): Promise<void> {
 
     function dialog2Uuids(accUids: number[], dialog: DialogI): number[] {
-        const allDialogUids = dialog.messages.map( message => message.user_id);
-
-        const uids = accUids
-            .concat(allDialogUids, dialog.uid);
+        const uids = dialog.messages.map( message => message.from_id);
 
         if (dialog.chat_active) return uids.concat(dialog.chat_active);
         else return uids;
     }
 
+    const requiredUids = dialogs.reduce(dialog2Uuids, [userId]);
+    const cachesUids = [...profilesColl.keys()];
+    const missingUids = _
+        .chain(requiredUids)
+        .uniq()
+        .difference(cachesUids)
+        .filter(e => 0 < e)
+        .value();
+
+    const missingGids = _
+        .chain(requiredUids)
+        .uniq()
+        .difference(cachesUids)
+        .filter(e => e < 0)
+        .value();
+
+    cachesUids
+        .filter(id => !requiredUids.includes(id))
+        .forEach( id => profilesColl.delete(id));
+
+    await Promise.all([addUsers(missingUids), addGroups(missingGids)])
+
+    publishData();
+}
+
+function addUsers(missingUids: number[]) {
     function addProfile(users: UserProfile[]) {
         function toChatProfile(user: UserProfile): ChatUserProfileI {
             const isSelf = user.id == userId;
@@ -109,26 +134,35 @@ function fetchProfiles(dialogs: DialogI[]): Promise<void> {
         users
             .map(toChatProfile)
             .forEach(e => profilesColl.set(e.id, e));
-
-        publishData();
     }
-
-    const requiredUids = dialogs.reduce(dialog2Uuids, [userId]);
-    const cachesUids = [...profilesColl.keys()];
-    const missingUids = _
-        .chain(requiredUids)
-        .uniq()
-        .difference(cachesUids)
-        .value();
-
-    cachesUids
-        .filter(id => !requiredUids.includes(id))
-        .forEach( id => profilesColl.delete(id));
 
     if (missingUids.length) {
         return Users.getProfilesById(missingUids).then(addProfile);
     }
     else return Promise.resolve();
+}
+
+async function addGroups(missingGids: number[]): Promise<void> {
+    function addProfile(users: GroupProfile[]) {
+        console.debug(users)
+        users
+            .forEach(e => groupsColl.set(-e.id, e));
+    }
+
+    if (missingGids.length) {
+        const absIds = missingGids.map(e => Math.abs(e))
+        console.debug(missingGids)
+        return Groups.getGroupById(absIds).then(addProfile);
+    }
+    else return Promise.resolve();
+}
+
+class Groups {
+    static getGroupById(missingIds: number[]): Promise<GroupProfile[]> {
+        const code = `return API.groups.getById({group_ids: '${missingIds.join()}'})`
+
+        return RequestBg.api<GroupProfile[]>({code})
+    }
 }
 
 /**
@@ -196,22 +230,20 @@ function dropReadMessages(messages: Message[]): Message[] {
 }
 
 function getDialogs(): Promise<DialogI[]> {
-    const code = "return API.messages.getDialogs({preview_length: 0});";
+    const code = "return API.messages.getConversations({preview_length: 0});";
 
-    function handleRequest(response: MessagesGetDialogsResponse): DialogI[] {
+    function handleRequest(response: MessagesGetConversationsResponse): DialogI[] {
 
-       function toDialog(messageCnt: VkDialog): DialogI {
-           const message = messageCnt.message;
+       function toDialog(messageCnt: VkConversationCnt): DialogI {
+           const message = messageCnt.last_message;
 
-           const id = message.chat_id
-               ? `chat_id_${message.chat_id}`
-               : `uid_${message.user_id}`;
+           const id = messageCnt.conversation.peer.id
 
            return {
                id,
                chat_id     : message.chat_id,
                chat_active : message.chat_active,
-               uid         : message.user_id,
+               //uid         : ,
                messages    : [message]
            };
        }
@@ -221,22 +253,13 @@ function getDialogs(): Promise<DialogI[]> {
         if (response && response.count) {
             return response
                 .items
-                .filter( item => {
-                    // only dialogs from users
-                    return item.message.user_id > 0 && (
-                        // only chat participants users
-                    item.message.chat_active
-                        ? item.message.chat_active.every(m => m > 0)
-                        : true
-                    );
-                })
                 .map(toDialog)
         }
         else return []
     }
 
     return RequestBg
-        .api<MessagesGetDialogsResponse>({ code })
+        .api<MessagesGetConversationsResponse>({ code })
         .then(handleRequest);
 }
 
@@ -297,8 +320,12 @@ function onUpdates(updates: LPMessage[]) {
  */
 async function getUnreadMessages(dialogs: DialogI[]): Promise<DialogI[]> {
     function getHistory(dialog: DialogI): Promise<MessagesGetHistoryResponse> {
+        if (!dialog.id) {
+            debugger
+            console.debug("getUnreadMessages", dialog)
+        }
         const code = "return API.messages.getHistory({" +
-            `user_id: ${dialog.uid},` +
+            `peer_id: ${dialog.id},` +
             `count: ${MAX_HISTORY_COUNT} ` +
             "});";
 
@@ -344,10 +371,11 @@ function addNewMessage(update: LPMessage) {
     if (_.isEmpty(attachment)) {
         // mimic response from server
         const message: Message = {
-            body      : update[6],
+            text      : update[6],
             title     : update[5],
             date      : update[4],
-            user_id   : dialogCompanionUid,
+            from_id   : dialogCompanionUid,
+            peer_id   : dialogCompanionUid,
             read_state: +!(flags & 1),
             id        : messageId,
             out       : +!!(flags & 2)
@@ -369,9 +397,7 @@ function addNewMessage(update: LPMessage) {
     async function handleMessage(response: GenericRS<Message>): Promise<Message> {
 
         const message: Message = response.items[0];
-        const dialogId = message.chat_id
-            ? "chat_id_" + message.chat_id
-            : "uid_" + dialogCompanionUid;
+        const dialogId = message.peer_id;
 
         const dialog = dialogColl.find(e => e.id == dialogId);
         if (dialog) {
@@ -380,8 +406,7 @@ function addNewMessage(update: LPMessage) {
         }
         else {
             const firstMessage: DialogI = {
-                id          : dialogId,
-                uid         : message.user_id,
+                id          : message.peer_id,
                 chat_id     : message.chat_id,
                 chat_active : message.chat_active,
                 messages    : [message]
@@ -419,7 +444,7 @@ function notifyAboutChange() {
 function onLatestMessageIdChange() {
     function notifyAboutMessage(): void {
 
-        const profile: UserProfile = profilesColl.get(lastMessage.user_id);
+        const profile: UserProfile = profilesColl.get(lastMessage.peer_id);
         const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
 
         const gender = profile.sex === 1 ? "female" : "male";
@@ -430,7 +455,7 @@ function onLatestMessageIdChange() {
             GENDER: gender
         });
 
-        const sanitizedMessage = html2text(lastMessage.body);
+        const sanitizedMessage = html2text(lastMessage.text);
 
         const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
 

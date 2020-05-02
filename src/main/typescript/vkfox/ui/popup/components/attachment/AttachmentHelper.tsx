@@ -31,7 +31,7 @@ import {
 import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
-import {media} from "../../../../../vk/types/newsfeed";
+import {media, PreviewAudioMsg} from "../../../../../vk/types/newsfeed";
 import AttachmentC from "./AttachmentC";
 
 
@@ -82,14 +82,7 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
         case AttachmentDocType.Audio: {
             const {audio_msg} = dataDoc.preview;
 
-            return (
-                <a
-                    className={`item__link`}
-                    onClick={_ => BrowserPu.createTab(videoViewPathByUrl(audio_msg.link_ogg))}>
-                    <i className="fa fa-music"/>
-                    {duration(audio_msg.duration)}
-                </a>
-            )
+            return audioMessageDiv(audio_msg);
         }
 
         default: {
@@ -104,6 +97,17 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
         }
     }
 
+}
+
+function audioMessageDiv(audio_msg: PreviewAudioMsg) {
+    return (
+        <a
+            className={`item__link`}
+            onClick={_ => BrowserPu.createTab(videoViewPathByUrl(audio_msg.link_ogg))}>
+            <i className="fa fa-music"/>
+            {duration(audio_msg.duration)}
+        </a>
+    )
 }
 
 function imageDiv(type: string, dataGraffiti: media.Photo, showFullWidth: boolean): JSX.Element {
@@ -161,6 +165,12 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
                     {dataAudio.artist} - {dataAudio.title}
                 </div>
             );
+
+        case "audio_message": {
+            const dataAudioMessage = data as media.AudioMessage;
+
+            return audioMessageDiv(dataAudioMessage);
+        }
 
         case "note":
             const dataNote = data as AttachmentNote;

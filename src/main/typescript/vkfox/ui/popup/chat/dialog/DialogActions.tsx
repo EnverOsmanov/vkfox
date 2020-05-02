@@ -18,7 +18,7 @@ interface DialogActionsProps {
 
     showReply(): void
     addToProfilesColl(profiles: UserProfile[]): void
-    addToMessages(dialogId: string, messages: Message[]): void
+    addToMessages(dialogId: number, messages: Message[]): void
 }
 
 class DialogActions extends React.Component<DialogActionsProps> {
@@ -63,7 +63,7 @@ class DialogActions extends React.Component<DialogActionsProps> {
 
     render(): React.ReactNode {
         const {dialog} = this.props;
-        const messageURL = `http://vk.com/im?sel=${(dialog.chat_id ? 'c' + dialog.chat_id:dialog.uid)}`;
+        const messageURL = `http://vk.com/im?sel=${(dialog.chat_id ? 'c' + dialog.chat_id:dialog.id)}`;
 
         const unread = _.last(dialog.messages).read_state === 0;
 

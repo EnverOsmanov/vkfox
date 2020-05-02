@@ -4,7 +4,7 @@ import {Msg} from "../../../mediator/messages";
 import I18N from "../../../common/i18n/i18n";
 import DialogItem from "./dialog/DialogItem";
 import {ChatDataI, DialogI} from "./types";
-import {UserProfile} from "../../../common/users/types";
+import {GroupProfile, UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
 import {ChatUserProfileI} from "../../../common/chat/types";
 
@@ -12,6 +12,7 @@ import {ChatUserProfileI} from "../../../common/chat/types";
 interface ChatState {
     dialogs     : DialogI[]
     profilesColl: ChatUserProfileI[]
+    groupsColl: GroupProfile[]
 }
 
 class ChatPage extends React.Component<object, ChatState> {
@@ -27,7 +28,7 @@ class ChatPage extends React.Component<object, ChatState> {
         Mediator.unsub(Msg.ChatData);
     }
 
-    private onChatData = ({dialogs, profiles}: ChatDataI) => {
+    private onChatData = ({dialogs, profiles, groups}: ChatDataI) => {
 
         this.setState(prevState => {
 
@@ -56,8 +57,10 @@ class ChatPage extends React.Component<object, ChatState> {
                 const mergedDialogs = dialogs.map(mergeDialogs);
 
                 const profilesColl: UserProfile[] = prevState.profilesColl.concat(profiles);
+                const groupsColl: GroupProfile[] = prevState.groupsColl.concat(groups);
 
                 return {
+                    groupsColl,
                     profilesColl,
                     dialogs: mergedDialogs
                 }
@@ -75,7 +78,7 @@ class ChatPage extends React.Component<object, ChatState> {
         })
     };
 
-    private addToMessages = (dialogId: string, messages: Message[]) => {
+    private addToMessages = (dialogId: number, messages: Message[]) => {
 
         this.setState(prevState => {
             const dialogs = prevState.dialogs.slice();
@@ -103,13 +106,14 @@ class ChatPage extends React.Component<object, ChatState> {
     }
 
     dialogElms = () => {
-        const {dialogs, profilesColl} = this.state;
+        const {dialogs, profilesColl, groupsColl} = this.state;
 
         return dialogs.map( dialog =>
             <DialogItem
                 key={dialog.id}
                 dialog={dialog}
                 profilesColl={profilesColl}
+                groupsColl={groupsColl}
                 addToProfilesColl={this.addToProfilesColl}
                 addToMessages={this.addToMessages}
             />
@@ -136,6 +140,7 @@ class ChatPageCpn {
 
     static initialState = {
         dialogs     : [],
-        profilesColl: []
+        profilesColl: [],
+        groupsColl: []
     };
 }

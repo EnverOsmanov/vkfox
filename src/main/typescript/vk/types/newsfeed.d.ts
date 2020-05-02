@@ -182,6 +182,12 @@ declare namespace media {
         url: string
     }
 
+    interface AudioMessage extends PreviewAudioMsg {
+        access_key: string
+        id: number
+        owner_id: number
+    }
+
     interface Podcast {
         artist: string
         date: number

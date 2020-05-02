@@ -3,7 +3,7 @@ import Request from "../../components/request/request.pu";
 import Users from "../../components/users/users.pu";
 import {ChatUserProfileI, GetHistoryParams} from "../../../../common/chat/types";
 import {DialogI, MessageHistoryI, Speech} from "../types";
-import {UserProfile} from "../../../../common/users/types";
+import {GroupProfile, ProfileI, UserProfile} from "../../../../common/users/types";
 import {Message, MessagesGetHistoryResponse} from "../../../../../vk/types";
 
 function getProfiles(dialog: DialogI, messages: Message[]): Promise<UserProfile[]> {
@@ -13,7 +13,7 @@ function getProfiles(dialog: DialogI, messages: Message[]): Promise<UserProfile[
         //we must make sure that we have
         //required profile objects
         const userIds = messages
-            .map(message => message.user_id);
+            .map(message => message.peer_id);
 
         return Users.getProfilesById( userIds )
     }
@@ -27,7 +27,7 @@ function buildParams(dialog: DialogI) {
     };
 
     if (dialog.chat_active) params.chat_id = dialog.chat_id;
-    else params.user_id = dialog.uid;
+    else params.user_id = dialog.id;
 
     return params;
 }
@@ -53,7 +53,7 @@ export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
  *
  * @returns {Array}
  */
-export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUserProfileI[]) {
+export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUserProfileI[], groupsColl: GroupProfile[]): Speech[] {
     const selfProfile: UserProfile = profilesColl.find(e => e.isSelf);
 
     function messageReducer(speeches: Speech[], message: Message): Speech[] {
@@ -61,7 +61,13 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUser
 
         function getProfile(): UserProfile {
 
-            return profilesColl.find(e => e.id == message.user_id)
+            const profiles: ProfileI[] = message.from_id > 0 ? profilesColl : groupsColl
+            const found = profiles.find(e => e.id == Math.abs(message.from_id))
+            if (!found) {
+                throw new Error(`User (${message.from_id}) not found for message ${message.id}`)
+            }
+
+            return found as UserProfile
         }
 
         const author: UserProfile = message.out

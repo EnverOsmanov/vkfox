@@ -16,6 +16,7 @@ interface DialogSpeechesProps {
     speeches    : Speech[],
     owners      : UserProfile | UserProfile[]
     profilesColl: ChatUserProfileI[]
+    groupsColl: GroupProfile[]
     showReply(): void
 }
 
@@ -27,17 +28,17 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
             const messageWithAction = messageItem as MessageWithAction;
 
             const {profilesColl} = this.props;
-            switch (messageWithAction.action) {
+            switch (messageWithAction.action.type) {
                 case "chat_kick_user": {
 
-                    const profile = profilesColl.find(e => e.id == messageWithAction.action_mid);
+                    const profile = profilesColl.find(e => e.id == messageWithAction.from_id);
 
                     if (!profile) {
-                        console.warn("Profile not found in message with action", messageWithAction.action_mid);
+                        console.warn("Profile not found in message with action", messageWithAction.from_id);
                         return undefined;
                     }
 
-                    const rawM = speech.author.id === messageWithAction.action_mid
+                    const rawM = speech.author.id === messageWithAction.from_id
                         ? "Chat leave user"
                         : "Chat kick user";
 
@@ -65,14 +66,14 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
                 function divForNotArray() {
                     const prevFwdMsg = messageItem.fwd_messages[i-1];
-                    if (prevFwdMsg && fwdMessage.user_id === prevFwdMsg.user_id) {
+                    if (prevFwdMsg && fwdMessage.peer_id === prevFwdMsg.peer_id) {
                         return undefined;
                     }
 
-                    const profileO = profilesColl.find(e => e.id == fwdMessage.user_id);
+                    const profileO = profilesColl.find(e => e.id == fwdMessage.peer_id);
 
                     if (!profileO) {
-                        console.warn("Profile not found in forwarded message", fwdMessage.user_id);
+                        console.warn("Profile not found in forwarded message", fwdMessage.peer_id);
                         return undefined;
                     }
 
@@ -104,7 +105,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     <div key={i} className="chat__fwd">
                         {divForNotArray()}
                         <RectifyPu
-                            text={fwdMessage.body}
+                            text={fwdMessage.text}
                             hasEmoji={false}
                         />
 
@@ -122,16 +123,19 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
     singleMessageDiv = (messageItem: Message, speech: Speech) => {
 
         const userJoinedOrKickedInfo = this.getActionText(messageItem, speech);
+        if (messageItem.text != "" && !messageItem.text) {
+            console.warn("Message is missing", messageItem)
+        }
 
         return (
             <div key={messageItem.id}>
-                <RectifyPu text={messageItem.body} hasEmoji={false}/>
+                <RectifyPu text={messageItem.text} hasEmoji={false}/>
 
                 {this.forwardedMessages(messageItem)}
 
                 {userJoinedOrKickedInfo}
 
-                <br hidden={!(messageItem.attachments && messageItem.body)}/>
+                <br hidden={!(messageItem.attachments && messageItem.text)}/>
 
                 {messageItem.attachments && attachmentsDivM(messageItem.attachments)}
             </div>
