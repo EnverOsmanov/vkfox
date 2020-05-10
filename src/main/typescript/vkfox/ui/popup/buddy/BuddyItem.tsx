@@ -64,9 +64,11 @@ class BuddyItem extends React.Component<BuddyItemProps, BuddyItemState> {
 
         // send message
         const message = this.state.message.trim();
+        const random_id = crypto.getRandomValues(new Uint32Array(1))[0]
 
         const params: SendMessageParams = {
             message,
+            random_id,
             user_id: uid
         };
 

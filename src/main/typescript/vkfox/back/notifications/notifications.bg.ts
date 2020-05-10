@@ -5,7 +5,7 @@ import Browser from "../browser/browser.bg"
 import {NotifType, VKNotification} from "./VKNotification";
 import {NotificationsSettingsI, VKNotificationI} from "../../common/notifications/types";
 import VKfoxAudio from "../../common/notifications/VKfoxAudio";
-import {html2text} from "../../rectify/helpers";
+import {html2textBasic} from "../../rectify/helpers";
 import NotificationOptions = Notifications.CreateNotificationOptions;
 import {NotificationQueue} from "./models/NotificationQueue";
 import {NotificationsSettings} from "./models/NotificationSettings";
@@ -93,7 +93,7 @@ export default class VKfoxNotifications {
                 type   : "basic",
                 title  : options.title,
                 iconUrl: base64,
-                message: html2text(message)
+                message: html2textBasic(message)
             };
 
             return browser.notifications

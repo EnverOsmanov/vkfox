@@ -45,6 +45,7 @@ $itemPadding: 0.75em;
     overflow: hidden;
     padding-left: $itemPadding;
     display: block;
+    text-align: left;
   }
   &__author {
     @include text-truncate();

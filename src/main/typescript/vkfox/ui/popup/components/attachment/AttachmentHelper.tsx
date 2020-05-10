@@ -31,7 +31,7 @@ import {
 import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
-import {media} from "../../../../../vk/types/newsfeed";
+import {media, PreviewAudioMsg} from "../../../../../vk/types/newsfeed";
 import AttachmentC from "./AttachmentC";
 
 
@@ -62,7 +62,7 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
         case AttachmentDocType.Gif: {
             const previewUrl = dataDoc.preview.photo.sizes.sort( (a, b) => b.width - a.width)
                 .find(p => p.width <= 604)
-                .src;
+                .url;
 
             return (
                 <div className="item__attachment item__attachment_type_photo item__attachment__wide">
@@ -82,14 +82,7 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
         case AttachmentDocType.Audio: {
             const {audio_msg} = dataDoc.preview;
 
-            return (
-                <a
-                    className={`item__link`}
-                    onClick={_ => BrowserPu.createTab(videoViewPathByUrl(audio_msg.link_ogg))}>
-                    <i className="fa fa-music"/>
-                    {duration(audio_msg.duration)}
-                </a>
-            )
+            return audioMessageDiv(audio_msg);
         }
 
         default: {
@@ -106,13 +99,29 @@ function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
 
 }
 
+function audioMessageDiv(audio_msg: PreviewAudioMsg) {
+    return (
+        <a
+            className={`item__link`}
+            onClick={_ => BrowserPu.createTab(videoViewPathByUrl(audio_msg.link_ogg))}>
+            <i className="fa fa-music"/>
+            {duration(audio_msg.duration)}
+        </a>
+    )
+}
+
 function imageDiv(type: string, dataGraffiti: media.Photo, showFullWidth: boolean): JSX.Element {
+    const first = dataGraffiti.sizes[0]
+    const size = first.height != 0
+        ? first
+        : dataGraffiti.sizes.find(s => s.type == "x")
+
     const image = (
         <img
             alt=""
             className="item__picture lazyload"
             data-srcset={buildSrcSet(dataGraffiti)}
-            data-src={dataGraffiti.photo_604}
+            data-src={size.url}
             onClick={_ => BrowserPu.createTab(imageViewPath(dataGraffiti))}
         />
     );
@@ -132,12 +141,14 @@ function videoDiv(dataVideo: media.Video, showFullWidth: boolean): JSX.Element {
         ? "item__attachment__wide"
         : "";
 
+    const image = dataVideo.image.find(e => e.width == 320)
+
     return (
         <div className={`item__attachment item__attachment_type_video ${wideClassName}`}>
             <img
                 alt=""
                 className="item__video__poster lazyload"
-                data-src={dataVideo.photo_320}
+                data-src={image.url}
                 onClick={() => onVideoClick(dataVideo)}
             />
             <div className="item__video-desc">
@@ -161,6 +172,12 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
                     {dataAudio.artist} - {dataAudio.title}
                 </div>
             );
+
+        case "audio_message": {
+            const dataAudioMessage = data as media.AudioMessage;
+
+            return audioMessageDiv(dataAudioMessage);
+        }
 
         case "note":
             const dataNote = data as AttachmentNote;
@@ -194,12 +211,12 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
         case "link": {
             const dataLink = data as AttachmentLink;
 
-            const image = dataLink.button && dataLink.photo.photo_604 ?
+            const image = dataLink.button && dataLink.photo.sizes[0].url ?
                 <img
                     alt=""
                     className="item__picture"
                     srcSet={buildSrcSet(dataLink.photo)}
-                    src={dataLink.photo.photo_604}
+                    src={dataLink.photo.sizes[0].url}
                 />
                 : null;
 

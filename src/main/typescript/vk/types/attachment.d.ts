@@ -5,6 +5,7 @@ export interface Attachment {}
 export type AttachmentT =
     "photo" |
     "audio" |
+    "audio_message" |
     "video" |
     "wall" |
     "note" |

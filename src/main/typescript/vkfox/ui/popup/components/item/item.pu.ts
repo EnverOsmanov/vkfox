@@ -111,12 +111,9 @@ export function stickerImageUrl(sticker: AttachmentSticker): string {
 export function buildSrcSet(photo: media.Photo): string {
     const arr: string[] = [];
 
-    if (photo.photo_75) arr.push(`${photo.photo_75} 75w`);
-    if (photo.photo_130) arr.push(`${photo.photo_130} 130w`);
-    if (photo.photo_604) arr.push(`${photo.photo_604} 604w`);
-    if (photo.photo_807) arr.push(`${photo.photo_807} 807w`);
-    if (photo.photo_1280) arr.push(`${photo.photo_1280} 1280w`);
-    if (photo.photo_2560) arr.push(`${photo.photo_2560} 2560w`);
+    photo.sizes.forEach( size =>
+        arr.push(`${size.url} ${size.height}w`)
+    )
 
     return arr.toString();
 }

@@ -1,38 +1,71 @@
 "use strict";
 import Request from "../../components/request/request.pu";
 import Users from "../../components/users/users.pu";
-import {ChatUserProfileI, GetHistoryParams} from "../../../../common/chat/types";
-import {DialogI, MessageHistoryI, Speech} from "../types";
-import {UserProfile} from "../../../../common/users/types";
-import {Message, MessagesGetHistoryResponse} from "../../../../../vk/types";
+import Groups from "../../components/groups/groups.pu";
+import {ChatUserProfileI, DialogI, GetHistoryParams} from "../../../../common/chat/types";
+import {MessageHistoryI, Speech} from "../types";
+import {GroupProfile, UserProfile} from "../../../../common/users/types";
+import {Message, MessagesGetHistoryResponse, MessageWithAction} from "../../../../../vk/types";
+import {DialogItemProps} from "../dialog/DialogItem";
 
-function getProfiles(dialog: DialogI, messages: Message[]): Promise<UserProfile[]> {
-
+function getProfiles(dialogItem: DialogItemProps, messages: Message[]): Promise<[ UserProfile[], GroupProfile[]]> {
+    const {dialog, profilesColl, groupsColl} = dialogItem
     if (dialog.chat_active) {
         //after fetching of news profiles,
         //we must make sure that we have
         //required profile objects
-        const userIds = messages
-            .map(message => message.user_id);
+        const messageIds = messages.map(m => m.from_id);
+        const fwdIds = messages.flatMap(m => m.fwd_messages.map(f => f.from_id))
+        const replyIds = messages.flatMap(m => m.reply_message? [m.reply_message.from_id] : [] )
+        const actionIds = messages.flatMap(m => ("action" in m)? [(m as MessageWithAction).action.member_id] : [] )
+        const ids = messageIds.concat(fwdIds, replyIds, actionIds)
 
-        return Users.getProfilesById( userIds )
-    }
-    else return Promise.resolve([]);
+        const unique = [...new Set(ids)];
+
+        return Promise.all([
+            getUsers(unique, profilesColl),
+            getGroups(unique, groupsColl)
+        ])
+
+    } else return Promise.resolve([[], []]);
 }
 
-function buildParams(dialog: DialogI) {
-    const params: GetHistoryParams = {
-        offset  : dialog.messages.length,
-        count   : 5
+function getUsers(unique: number[], users: UserProfile[]): Promise<UserProfile[]> {
+    const cachedIds = users.map(u => u.id)
+
+    const ids = unique
+        .filter(id => 0 < id)
+        .filter(id => !cachedIds.includes(id))
+
+    return ids.length ?
+        Users.getProfilesById(ids)
+        : Promise.resolve([]);
+}
+
+function getGroups(unique: number[], profiles: GroupProfile[]): Promise<GroupProfile[]> {
+    const cachedIds = profiles.map(p => p.id)
+
+    const ids = unique
+        .filter(id => id < 0)
+        .filter(id => !cachedIds.includes(id))
+        .map(id => Math.abs(id))
+
+    return ids.length
+        ? Groups.getProfilesById(ids)
+        : Promise.resolve([]);
+}
+
+function buildParams(dialog: DialogI): GetHistoryParams {
+    return {
+        peer_id: dialog.conversation.peer.id,
+        offset : dialog.messages.length,
+        count  : 5
     };
-
-    if (dialog.chat_active) params.chat_id = dialog.chat_id;
-    else params.user_id = dialog.uid;
-
-    return params;
 }
 
-export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
+export async function getHistory(dialogItem: DialogItemProps): Promise<MessageHistoryI> {
+    const {dialog} = dialogItem
+
     const params = buildParams(dialog);
 
     const method = "messages.getHistory";
@@ -41,9 +74,17 @@ export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
 
     const messages = historyR.items;
 
-    const profiles = await getProfiles(dialog, messages);
+    const [profiles, groups] = await getProfiles(dialogItem, messages);
 
-    return {messages, profiles}
+    return {messages, profiles, groups}
+}
+
+export function findProfile(id: number, profilesColl: ChatUserProfileI[], groupsColl: GroupProfile[]): UserProfile | GroupProfile {
+    const profiles: Array<UserProfile | GroupProfile> = id > 0
+        ? profilesColl
+        : groupsColl
+
+    return profiles.find(e => e.id == Math.abs(id));
 }
 
 /**
@@ -53,15 +94,19 @@ export async function getHistory(dialog: DialogI): Promise<MessageHistoryI> {
  *
  * @returns {Array}
  */
-export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUserProfileI[]) {
+export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUserProfileI[], groupsColl: GroupProfile[]): Speech[] {
     const selfProfile: UserProfile = profilesColl.find(e => e.isSelf);
 
     function messageReducer(speeches: Speech[], message: Message): Speech[] {
         const lastItem = speeches[speeches.length - 1];
 
         function getProfile(): UserProfile {
+            const found = findProfile(message.from_id, profilesColl, groupsColl);
+            if (!found) {
+                throw new Error(`User (${message.from_id}) not found for message ${message.id}`)
+            }
 
-            return profilesColl.find(e => e.id == message.user_id)
+            return found as UserProfile
         }
 
         const author: UserProfile = message.out
@@ -74,8 +119,8 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUser
 
 
             speeches.push({
-                items : [message],
-                out   : Boolean(message.out),
+                items: [message],
+                out  : Boolean(message.out),
                 author
             });
         }
@@ -87,16 +132,15 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUser
 }
 
 /**
- * Mark messages as read
+ * Mark dialog as read
  *
- * @param {Array} messages
  */
-export function markAsRead(messages: Message[]): Promise<any> {
-    const message_ids = messages.map(m => m.id);
+export function markAsRead(dialog: DialogI): Promise<any> {
+    const {peer_id} = dialog;
 
-    const method = "messages.markAsRead";
+    const method = "dialog.markAsRead";
     const params = {
-        message_ids
+        peer_id
     };
 
     return Request.directApi(method, params);

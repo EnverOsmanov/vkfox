@@ -15,6 +15,7 @@ function wait() {
 function fetchUpdates(serverRS: LongPollServerRS) {
     //console.debug("StartLP", serverRS)
     const params = {
+        version: 3,
         act : 'a_check',
         key : serverRS.key,
         ts  : serverRS.ts,
@@ -51,9 +52,12 @@ function fetchUpdates(serverRS: LongPollServerRS) {
         .then(() => fetchUpdates(serverRS))
 }
 
-export default function enableLongPollUpdates(ts?: number) {
+export default function enableLongPollUpdates(ts?: string) {
+    const obj = {
+        lp_version: 3
+    }
     return RequestBg
-        .api<LongPollServerRS>({ code: "return API.messages.getLongPollServer();" })
+        .api<LongPollServerRS>({ code: `return API.messages.getLongPollServer(${JSON.stringify(obj)});` })
         .then(server => {
             if (ts) server.ts = ts;
             return fetchUpdates(server)

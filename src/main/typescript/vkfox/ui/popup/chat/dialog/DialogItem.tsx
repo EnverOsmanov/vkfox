@@ -1,25 +1,27 @@
 import * as React from "react"
-import {DialogI, ReplyI, SendMessageParams} from "../types";
+import {ReplyI, SendMessageParams} from "../types";
 import DialogActions from "./DialogActions";
 import * as _ from "underscore"
-import {foldMessagesByAuthor} from "../helpers/chat.pu";
+import {findProfile, foldMessagesByAuthor} from "../helpers/chat.pu";
 import Request from "../../components/request/request.pu"
 import {timeAgo} from "../../components/filters/filters.pu";
-import {UserProfile} from "../../../../common/users/types";
-import {Message} from "../../../../../vk/types";
+import {GroupProfile, UserProfile} from "../../../../common/users/types";
+import {Message, VkConversationChat} from "../../../../../vk/types";
 import DialogSpeeches from "./DialogSpeeches";
 import ReplyMessage from "../../components/reply/ReplyMessage";
 import {Description} from "../../components/item/ItemDescription";
-import ItemHero from "../../components/item/ItemHero";
-import {ChatUserProfileI} from "../../../../common/chat/types";
+import {ChatUserProfileI, DialogI} from "../../../../common/chat/types";
+import ItemHeroV2 from "../../components/item/ItemHerV2";
 
 
-interface DialogItemProps {
+export interface DialogItemProps {
     dialog      : DialogI
     profilesColl: ChatUserProfileI[]
+    groupsColl: GroupProfile[]
 
     addToProfilesColl(profiles: UserProfile[]): void
-    addToMessages(dialogId: string, messages: Message[]): void
+    addToGroupsColl(profiles: GroupProfile[]): void
+    addToMessages(dialogId: number, messages: Message[]): void
 }
 
 interface DialogItemState {
@@ -34,7 +36,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     handleMessageChange = (message: string) => {
         const {dialog} = this.props;
 
-        localStorage.setItem(`chatDraft:${dialog.id}`, message);
+        localStorage.setItem(`chatDraft:${dialog.peer_id}`, message);
 
         this.setState(prevState => {
             return {
@@ -44,16 +46,18 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         })
     };
 
-    onSendMessage = (chatId ?:number, uid?: number) => {
+    onSendMessage = (peer_id ?:number) => {
         this.showOrHideReply();
 
         // send message
         const message = this.state.message.trim();
+        const random_id = crypto.getRandomValues(new Uint32Array(1))[0]
 
-        const params: SendMessageParams = { message };
-
-        if (chatId) params.chat_id = chatId;
-        else params.user_id = uid;
+        const params: SendMessageParams = {
+            peer_id,
+            random_id,
+            message
+        };
 
         const method = "messages.send";
 
@@ -79,14 +83,17 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
     };
 
 
-    getOwners = (dialog: DialogI): UserProfile | UserProfile[] =>{
-        const {profilesColl} = this.props;
+    getOwners = (dialog: DialogI): UserProfile | UserProfile[] | GroupProfile | GroupProfile[] =>{
+        const {profilesColl, groupsColl} = this.props;
 
-        if (dialog.chat_id) {
-            return dialog.chat_active.map(uid => profilesColl.find(e => e.id == uid))
+        if (dialog.chat_active.length > 1) {
+            return dialog.chat_active.map(uid => findProfile(uid, profilesColl, groupsColl)) as GroupProfile[]
+        }
+        else if (dialog.chat_active.length == 1) {
+            return findProfile(dialog.chat_active[0], profilesColl, groupsColl)
         }
         else {
-            return profilesColl.find(e => e.id == dialog.uid);
+            return findProfile(dialog.peer_id, profilesColl, groupsColl)
         }
 
     };
@@ -97,25 +104,39 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         return <Description description={datetime}/>
     };
 
+    static getTitle(dialog: DialogI) {
+        const {conversation} = dialog
+        if ("chat_settings" in conversation) {
+            const chat = conversation as VkConversationChat
+            return chat.chat_settings.title
+        }
+    }
+
 
     render(): React.ReactNode {
-        const {dialog, profilesColl} = this.props;
+        const {dialog, profilesColl, groupsColl} = this.props;
 
-        const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl);
+        const foldedMessages = foldMessagesByAuthor(dialog.messages, profilesColl, groupsColl);
         const out = _.last(foldedMessages).author.isSelf;
         const lastMessage = dialog.messages.slice(-1)[0];
 
         const owners = this.getOwners(dialog);
 
 
+        if (!owners) {
+            console.debug(dialog, profilesColl, groupsColl)
+        }
+
+
         return (
             <div className="item chat card-1 scrollable-card">
 
-                <ItemHero
+                <ItemHeroV2
                     description={DialogItem.heroSmallDescription(lastMessage)}
                     owners={owners}
+                    dialog={dialog}
                     ownerClass="item__avatar"
-                    title={lastMessage.title}
+                    title={DialogItem.getTitle(dialog)}
                 />
 
                 <div className="item__body clearfix">
@@ -123,23 +144,22 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
                         speeches={foldedMessages}
                         owners={owners}
                         profilesColl={profilesColl}
+                        groupsColl={groupsColl}
                         showReply={this.showOrHideReply}
                     />
 
                     <DialogActions
-                        dialog={dialog}
+                        dialogItem={this.props}
                         foldedMessages={foldedMessages}
                         out={out}
                         showReply={this.showOrHideReply}
-                        addToProfilesColl={this.props.addToProfilesColl}
-                        addToMessages={this.props.addToMessages}
                     />
                 </div>
 
                 <ReplyMessage
                     reply={this.state.reply}
                     message={this.state.message}
-                    sendMessage={() => this.onSendMessage(dialog.chat_id, dialog.uid)}
+                    sendMessage={() => this.onSendMessage(dialog.peer_id)}
                     handleMessageChange={this.handleMessageChange}
                 />
 
@@ -157,7 +177,7 @@ class DialogItemCpn {
 
     static initialState(props: DialogItemProps) {
         const {dialog} = props;
-        const message = localStorage.getItem(`chatDraft:${dialog.id}`) || "";
+        const message = localStorage.getItem(`chatDraft:${dialog.peer_id}`) || "";
 
         return {
             message,

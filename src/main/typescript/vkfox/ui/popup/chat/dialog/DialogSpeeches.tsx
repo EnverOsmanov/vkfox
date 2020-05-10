@@ -3,19 +3,21 @@ import {CSSProperties} from "react"
 import {buildVkLink, profile2Name} from "../../components/filters/filters.pu";
 import {Speech} from "../types";
 import {GroupProfile, UserProfile} from "../../../../common/users/types";
-import {Message, MessageWithAction} from "../../../../../vk/types";
+import {FwdMessage, Message, MessageWithAction} from "../../../../../vk/types";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import I18N from "../../../../common/i18n/i18n";
 import {profilePhotoPath} from "../../components/item/item.pu";
 import {attachmentsDivM} from "./helpers/dialog.pu";
 import BrowserPu from "../../../../browser/browser.pu";
 import {ChatUserProfileI} from "../../../../common/chat/types";
+import {findProfile} from "../helpers/chat.pu";
 
 
 interface DialogSpeechesProps {
     speeches    : Speech[],
-    owners      : UserProfile | UserProfile[]
+    owners      : UserProfile | UserProfile[] | GroupProfile | GroupProfile[]
     profilesColl: ChatUserProfileI[]
+    groupsColl: GroupProfile[]
     showReply(): void
 }
 
@@ -27,17 +29,17 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
             const messageWithAction = messageItem as MessageWithAction;
 
             const {profilesColl} = this.props;
-            switch (messageWithAction.action) {
+            switch (messageWithAction.action.type) {
                 case "chat_kick_user": {
 
-                    const profile = profilesColl.find(e => e.id == messageWithAction.action_mid);
+                    const profile = profilesColl.find(e => e.id == messageWithAction.action.member_id);
 
                     if (!profile) {
-                        console.warn("Profile not found in message with action", messageWithAction.action_mid);
+                        console.warn("Profile not found in message with action", messageWithAction.from_id);
                         return undefined;
                     }
 
-                    const rawM = speech.author.id === messageWithAction.action_mid
+                    const rawM = speech.author.id === messageWithAction.action.member_id
                         ? "Chat leave user"
                         : "Chat kick user";
 
@@ -57,22 +59,22 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
         else return undefined;
     };
 
-    forwardedMessages(messageItem: Message) {
-        const {profilesColl} = this.props;
+    forwardedMessages(fwd_messages?: FwdMessage[]) {
+        const {profilesColl, groupsColl} = this.props;
 
-        if (messageItem.fwd_messages) {
-            return messageItem.fwd_messages.map( (fwdMessage, i) => {
+        if (fwd_messages) {
+            return fwd_messages.map( (fwdMessage, i) => {
 
                 function divForNotArray() {
-                    const prevFwdMsg = messageItem.fwd_messages[i-1];
-                    if (prevFwdMsg && fwdMessage.user_id === prevFwdMsg.user_id) {
+                    const prevFwdMsg = fwd_messages[i-1];
+                    if (prevFwdMsg && fwdMessage.from_id === prevFwdMsg.from_id) {
                         return undefined;
                     }
 
-                    const profileO = profilesColl.find(e => e.id == fwdMessage.user_id);
+                    const profileO = findProfile(fwdMessage.from_id, profilesColl, groupsColl);
 
                     if (!profileO) {
-                        console.warn("Profile not found in forwarded message", fwdMessage.user_id);
+                        console.warn("Profile not found in forwarded message", fwdMessage.from_id);
                         return undefined;
                     }
 
@@ -88,14 +90,15 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     };
 
                     return (
-                        <div className="item__title">
-                        <div
-                            style={cssProps}
-                            onClick={_ => BrowserPu.createTab(buildVkLink(anchor))}
-                            className="item__img media-object float-left"
-                        />
-
-                            <span className="item__author">{profile2Name(owner)}</span>
+                        <div>
+                            <div
+                                style={cssProps}
+                                onClick={_ => BrowserPu.createTab(buildVkLink(anchor))}
+                                className="item__img media-object float-left"
+                            />
+                            <div className="item__title">
+                                <span className="item__author">{profile2Name(owner)}</span>
+                            </div>
                         </div>
                     );
                 }
@@ -104,7 +107,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     <div key={i} className="chat__fwd">
                         {divForNotArray()}
                         <RectifyPu
-                            text={fwdMessage.body}
+                            text={fwdMessage.text}
                             hasEmoji={false}
                         />
 
@@ -122,16 +125,18 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
     singleMessageDiv = (messageItem: Message, speech: Speech) => {
 
         const userJoinedOrKickedInfo = this.getActionText(messageItem, speech);
+        if (messageItem.text != "" && !messageItem.text) {
+            console.warn("Message is missing", messageItem)
+        }
 
         return (
             <div key={messageItem.id}>
-                <RectifyPu text={messageItem.body} hasEmoji={false}/>
+                {this.forwardedMessages(messageItem.reply_message ? [messageItem.reply_message] : [])}
+                <RectifyPu text={messageItem.text} hasEmoji={false}/>
 
-                {this.forwardedMessages(messageItem)}
+                {this.forwardedMessages(messageItem.fwd_messages)}
 
                 {userJoinedOrKickedInfo}
-
-                <br hidden={!(messageItem.attachments && messageItem.body)}/>
 
                 {messageItem.attachments && attachmentsDivM(messageItem.attachments)}
             </div>
@@ -162,8 +167,9 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
                 const onSpeechClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     const isButton = (event.target as HTMLElement).classList.contains("btn");
+                    const isLink = (event.target as HTMLElement).tagName === "A";
 
-                    if (!isButton && !getSelection().toString() && array.length === i + 1) {
+                    if (!isButton && !isLink && !getSelection().toString() && array.length === i + 1) {
                         this.props.showReply();
                     }
                 };

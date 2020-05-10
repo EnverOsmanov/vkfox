@@ -1,6 +1,6 @@
-import {ChatUserProfileI} from "../../../common/chat/types";
-import {UserProfile} from "../../../common/users/types";
-import {Message} from "../../../../vk/types";
+import {ChatUserProfileI, DialogI} from "../../../common/chat/types";
+import {GroupProfile, UserProfile} from "../../../common/users/types";
+import {Message, Peer, VkConversation} from "../../../../vk/types";
 
 export interface Speech {
     items   : Message[]
@@ -12,20 +12,13 @@ export interface Speech {
 export interface MessageHistoryI {
     messages: Message[]
     profiles: UserProfile[]
-}
-
-export interface DialogI {
-    id      : string
-    uid     : number
-    messages: Message[]
-
-    chat_active ?: number[]
-    chat_id     ?: number
+    groups: GroupProfile[]
 }
 
 export interface ChatDataI {
     dialogs : DialogI[]
     profiles: ChatUserProfileI[]
+    groups: GroupProfile[]
 }
 
 
@@ -35,6 +28,8 @@ export interface ReplyI {
 
 export interface SendMessageParams {
     message: string
+    random_id: number
+    peer_id?: number
     chat_id?: number
     user_id?: number
 }

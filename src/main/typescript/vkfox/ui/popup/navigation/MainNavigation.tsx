@@ -10,7 +10,7 @@ import PersistentModel from "../../../common/persistent-model/persistent-model";
 import NewsPage from "../news/NewsPage";
 import Mediator from '../../../mediator/mediator.pu'
 import {Msg} from "../../../mediator/messages";
-import {AuthState} from "../../../back/auth/models";
+import {AuthState} from "../../../common/auth/AuthState";
 import Browser, {default as BrowserPu} from '../../../browser/browser.pu'
 import {VKNotificationI} from "../../../common/notifications/types";
 

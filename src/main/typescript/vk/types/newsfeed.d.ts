@@ -4,6 +4,12 @@ import {WithUserLikes, ZeroOne} from "./feedback";
 import {AttachmentContainer} from "./attachment";
 
 
+interface Artist {
+    domain: string
+    id: string
+    name: string
+}
+
 export interface ItemLike {
     type: string
     date     : number
@@ -55,6 +61,12 @@ export interface AudioItem extends ItemLike {
     audio: GenericRS<AudioAudio>
 }
 
+export interface AudioPlaylistItem extends ItemLike {
+    type: "audio_playlist";
+
+    audio_playlist: GenericRS<AudioPlaylist>
+}
+
 export interface VideoItem extends ItemLike {
     type: "video";
 
@@ -72,6 +84,7 @@ export interface NoteItem extends ItemLike {
 type ItemObj =
     VideoItem |
     AudioItem |
+    AudioPlaylistItem |
     FriendItem |
     WallPhotoItem |
     PhotoTagItem |
@@ -133,6 +146,11 @@ export interface AudioAudio {
     duration: number
 }
 
+export interface AudioPlaylist {
+    main_artists  : Artist[]
+    title   : string
+}
+
 
 
 
@@ -146,8 +164,7 @@ declare namespace media {
         duration    : number
         id          : number
         owner_id    : number
-        photo_130   : string
-        photo_320   : string
+        image: VideoSizeI[]
         views       : number
         title       : string
     }
@@ -156,12 +173,7 @@ declare namespace media {
         id          : number
         owner_id    : number
         date        : number
-        photo_75    : string
-        photo_130   : string
-        photo_604   : string
-        photo_807   : string
-        photo_1280 ?: string
-        photo_2560 ?: string
+        sizes: PhotoSizeI[]
         text        : string
         user_id     : number
         height      : number
@@ -180,6 +192,12 @@ declare namespace media {
         owner_id: number
         title: string
         url: string
+    }
+
+    interface AudioMessage extends PreviewAudioMsg {
+        access_key: string
+        id: number
+        owner_id: number
     }
 
     interface Podcast {
@@ -255,10 +273,17 @@ export interface NewsfeedResp {
 }
 
 interface PhotoSizeI {
-    src     : string
+    url     : string
     type    : string
     width   : number
     height  : number
+}
+
+interface VideoSizeI {
+    url: string
+    height      : number
+    width       : number
+    with_padding: 0 | 1
 }
 
 interface PreviewPhoto {

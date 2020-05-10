@@ -152,14 +152,11 @@ class Users {
         function promisify(resolve: (_: UserProfile[]) => void) {
 
             usersGetQueue.push({
-                uids: positiveUids,
+                uids,
                 promise: resolve
             });
             processGetUsersQueue(usersGetQueue);
         }
-
-        //communities have negative uids but they also can write a message
-        const positiveUids = uids.filter(x => x > 0);
 
         return Users.getFriendsProfiles()
             .then( () => new Promise(promisify) );

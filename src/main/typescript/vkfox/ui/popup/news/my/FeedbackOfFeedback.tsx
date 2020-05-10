@@ -78,7 +78,7 @@ class FeedbackOfFeedback extends React.Component<FeedbackItemProps, FeedbackItem
                 );
 
             default:
-                console.debug("Unknown FeedbackOfFeedback", feedback.type);
+                console.warn("Unknown FeedbackOfFeedback", feedback.type);
                 break;
         }
     };
@@ -113,7 +113,7 @@ class FeedbackOfFeedbackCpn {
         visible: false
     };
 
-    static initialState = {
+    static initialState: FeedbackItemState = {
         message : "",
         reply   : FeedbackOfFeedbackCpn.reply
     };

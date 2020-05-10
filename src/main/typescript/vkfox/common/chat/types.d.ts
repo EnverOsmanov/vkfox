@@ -1,9 +1,10 @@
 import {UserProfile} from "../users/types";
+import {Message, VkConversation} from "../../../vk/types";
 
 export interface GetHistoryParams {
     offset  : number
     count   : number
-    chat_id?: number
+    peer_id?: number
     user_id?: number
 }
 
@@ -32,3 +33,13 @@ export interface FoxUserProfileI extends UserProfile {
     lastActivityTime    ?: number
     description         ?: string
 }
+
+
+export interface DialogI {
+    peer_id: number
+    conversation: VkConversation
+    messages: Message[]
+
+    chat_active ?: number[]
+}
+

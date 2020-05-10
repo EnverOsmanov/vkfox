@@ -7,7 +7,7 @@ import VKfoxNotifications from "../notifications/notifications.bg"
 import PersistentSet from "../persistent-set/persistent-set.bg"
 import {Msg} from "../../mediator/messages"
 import {NotifType} from "../notifications/VKNotification"
-import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
+import {GProfileCollCmpn} from "../profiles-collection/profiles-collection.bg";
 
 import {FaveGetUsersResponse, MessagesLastActivityResponse} from "../../../vk/types";
 import {FoxUserProfileI} from "../../common/chat/types";

@@ -20,11 +20,3 @@ export class AuthModel extends Model {
         super.set("userId", value)
     }
 }
-
-export enum AuthState {
-    NULL,
-    LOCKED_IFRAME,
-    LOCKED_WINDOW,
-    LOCKED_TOKEN_PROCESSING,
-    READY
-}

@@ -12,12 +12,14 @@ import InstallPageOrLogin from "../yandex/yandex.bg";
 import Auth from "../auth/auth.bg";
 import Users from "../users/users.bg";
 import VKfoxNotifications from "../notifications/notifications.bg";
+import Groups from "../groups/groups.bg";
 
 
 Browser.init();
 Auth.init();
 Buddies();
 Users.init();
+Groups.init();
 ChatBg();
 NewsfeedBg();
 VKfoxNotifications.init();

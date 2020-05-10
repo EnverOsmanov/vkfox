@@ -1,4 +1,4 @@
-import {DialogI} from "../../../ui/popup/chat/types";
+import {DialogI} from "../../../common/chat/types";
 
 export class DialogIUtils {
 

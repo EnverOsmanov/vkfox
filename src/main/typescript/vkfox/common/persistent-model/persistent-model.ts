@@ -1,6 +1,6 @@
 "use strict";
 import {Model} from "backbone";
-import {BBCollectionOps} from "../profiles-collection/profiles-collection.bg";
+import {BBCollectionOps} from "../profiles-collection/profiles-collection";
 
 
 export default class PersistentModel extends Model {

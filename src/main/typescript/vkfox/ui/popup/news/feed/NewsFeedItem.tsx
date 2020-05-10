@@ -10,7 +10,7 @@ import AttachmentC from "../../components/attachment/AttachmentC";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import {ProfileI, UserProfile} from "../../../../common/users/types";
 import {
-    AudioItem,
+    AudioItem, AudioPlaylistItem,
     FriendItem,
     ItemObj, media,
     PhotoTagItem,
@@ -281,6 +281,26 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                         {audios}
                     </div>
                 );
+
+            case "audio_playlist": {
+                const audioItem = item as AudioPlaylistItem;
+
+                const audios = audioItem.audio_playlist.items.map( (audio, i) => {
+                    return (
+                        <div key={i}>
+                            <i className="fa fa-music"/>
+                            {audio.main_artists[0].name} - {audio.title}
+                        </div>
+                    )
+                });
+
+                return (
+                    <div>
+                        {I18N.get("New music:")}
+                        {audios}
+                    </div>
+                );
+            }
 
             case "video":
                 const videoItem = item as VideoItem;

@@ -160,7 +160,7 @@ class FeedbackItemCpn {
         visible: false
     };
 
-    static initialState = {
+    static initialState: FeedbackItemState = {
         message         : "",
         reply           : FeedbackItemCpn.reply,
         showAllFeedbacks: false

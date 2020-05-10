@@ -1,9 +1,8 @@
 import * as React from "react"
+import * as ReactDOMServer from 'react-dom/server'
 import I18N from '../common/i18n/i18n.pu';
-import * as linkifyHtml from 'linkifyjs/html';
-import * as sanitizeHtml from "sanitize-html";
-import * as jEmoji from 'emoji';
 import BrowserPu from "../browser/browser.pu";
+import {linkifySanitizeEmoji} from "./helpers";
 
 interface RectifyPuProps {
     text    : string
@@ -28,43 +27,8 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
         this.setState({ hideButton: true })
     }
 
-    /**
-     * Sanitize html with Angular's $sanitize.
-     * Replaces all links with correspndenting anchors,
-     * replaces next wiki format: [id12345|Dmitrii],
-     * [id12345:bp_234567_1234|Dmitrii]
-     * or [club32194285|Читать прoдoлжение..]
-     * with <a anchor="http://vk.com/id12345">Dmitrii</a>
-     * And repaces emoji unicodes with corrspondenting images
-     *
-     * @param {String} text
-     * @param {Boolean} hasEmoji
-     * @returns {String} html
-     */
-    static linkifySanitizeEmoji(text, hasEmoji) {
-        const jEmojedText = hasEmoji
-            ? jEmoji.unifiedToHTML(text)
-            : text;
-
-        const sanitized = sanitizeHtml(jEmojedText, {
-            parser: {},
-            allowedTags: [ "br" ]
-        });
-        const linkifiedText: string = linkifyHtml(sanitized, {
-                //"text" and "href" are safe tokens of the already sanitized string,
-                //which is passed to the "linkify" function above
-                callback: (text, href) => href
-                    ? <a onClick={_ => BrowserPu.createTab(href)}>{text}
-                        </a>
-                    : text
-            });
-
-        //replace wiki layout,
-        //linkifiedText is a sanitized and linkified text
-        return linkifiedText.replace(
-            /\[((?:id|club)\d+)(?::bp-\d+_\d+)?\|([^\]]+)\]/g,
-            '<a data-anchor="https://vk.com/$1">$2</a>'
-        );
+    static createTab(href: string, text: string):string {
+        return ReactDOMServer.renderToStaticMarkup(<a onClick={_ => BrowserPu.createTab(href)}>{text}</a>)
     }
 
     static escapeQuotes(string) {
@@ -77,9 +41,8 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
     }
 
     buttonOrFullText = (text: string, spaceIndex: number, hasEmoji: boolean) => {
-
         if (this.state.hideButton) {
-            const resultText = RectifyPu.linkifySanitizeEmoji(text, hasEmoji);
+            const resultText = linkifySanitizeEmoji(text, hasEmoji, RectifyPu.createTab);
 
             return (
                 <div
@@ -89,7 +52,7 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
             )
         }
         else {
-            const firstPartOfText = RectifyPu.linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji);
+            const firstPartOfText = linkifySanitizeEmoji(text.slice(0, spaceIndex), hasEmoji, RectifyPu.createTab);
 
             return (
                 <div className="news__post">
@@ -131,13 +94,13 @@ class RectifyPu extends React.Component<RectifyPuProps, RectifyPuState>{
             }
             else return <div
                 className="news__post news__item-text"
-                dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}
+                dangerouslySetInnerHTML={{__html: linkifySanitizeEmoji(text, hasEmoji, RectifyPu.createTab)}}
             />;
         }
         else if (text) {
             return <div
                 className="news__post news__item-text"
-                dangerouslySetInnerHTML={{__html: RectifyPu.linkifySanitizeEmoji(text, hasEmoji)}}
+                dangerouslySetInnerHTML={{__html: linkifySanitizeEmoji(text, hasEmoji, RectifyPu.createTab)}}
             />;
         }
         else return null;

@@ -55,7 +55,7 @@ import {
 } from "../../../vk/types/feedback";
 import {ItemObj, PhotoItem, VideoItem} from "../../../vk/types/newsfeed";
 import {GroupProfile, UserProfile} from "../../common/users/types";
-import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
+import {GProfileCollCmpn} from "../profiles-collection/profiles-collection.bg";
 import {idMaker} from "../../common/feedbacks/id";
 
 /**

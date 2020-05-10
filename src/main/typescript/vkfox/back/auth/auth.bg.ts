@@ -4,9 +4,10 @@ import * as Config from "../../common/config/config";
 import Mediator from "../../mediator/mediator.bg";
 import Browser from "../browser/browser.bg";
 import {Msg} from "../../mediator/messages";
-import {AuthModel, AuthState} from "./models";
+import {AuthModel} from "./models";
 import {AuthModelI} from "./types";
 import Tab = Tabs.Tab;
+import {AuthState} from "../../common/auth/AuthState";
 
 
 const RETRY_INTERVAL = 60000; //ms

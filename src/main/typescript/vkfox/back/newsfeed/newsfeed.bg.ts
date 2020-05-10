@@ -3,7 +3,7 @@ import RequestBg from "../request/request.bg";
 import * as _ from "underscore"
 import Mediator from "../../mediator/mediator.bg"
 import {Msg} from "../../mediator/messages"
-import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
+import {GProfileCollCmpn} from "../profiles-collection/profiles-collection.bg";
 import {AccessTokenError} from "../request/models";
 import {markAsOfflineIfModeOnOnce} from "../force-online/force-online.bg";
 import {

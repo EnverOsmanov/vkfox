@@ -1,9 +1,6 @@
-"use strict";
-import Mediator from '../../mediator/mediator.bg'
-import {AddOptions, Silenceable} from "backbone";
+import {UserProfile} from "../../common/users/types";
+import Mediator from "../../mediator/mediator.bg";
 import {Msg} from "../../mediator/messages";
-import {UserProfile} from "../users/types";
-
 
 export class GProfileCollCmpn {
 
@@ -35,20 +32,4 @@ export class GProfileCollCmpn {
             (updates: number[][]) => GProfileCollCmpn._onUserUpdates(users, updates)
         );
     }
-}
-
-
-class ProfilesAddOptions implements AddOptions {
-    parse = true;
-
-    merge = false;
-}
-
-class SilentAddOptions implements Silenceable {
-    silent = true
-}
-
-export class BBCollectionOps {
-    static beSilentOptions = new SilentAddOptions();
-    static addOptions = new ProfilesAddOptions()
 }

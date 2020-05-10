@@ -12,20 +12,23 @@ import {Msg} from "../../mediator/messages"
 import {NotifType} from "../notifications/VKNotification";
 import {LPMessage} from "../longpoll/types";
 import {AuthModelI} from "../auth/types";
-import {UserProfile} from "../../common/users/types";
+import {GroupProfile, UserProfile} from "../../common/users/types";
 import {
     GenericRS,
     Message,
     MessagesGetByIdResponse,
-    MessagesGetDialogsResponse,
-    MessagesGetHistoryResponse,
-    VkDialog
+    MessagesGetConversationsByIdResponse,
+    MessagesGetConversationsResponse,
+    MessagesGetHistoryResponse, MessageWithAction,
+    VkConversation,
+    VkConversationChat,
+    VkConversationCnt
 } from "../../../vk/types";
-import {DialogI} from "../../ui/popup/chat/types";
-import {html2text} from "../../rectify/helpers";
+import {html2textBasic} from "../../rectify/helpers";
 import {DialogIUtils} from "./collections/DialogColl";
-import {ChatUserProfileI} from "../../common/chat/types";
-import {GProfileCollCmpn} from "../../common/profiles-collection/profiles-collection.bg";
+import {ChatUserProfileI, DialogI} from "../../common/chat/types";
+import {GProfileCollCmpn} from "../profiles-collection/profiles-collection.bg";
+import Groups from "../groups/groups.bg";
 
 
 const MAX_HISTORY_COUNT = 10;
@@ -34,16 +37,18 @@ let persistentModel: PersistentModel,
     userId: number;
 
 const profilesColl: Map<number, ChatUserProfileI> = new Map();
+const groupsColl: Map<number, GroupProfile> = new Map();
 
 /**
  * Notifies about current state of module.
  * Has a tiny debounce to make only one publish per event loop
  */
-const publishData = _.debounce( () => {
+const publishData = _.debounce(() => {
 
     Mediator.pub(Msg.ChatData, {
-        dialogs: dialogColl,
-        profiles: [...profilesColl.values()]
+        dialogs : dialogColl,
+        profiles: [...profilesColl.values()],
+        groups  : [...groupsColl.values()]
     });
 }, 0);
 
@@ -84,51 +89,82 @@ function updateLatestMessageId(): void {
     }
 }
 
-function fetchProfiles(dialogs: DialogI[]): Promise<void> {
+async function fetchProfiles(dialogs: DialogI[]): Promise<void> {
 
     function dialog2Uuids(accUids: number[], dialog: DialogI): number[] {
-        const allDialogUids = dialog.messages.map( message => message.user_id);
+        const {messages} = dialog
+        const allDialogUids = messages.map(message => message.from_id);
 
-        const uids = accUids
-            .concat(allDialogUids, dialog.uid);
+        const activeUids = dialog.chat_active
+            ? dialog.chat_active
+            : [];
 
-        if (dialog.chat_active) return uids.concat(dialog.chat_active);
-        else return uids;
+        const fwdIds = messages.flatMap(m => m.fwd_messages.map(f => f.from_id))
+        const replyIds = messages.flatMap(m => m.reply_message? [m.reply_message.from_id] : [] )
+        const actionIds = messages.flatMap(m => ("action" in m)? [(m as MessageWithAction).action.member_id] : [] )
+
+        return accUids.concat(allDialogUids, activeUids, fwdIds, replyIds, actionIds);
     }
 
-    function addProfile(users: UserProfile[]) {
-        function toChatProfile(user: UserProfile): ChatUserProfileI {
-            const isSelf = user.id == userId;
+    const requiredIds = dialogs.reduce(dialog2Uuids, []);
 
-            return {
-                ...user,
-                isSelf
-            }
-        }
-
-        users
-            .map(toChatProfile)
-            .forEach(e => profilesColl.set(e.id, e));
-
-        publishData();
-    }
-
-    const requiredUids = dialogs.reduce(dialog2Uuids, [userId]);
-    const cachesUids = [...profilesColl.keys()];
+    const cachedUids = [...profilesColl.keys()];
     const missingUids = _
-        .chain(requiredUids)
+        .chain(requiredIds.concat(userId))
         .uniq()
-        .difference(cachesUids)
+        .difference(cachedUids)
+        .filter(e => 0 < e)
         .value();
 
-    cachesUids
-        .filter(id => !requiredUids.includes(id))
-        .forEach( id => profilesColl.delete(id));
+    const cachesGids = [...groupsColl.keys()];
+    const missingGids = _
+        .chain(requiredIds)
+        .uniq()
+        .difference(cachesGids)
+        .filter(e => e < 0)
+        .value();
+
+    cachedUids
+        .filter(id => !requiredIds.includes(id))
+        .forEach(id => profilesColl.delete(id));
+
+    await Promise.all([addUsers(missingUids), addGroups(missingGids)])
+
+    publishData();
+}
+
+function addProfiles(users: UserProfile[]) {
+    function toChatProfile(user: UserProfile): ChatUserProfileI {
+        const isSelf = user.id == userId;
+
+        return {
+            ...user,
+            isSelf
+        }
+    }
+
+    users
+        .map(toChatProfile)
+        .forEach(e => profilesColl.set(e.id, e));
+}
+
+function addUsers(missingUids: number[]) {
 
     if (missingUids.length) {
-        return Users.getProfilesById(missingUids).then(addProfile);
+        return Users.getProfilesById(missingUids).then(addProfiles);
+    } else return Promise.resolve();
+}
+
+async function addGroups(missingGids: number[]): Promise<void> {
+    function addProfile(users: GroupProfile[]) {
+        users
+            .forEach(e => groupsColl.set(e.id, e));
     }
-    else return Promise.resolve();
+
+    if (missingGids.length) {
+        const absIds = missingGids.map(e => Math.abs(e))
+        return Groups.getProfilesById(absIds).then(addProfile);
+    } else return Promise.resolve();
 }
 
 /**
@@ -138,7 +174,7 @@ function initialize(readyPromise: Promise<void>) {
 
     Mediator.sub(Msg.ChatDataGet, () => {
         readyPromise.then(publishData)
-    } );
+    });
 
     Mediator.sub(Msg.LongpollUpdates, onUpdates);
 
@@ -149,7 +185,7 @@ function initialize(readyPromise: Promise<void>) {
     persistentModel.on("change:latestMessageId", onLatestMessageIdChange);
 
 
-    readyPromise.then( () => {
+    readyPromise.then(() => {
         updateLatestMessageId();
         publishData();
     }).catch(console.error);
@@ -162,13 +198,14 @@ function initialize(readyPromise: Promise<void>) {
  * @param {DialogI} dialog subject for mutation
  */
 function removeReadMessages(dialog: DialogI): DialogI {
-    const {messages} = dialog;
+    const {messages, conversation} = dialog;
     const lastMessage = messages.pop();
     const result = [lastMessage];
     const originalOut = lastMessage.out;
 
-    messages.reverse().some( (message) => {
-        if (message.out === originalOut && message.read_state === 0) {
+    messages.reverse().some((message) => {
+        const isRead = message.id === conversation.in_read || message.id == conversation.out_read
+        if (!isRead && message.out === originalOut) {
             result.unshift(message);
         }
         // stop copying messages
@@ -179,13 +216,14 @@ function removeReadMessages(dialog: DialogI): DialogI {
     return dialog;
 }
 
-function dropReadMessages(messages: Message[]): Message[] {
+function dropReadMessages(messages: Message[], conversation: VkConversation): Message[] {
     const lastMessage = messages.pop();
     const result = [lastMessage];
     const originalOut = lastMessage.out;
 
-    messages.reverse().some(function (message) {
-        if (message.out === originalOut && message.read_state === 0) {
+    messages.reverse().some( message => {
+        const isRead = message.id === conversation.in_read || message.id == conversation.out_read
+        if (!isRead && message.out === originalOut) {
             result.unshift(message);
         }
         // stop copying messages
@@ -196,83 +234,86 @@ function dropReadMessages(messages: Message[]): Message[] {
 }
 
 function getDialogs(): Promise<DialogI[]> {
-    const code = "return API.messages.getDialogs({preview_length: 0});";
+    const obj = {
+        preview_length: 0
+    }
+    const code = `return API.messages.getConversations(${JSON.stringify(obj)});`;
 
-    function handleRequest(response: MessagesGetDialogsResponse): DialogI[] {
+    function handleRequest(response: MessagesGetConversationsResponse): DialogI[] {
 
-       function toDialog(messageCnt: VkDialog): DialogI {
-           const message = messageCnt.message;
+        function toDialog(messageCnt: VkConversationCnt): DialogI {
+            const {last_message, conversation} = messageCnt;
 
-           const id = message.chat_id
-               ? `chat_id_${message.chat_id}`
-               : `uid_${message.user_id}`;
+            const chat_active = getActive(conversation)
 
-           return {
-               id,
-               chat_id     : message.chat_id,
-               chat_active : message.chat_active,
-               uid         : message.user_id,
-               messages    : [message]
-           };
-       }
-
+            return {
+                peer_id : conversation.peer.id,
+                //chat_id     : last_message.chat_id,
+                chat_active,
+                messages: [last_message],
+                conversation
+            };
+        }
 
 
         if (response && response.count) {
             return response
                 .items
-                .filter( item => {
-                    // only dialogs from users
-                    return item.message.user_id > 0 && (
-                        // only chat participants users
-                    item.message.chat_active
-                        ? item.message.chat_active.every(m => m > 0)
-                        : true
-                    );
-                })
                 .map(toDialog)
-        }
-        else return []
+        } else return []
     }
 
     return RequestBg
-        .api<MessagesGetDialogsResponse>({ code })
+        .api<MessagesGetConversationsResponse>({code})
         .then(handleRequest);
 }
 
-function onUpdates(updates: LPMessage[]) {
+function getActive(conversation: VkConversation): number[] {
+    switch (conversation.peer.type) {
+        case "chat": {
+            const chat = conversation as VkConversationChat
+            return chat.chat_settings.active_ids
+        }
+        case "user":
+        case "group": {
+            return [conversation.peer.id]
+        }
+        default:
+            return []
+    }
+}
 
-    updates.forEach( (update: LPMessage) => {
+function onUpdates(updates: LPMessage[]) {
+    updates.forEach((update: LPMessage) => {
 
         // @see http://vk.com/developers.php?oid=-17680044&p=Connecting_to_the_LongPoll_Server
         switch (update[0]) {
-/*            case 2: {
-                // {"ts":1681860311,"updates":[[2,32893,128,14100889]]}
-                const messageId = update[1];
-                const mask = update[2];
+            /*            case 2: {
+                            // {"ts":1681860311,"updates":[[2,32893,128,14100889]]}
+                            const messageId = update[1];
+                            const mask = update[2];
 
-                if (mask == 128) {
-                    dialogColl.some( dialog => {
-                        dialog.messages.map( message => {
-                            if (message.id === messageId) {
-                                message.read_state
+                            if (mask == 128) {
+                                dialogColl.some( dialog => {
+                                    dialog.messages.map( message => {
+                                        if (message.id === messageId) {
+                                            message.read_state
+                                        }
+                                    });
+                                })
                             }
-                        });
-                    })
-                }
 
-                break;
-            }*/
+                            break;
+                        }*/
             // reset message flags (FLAGS&=~$mask)
             case 3:
                 const messageId = update[1];
                 const mask = update[2];
                 const readState = mask & 1;
                 if (messageId && mask && readState) {
-                    dialogColl.some( (dialog: DialogI) => {
-                        return dialog.messages.some( (message) => {
+                    dialogColl.some((dialog: DialogI) => {
+                        return dialog.messages.some((message) => {
                             if (message.id === messageId) {
-                                message.read_state = readState;
                                 removeReadMessages(dialog);
                                 if (readState) {
                                     Mediator.pub(Msg.ChatMessageRead, message);
@@ -297,29 +338,32 @@ function onUpdates(updates: LPMessage[]) {
  */
 async function getUnreadMessages(dialogs: DialogI[]): Promise<DialogI[]> {
     function getHistory(dialog: DialogI): Promise<MessagesGetHistoryResponse> {
-        const code = "return API.messages.getHistory({" +
-            `user_id: ${dialog.uid},` +
-            `count: ${MAX_HISTORY_COUNT} ` +
-            "});";
+        const params = {
+            peer_id: dialog.peer_id,
+            count: MAX_HISTORY_COUNT
+        }
 
-        return RequestBg.api({ code });
+        const code = `return API.messages.getHistory(${JSON.stringify(params)});`;
+
+        return RequestBg.api({code});
     }
 
-    function getUnreadMessagesForDialog(dialog: DialogI) {
-        const isUnread = !dialog.chat_id && !dialog.messages[0].read_state;
+    async function getUnreadMessagesForDialog(dialog: DialogI): Promise<DialogI> {
+        const {conversation, messages} = dialog
+        const lastMessageId = messages[0].id;
+        const isRead = lastMessageId === conversation.out_read || lastMessageId == conversation.in_read;
 
-        if (isUnread) {
-            return getHistory(dialog).then( historyMessages => {
-                if (historyMessages && historyMessages.items[0]) {
-                    const rawHistoryMessages = historyMessages.items.reverse();
+        if (isRead) return Promise.resolve(dialog);
+        else {
+            const historyMessages = await getHistory(dialog);
+            if (historyMessages && historyMessages.items[0]) {
+                const rawHistoryMessages = historyMessages.items.reverse();
 
-                    dialog.messages = dropReadMessages(rawHistoryMessages);
-                    return dialog;
-                }
-                else return dialog;
-            })
+                dialog.messages = dropReadMessages(rawHistoryMessages, conversation);
+                return dialog;
+            }
+            else return dialog;
         }
-        else return Promise.resolve(dialog);
     }
 
     const dialogsWithUnreadMessages = dialogs.map(getUnreadMessagesForDialog);
@@ -328,84 +372,60 @@ async function getUnreadMessages(dialogs: DialogI[]): Promise<DialogI[]> {
 }
 
 
+async function getMessageById(messageId: number): Promise<Message> {
+    const obj = {
+        chat_active: 1,
+        message_ids: [messageId]
+    }
+
+    const code = `return API.messages.getById(${JSON.stringify(obj)});`;
+    const response = await RequestBg.api<MessagesGetByIdResponse>({code});
+
+    return (response as GenericRS<Message>).items[0];
+}
+
 /**
  * @param {Object} update Update object from long poll
  */
-function addNewMessage(update: LPMessage) {
+async function addNewMessage(update: LPMessage): Promise<Message | void> {
+    const messageId = update[1],
+        peer_id = update[3];
 
-    const messageId      = update[1],
-      flags              = update[2],
-      attachment         = update[7],
-      dialogCompanionUid = update[3];
-
-    let messageDeferred: Promise<MessagesGetByIdResponse>;
+    const dialog = dialogColl.find(e => e.peer_id == peer_id);
 
     // For messages from chat attachment contains "from" property
-    if (_.isEmpty(attachment)) {
-        // mimic response from server
-        const message: Message = {
-            body      : update[6],
-            title     : update[5],
-            date      : update[4],
-            user_id   : dialogCompanionUid,
-            read_state: +!(flags & 1),
-            id        : messageId,
-            out       : +!!(flags & 2)
-        };
+    if (dialog) {
+        const message = await getMessageById(messageId);
 
-        const rs: MessagesGetByIdResponse = {
-            count   : 1,
-            items   : [message]
-        };
-
-
-        messageDeferred = Promise.resolve(rs);
-    }
-    else {
-        const code = `return API.messages.getById({chat_active: 1, message_ids: [${messageId}]});`;
-        messageDeferred = RequestBg.api<MessagesGetByIdResponse>({ code });
-    }
-
-    async function handleMessage(response: GenericRS<Message>): Promise<Message> {
-
-        const message: Message = response.items[0];
-        const dialogId = message.chat_id
-            ? "chat_id_" + message.chat_id
-            : "uid_" + dialogCompanionUid;
-
-        const dialog = dialogColl.find(e => e.id == dialogId);
-        if (dialog) {
-            dialog.messages.push(message);
-            removeReadMessages(dialog);
-        }
-        else {
-            const firstMessage: DialogI = {
-                id          : dialogId,
-                uid         : message.user_id,
-                chat_id     : message.chat_id,
-                chat_active : message.chat_active,
-                messages    : [message]
-            };
-
-            dialogColl.push(firstMessage);
+        dialog.messages.push(message);
+        removeReadMessages(dialog);
+    } else {
+        const obj = {
+            peer_ids: [peer_id]
         }
 
-        await fetchProfiles(dialogColl);
-        // important to trigger change, when profiles are available
-        // because will cause an error, when creating notifications
-        notifyAboutChange();
-        return message;
+        const code = `return API.messages.getConversationsById(${JSON.stringify(obj)});`;
+        const [response, message] = await Promise.all([
+            RequestBg.api<MessagesGetConversationsByIdResponse>({code}),
+            getMessageById(messageId)
+        ])
+
+        const conversation = (response as GenericRS<VkConversation>).items[0]
+
+        const firstDialog: DialogI = {
+            conversation,
+            peer_id,
+            chat_active: getActive(conversation),
+            messages   : [message]
+        };
+
+        dialogColl.push(firstDialog);
     }
 
-    function handleResponse(response: MessagesGetByIdResponse): Promise<Message> {
-        return response
-            ? handleMessage(response as GenericRS<Message>)
-            : Promise.reject(new Error("VK response sucks, maybe I used incorrect parameters :("))
-    }
-
-    return messageDeferred
-        .then(handleResponse)
-        .catch(e => console.error(`Error during AddNewMessage`, e));
+    await fetchProfiles(dialogColl);
+    // important to trigger change, when profiles are available
+    // because will cause an error, when creating notifications
+    notifyAboutChange();
 }
 
 
@@ -416,21 +436,39 @@ function notifyAboutChange() {
 }
 
 
+function findProfile(
+    id: number,
+    profilesColl: Map<number, UserProfile>,
+    groupsColl: Map<number, GroupProfile>
+): UserProfile | GroupProfile {
+    const profiles: Map<number, UserProfile | GroupProfile> = id > 0
+        ? profilesColl
+        : groupsColl
+
+    return profiles.get(Math.abs(id));
+}
+
 function onLatestMessageIdChange() {
     function notifyAboutMessage(): void {
 
-        const profile: UserProfile = profilesColl.get(lastMessage.user_id);
+        const profile = findProfile(lastMessage.from_id, profilesColl, groupsColl);
         const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
 
-        const gender = profile.sex === 1 ? "female" : "male";
+        const sex = ("sex" in profile)
+            ? profile.sex
+            : 0
+
+        const gender = sex === 1
+            ? "female"
+            : "male";
         const name = Users.getName(profile);
 
         const title = I18N.get("sent a message", {
-            NAME: name,
+            NAME  : name,
             GENDER: gender
         });
 
-        const sanitizedMessage = html2text(lastMessage.body);
+        const sanitizedMessage = html2textBasic(lastMessage.text);
 
         const image = profile.photo || profile.photo_50 || profile.photo_100 || profile.photo_200;
 
@@ -441,7 +479,7 @@ function onLatestMessageIdChange() {
             image,
             noBadge: chatActive,
             noPopup: chatActive,
-            sex    : profile.sex
+            sex
         });
     }
 

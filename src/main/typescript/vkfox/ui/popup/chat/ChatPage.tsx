@@ -3,15 +3,16 @@ import Mediator from "../../../mediator/mediator.pu"
 import {Msg} from "../../../mediator/messages";
 import I18N from "../../../common/i18n/i18n";
 import DialogItem from "./dialog/DialogItem";
-import {ChatDataI, DialogI} from "./types";
-import {UserProfile} from "../../../common/users/types";
+import {ChatDataI} from "./types";
+import {GroupProfile, UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
-import {ChatUserProfileI} from "../../../common/chat/types";
+import {ChatUserProfileI, DialogI} from "../../../common/chat/types";
 
 
 interface ChatState {
     dialogs     : DialogI[]
     profilesColl: ChatUserProfileI[]
+    groupsColl: GroupProfile[]
 }
 
 class ChatPage extends React.Component<object, ChatState> {
@@ -27,12 +28,12 @@ class ChatPage extends React.Component<object, ChatState> {
         Mediator.unsub(Msg.ChatData);
     }
 
-    private onChatData = ({dialogs, profiles}: ChatDataI) => {
+    private onChatData = ({dialogs, profiles, groups}: ChatDataI) => {
 
         this.setState(prevState => {
 
                 function mergeDialogs(bgDialog: DialogI): DialogI {
-                    const maybeUiDialog = prevState.dialogs.find(d => d.id === bgDialog.id);
+                    const maybeUiDialog = prevState.dialogs.find(d => d.peer_id === bgDialog.peer_id);
 
                     function mergeMessages() {
                         const onlyNewUimessages =
@@ -56,8 +57,10 @@ class ChatPage extends React.Component<object, ChatState> {
                 const mergedDialogs = dialogs.map(mergeDialogs);
 
                 const profilesColl: UserProfile[] = prevState.profilesColl.concat(profiles);
+                const groupsColl: GroupProfile[] = prevState.groupsColl.concat(groups);
 
                 return {
+                    groupsColl,
                     profilesColl,
                     dialogs: mergedDialogs
                 }
@@ -69,17 +72,32 @@ class ChatPage extends React.Component<object, ChatState> {
     private addToProfilesColl = (profiles: UserProfile[]) => {
 
         this.setState(prevState => {
-            prevState.profilesColl.concat(profiles);
+            const profilesColl = prevState.profilesColl.concat(profiles);
 
-            return prevState
+            return {
+                ...prevState,
+                profilesColl
+            }
         })
     };
 
-    private addToMessages = (dialogId: string, messages: Message[]) => {
+    private addToGroupsColl = (profiles: GroupProfile[]) => {
+
+        this.setState(prevState => {
+            const groupsColl = prevState.groupsColl.concat(profiles);
+
+            return {
+                ...prevState,
+                groupsColl
+            }
+        })
+    };
+
+    private addToMessages = (dialogId: number, messages: Message[]) => {
 
         this.setState(prevState => {
             const dialogs = prevState.dialogs.slice();
-            const i = prevState.dialogs.findIndex( dialog => dialog.id == dialogId);
+            const i = prevState.dialogs.findIndex( dialog => dialog.peer_id == dialogId);
 
             const prevDialog = dialogs[i];
             dialogs[i] = {
@@ -103,14 +121,16 @@ class ChatPage extends React.Component<object, ChatState> {
     }
 
     dialogElms = () => {
-        const {dialogs, profilesColl} = this.state;
+        const {dialogs, profilesColl, groupsColl} = this.state;
 
         return dialogs.map( dialog =>
             <DialogItem
-                key={dialog.id}
+                key={dialog.peer_id}
                 dialog={dialog}
                 profilesColl={profilesColl}
+                groupsColl={groupsColl}
                 addToProfilesColl={this.addToProfilesColl}
+                addToGroupsColl={this.addToGroupsColl}
                 addToMessages={this.addToMessages}
             />
         )
@@ -134,8 +154,9 @@ export default ChatPage
 
 class ChatPageCpn {
 
-    static initialState = {
+    static initialState: ChatState = {
         dialogs     : [],
-        profilesColl: []
+        profilesColl: [],
+        groupsColl: []
     };
 }
