@@ -7,10 +7,10 @@ import {FwdMessage, Message, MessageWithAction} from "../../../../../vk/types";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import I18N from "../../../../common/i18n/i18n";
 import {profilePhotoPath} from "../../components/item/item.pu";
-import {attachmentsDivM} from "./helpers/dialog.pu";
 import BrowserPu from "../../../../browser/browser.pu";
 import {ChatUserProfileI} from "../../../../common/chat/types";
 import {findProfile} from "../helpers/chat.pu";
+import {postAttachmentsO} from "../../components/attachment/AttachmentHelper";
 
 
 interface DialogSpeechesProps {
@@ -111,7 +111,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                             hasEmoji={false}
                         />
 
-                        {fwdMessage.attachments && attachmentsDivM(fwdMessage.attachments)}
+                        {fwdMessage.attachments && postAttachmentsO(fwdMessage.attachments)}
                     </div>
                 )
             })
@@ -138,7 +138,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
                 {userJoinedOrKickedInfo}
 
-                {messageItem.attachments && attachmentsDivM(messageItem.attachments)}
+                {messageItem.attachments && postAttachmentsO(messageItem.attachments)}
             </div>
         )
     };

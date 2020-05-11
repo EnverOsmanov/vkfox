@@ -28,7 +28,6 @@ import {
     AttachmentSticker, AttachmentT,
     AttachmentWall
 } from "../../../../../vk/types/attachment";
-import {attachmentsDivM} from "../../chat/dialog/helpers/dialog.pu";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
 import {media, PreviewAudioMsg} from "../../../../../vk/types/newsfeed";
@@ -265,7 +264,7 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
                     <div className="item__post">
                         <RectifyPu text={wall.text} hasEmoji={false}/>
                         {MyFeedbackPost.repostsElm(wall)}
-                        { attachmentsDivM(wall.attachments)}
+                        { postAttachmentsO(wall.attachments)}
                     </div>
 
                 </div>
