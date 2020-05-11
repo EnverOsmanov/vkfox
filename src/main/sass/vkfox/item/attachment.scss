@@ -61,12 +61,6 @@
 .item__sticker {
     width: 50%;
     vertical-align: unset;
-
-    &:after {
-        content: '';
-        display: block;
-        margin-top: 110%;
-    }
 }
 .item__video__poster {
     @extend .item__picture;

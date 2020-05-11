@@ -32,8 +32,6 @@
             , "https://sun9-9.userapi.com/*"
             , "https://vk.com/*"
             , "https://*.vk.com/*"
-            , "webRequest"
-            , "webRequestBlocking"
             , "tabs"
             , "notifications"
         ],

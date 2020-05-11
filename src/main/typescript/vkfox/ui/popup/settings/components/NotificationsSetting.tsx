@@ -7,7 +7,7 @@ import {NotificationsSettingsI} from "../../../../common/notifications/types";
 interface Props {
     notifications: NotificationsSettingsI
 
-    onNotificationsToggle(filterName: string, filterValue: boolean)
+    onNotificationsToggle(filterName: string, filterValue: boolean): void
 }
 
 class NotificationsSetting extends React.Component<Props, object> {

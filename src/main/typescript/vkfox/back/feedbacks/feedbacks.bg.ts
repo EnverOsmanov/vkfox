@@ -102,7 +102,7 @@ function publishData() {
     }
 
     Mediator.pub(Msg.FeedbacksData, {
-        profiles: profilesColl,
+        profiles: [...profilesColl],
         items   : itemsCollJS()
     });
 }
@@ -166,7 +166,7 @@ function onFeedbackUnsubcribe(params: FeedbackUnsubOptions): void {
 
     const code = `return API.newsfeed.unsubscribe(${JSON.stringify(params)});`;
 
-    function handleResponse(response) {
+    function handleResponse(response: number) {
         if (response) {
             itemsColl.remove(itemsColl.get(unsubscribeFromId));
             updateLatestFeedbackId(true);

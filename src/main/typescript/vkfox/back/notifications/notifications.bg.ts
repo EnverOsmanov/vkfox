@@ -31,7 +31,7 @@ const notificationsSettings: NotificationsSettings =
 const notificationQueue = new NotificationQueue();
 
 
-function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: any) {
+function getBase64FromImage(url: string, onSuccess: (_: string) => any, onError?: any) {
     const xhr = new XMLHttpRequest();
 
     xhr.responseType = "arraybuffer";
@@ -42,9 +42,7 @@ function getBase64FromImage(url: string, onSuccess: (string) => any, onError?: a
         const bytes = new Uint8Array(xhr.response);
         //NOTE String.fromCharCode.apply(String, ...
         //may cause "Maximum call stack size exceeded"
-        const binary = [].map.call(bytes, function (byte) {
-            return String.fromCharCode(byte);
-        }).join('');
+        const binary = [].map.call(bytes, (byte: number) => String.fromCharCode(byte)).join('');
 
         const mediaType = xhr.getResponseHeader('content-type');
         const base64 = [
@@ -119,7 +117,7 @@ export default class VKfoxNotifications {
         }
     }
 
-    static setBadge(count, force?: boolean) {
+    static setBadge(count: number | "", force?: boolean) {
         if (notificationsSettings.enabled || force) {
             Browser.setBadgeText(count || '');
         }

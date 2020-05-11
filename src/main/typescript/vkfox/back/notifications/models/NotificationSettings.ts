@@ -21,7 +21,7 @@ export class NotificationsSettings extends PersistentModel {
 
     initialize() {
         const self = this;
-        let sound;
+        let sound: SoundSetting;
 
         PersistentModel.prototype.initialize.apply(this, arguments);
 

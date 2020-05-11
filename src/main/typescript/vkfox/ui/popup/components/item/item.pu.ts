@@ -64,11 +64,8 @@ export function videoViewPathByUrl(url: string): string {
 export function imageViewPath(photo: media.Photo): string | null {
 
     if (photo) {
-        for (const i in photoSizes) {
-            if (photoSizes[i] in photo) {
-                return `${IMAGE_VIEW_URL}#${btoa(photo[photoSizes[i]])}`;
-            }
-        }
+        const url = photo.sizes[photo.sizes.length-1].url
+        return `${IMAGE_VIEW_URL}#${btoa(url)}`;
     }
 }
 
@@ -107,13 +104,13 @@ export function stickerImageUrl(sticker: AttachmentSticker): string {
         ? maybeImage.url
         : ""
 }
-
+const croppedImageTypes = ["o", "p", "q", "r"]
 export function buildSrcSet(photo: media.Photo): string {
     const arr: string[] = [];
 
-    photo.sizes.forEach( size =>
-        arr.push(`${size.url} ${size.height}w`)
-    )
+    photo.sizes
+        .filter(size => !croppedImageTypes.includes(size.type))
+        .forEach( size => arr.push(`${size.url} ${size.height}w`))
 
     return arr.toString();
 }

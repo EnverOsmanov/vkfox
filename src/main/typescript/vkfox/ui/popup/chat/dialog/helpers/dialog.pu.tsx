@@ -2,7 +2,7 @@ import * as React from "react"
 import {AttachmentContainer} from "../../../../../../vk/types/attachment";
 import AttachmentC from "../../../components/attachment/AttachmentC";
 
-export function attachmentsDivM(attachments?: AttachmentContainer[]): JSX.Element {
+export function attachmentsDivM(attachments?: AttachmentContainer[]) {
     function singleAttachment(attachment: AttachmentContainer, i: number): JSX.Element {
 
         return (
@@ -16,9 +16,6 @@ export function attachmentsDivM(attachments?: AttachmentContainer[]): JSX.Elemen
     }
 
     return attachments
-        ? (
-            <div className="attachments-container">
-                {attachments.map(singleAttachment)}
-            </div>
-        ) : null;
+        ? attachments.map(singleAttachment)
+        : null;
 }

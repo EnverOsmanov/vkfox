@@ -33,6 +33,7 @@ import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
 import {media, PreviewAudioMsg} from "../../../../../vk/types/newsfeed";
 import AttachmentC from "./AttachmentC";
+import Sticker from "./sticker/Sticker";
 
 
 function imageProperties(src: string): CSSProperties {
@@ -60,9 +61,10 @@ function onVideoClick(dataVideo: media.Video): Promise<void> {
 function documentDiv(dataDoc: AttachmentDoc): JSX.Element {
     switch (dataDoc.type) {
         case AttachmentDocType.Gif: {
-            const previewUrl = dataDoc.preview.photo.sizes.sort( (a, b) => b.width - a.width)
+            const previewUrl = dataDoc.preview.photo.sizes
+                .sort( (a, b) => b.width - a.width)
                 .find(p => p.width <= 604)
-                .url;
+                .src;
 
             return (
                 <div className="item__attachment item__attachment_type_photo item__attachment__wide">
@@ -243,24 +245,29 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
 
         case "sticker":
             const sticker = data as AttachmentSticker;
-            return (
+
+            return "animation_url" in sticker
+                ? <Sticker sticker={sticker}/>
+                : (
                 <img
                     alt=""
                     className="item__sticker"
                     src={stickerImageUrl(sticker)}
                     onClick={_ => BrowserPu.createTab(stickerViewPath(sticker))}
                 />
-
-            );
+                );
         case "wall":
             const wall = data as AttachmentWall;
             return (
                 <div className="item__attachment chat__fwd card-1">
                     <i className="fa fa-bullhorn"/>
 
-                    <RectifyPu text={wall.text} hasEmoji={false}/>
-                    {MyFeedbackPost.repostsElm(wall)}
-                    { attachmentsDivM(wall.attachments)}
+                    <div className="item__post">
+                        <RectifyPu text={wall.text} hasEmoji={false}/>
+                        {MyFeedbackPost.repostsElm(wall)}
+                        { attachmentsDivM(wall.attachments)}
+                    </div>
+
                 </div>
             );
         case "gift":

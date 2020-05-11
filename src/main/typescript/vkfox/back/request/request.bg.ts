@@ -183,7 +183,7 @@ class RequestBg {
     }
 
     static api<R>(params: ApiOptions): Promise<R> {
-        function promisify(resolve, reject) {
+        function promisify(resolve: (_: any) => void, reject: (_: Error) => void) {
             apiQueriesQueue.push({ params, resolve, reject });
         }
         RequestBg._processApiQueries();

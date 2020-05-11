@@ -1,7 +1,8 @@
 import * as React from "react"
 import NewsFeedItem from "./NewsFeedItem";
-import {ItemObj, NewsfeedData} from "../../../../../vk/types/newsfeed";
+import {ItemObj} from "../../../../../vk/types/newsfeed";
 import {idMaker} from "../../../../common/feedbacks/id";
+import {NewsfeedData} from "../../../../back/newsfeed/types";
 
 interface FeedsProps {
     data: NewsfeedData
@@ -19,7 +20,7 @@ class Feeds extends React.Component<FeedsProps, object> {
                 <NewsFeedItem
                     key={idMaker(item)}
                     item={item}
-                    profiles={profiles}
+                    profiles={new Map(profiles)}
                 />
             )
         };

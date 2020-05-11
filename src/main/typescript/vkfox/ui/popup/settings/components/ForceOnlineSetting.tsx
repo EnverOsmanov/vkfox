@@ -7,7 +7,7 @@ import {ForceOnlineSettingsI} from "../../../../common/notifications/types";
 interface Props {
     forceOnline: ForceOnlineSettingsI
 
-    onForceOnlineToggle(filterName: string, filterValue: boolean)
+    onForceOnlineToggle(filterName: string, filterValue: boolean): void
 }
 
 class ForceOnlineSetting extends React.Component<Props, object> {

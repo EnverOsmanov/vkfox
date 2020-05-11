@@ -87,7 +87,7 @@ function onAuthOAuth(): void {
 }
 
 
-function promisify(resolve: (AuthModelI) => void) {
+function promisify(resolve: (_: AuthModelI) => void) {
     function onSuccess(data: AuthModelI) {
         state = AuthState.READY;
         Browser.setIconOnline();

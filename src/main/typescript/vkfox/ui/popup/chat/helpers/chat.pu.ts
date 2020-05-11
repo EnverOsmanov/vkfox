@@ -138,7 +138,7 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUser
 export function markAsRead(dialog: DialogI): Promise<any> {
     const {peer_id} = dialog;
 
-    const method = "dialog.markAsRead";
+    const method = "messages.markAsRead";
     const params = {
         peer_id
     };

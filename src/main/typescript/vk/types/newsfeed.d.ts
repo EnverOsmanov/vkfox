@@ -92,11 +92,6 @@ type ItemObj =
     PostItem |
     NoteItem
 
-export interface NewsfeedData {
-    profiles: Map<number, ProfileI>
-    items: ItemObj[]
-}
-
 
 interface CanPostable {
     can_post: number
@@ -273,7 +268,9 @@ export interface NewsfeedResp {
 }
 
 interface PhotoSizeI {
-    url     : string
+    url?     : string
+    //src only for Gif
+    src?     : string
     type    : string
     width   : number
     height  : number

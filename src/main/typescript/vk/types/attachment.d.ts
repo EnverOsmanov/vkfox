@@ -169,9 +169,12 @@ interface AStickerImage {
 export interface AttachmentSticker extends Attachment {
     sticker_id              : number
     product_id              : number
-    animation_url           : string
     images                  : AStickerImage[]
     images_with_background  : AStickerImage[]
+}
+
+export interface AnimationSticker extends AttachmentSticker {
+    animation_url: string
 }
 
 export interface AttachmentGift extends Attachment {

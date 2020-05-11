@@ -14,7 +14,7 @@ export default class PersistentModel extends Model {
     * @param {Object} options
     * @param {String} options.name
     */
-    initialize(attributes, options: {name: string}) {
+    initialize(attributes?: any, options?: {name: string}) {
         this._name = options.name;
         const item = localStorage.getItem(this._name);
 

@@ -281,14 +281,14 @@ export default function initialize() {
 
 function publishNewsfeedFriends() {
     Mediator.pub(Msg.NewsfeedFriends, {
-        profiles: profilesColl,
+        profiles: [...profilesColl],
         items   : friendItemsColl
     });
 }
 
 function publishNewsfeedGroups() {
     Mediator.pub(Msg.NewsfeedGroups, {
-        profiles: profilesColl,
+        profiles: [...profilesColl],
         items   : groupItemsColl
     });
 }

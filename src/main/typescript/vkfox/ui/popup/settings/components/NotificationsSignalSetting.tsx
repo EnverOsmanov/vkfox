@@ -6,7 +6,7 @@ import Settings from "../../../../common/notifications/VKfoxSignal";
 interface Props {
     notifications: NotificationsSettingsI
 
-    onSoundChange(event: React.ChangeEvent<HTMLSelectElement>)
+    onSoundChange(event: React.ChangeEvent<HTMLSelectElement>): void
 }
 
 class NotificationsSignalSetting extends React.Component<Props, object> {

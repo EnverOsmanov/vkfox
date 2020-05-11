@@ -314,6 +314,8 @@ function onUpdates(updates: LPMessage[]) {
                     dialogColl.some((dialog: DialogI) => {
                         return dialog.messages.some((message) => {
                             if (message.id === messageId) {
+                                if (message.out) dialog.conversation.out_read = messageId
+                                else dialog.conversation.in_read = messageId
                                 removeReadMessages(dialog);
                                 if (readState) {
                                     Mediator.pub(Msg.ChatMessageRead, message);
@@ -389,6 +391,7 @@ async function getMessageById(messageId: number): Promise<Message> {
  */
 async function addNewMessage(update: LPMessage): Promise<Message | void> {
     const messageId = update[1],
+        flags = update[2],
         peer_id = update[3];
 
     const dialog = dialogColl.find(e => e.peer_id == peer_id);
@@ -398,6 +401,14 @@ async function addNewMessage(update: LPMessage): Promise<Message | void> {
         const message = await getMessageById(messageId);
 
         dialog.messages.push(message);
+        dialog.conversation.last_message_id = messageId;
+
+        const out = +!!(flags & 2);
+        const read_state = +!(flags & 1);
+        if (read_state) {
+            if (out) dialog.conversation.out_read = messageId
+            else dialog.conversation.in_read = messageId
+        }
         removeReadMessages(dialog);
     } else {
         const obj = {

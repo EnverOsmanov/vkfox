@@ -1,43 +1,49 @@
 "use strict";
 
-const constructor = function (name: string) {
-    const item = localStorage.getItem(name);
+export default class PersistentSetBg {
+    private item: string = null
+    private _name: string = null;
 
-    this._set = item
-        ? JSON.parse(item)
+    constructor(name: string) {
+        this.item = localStorage.getItem(name);
+    }
+
+    private _set: number[] = this.item
+        ? JSON.parse(this.item)
         : [];
 
-    this._name = name;
-};
-constructor.prototype = {
-    _save: function () {
+    private _save() {
         localStorage.setItem(
             this._name,
             JSON.stringify(this._set)
         );
-    },
-    toArray: function () {
+    }
+
+    toArray() {
         return this._set;
-    },
-    add: function (value) {
+    }
+
+    add(value: number) {
         if (!this.contains(value)) {
             this._set.push(value);
             this._save();
         }
-    },
-    contains: function (value) {
+    }
+
+    contains(value: number) {
         return this._set.indexOf(value) !== -1;
-    },
-    remove: function (value) {
+    }
+
+    remove(value: number) {
         const position = this._set.indexOf(value);
         if (position !== -1) {
             this._set.splice(position, 1);
             this._save();
         }
-    },
-    size: function () {
+    }
+
+    size() {
         return this._set.length;
     }
-};
 
-export default constructor;
+};

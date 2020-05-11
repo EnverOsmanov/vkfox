@@ -3,7 +3,7 @@ import Mediator from "../../../../mediator/mediator.pu"
 import {RouteComponentProps} from "react-router"
 import {Msg} from "../../../../mediator/messages"
 import Feeds from "./Feeds";
-import {NewsfeedData} from "../../../../../vk/types/newsfeed";
+import {NewsfeedData} from "../../../../back/newsfeed/types";
 
 
 interface ChatProps extends RouteComponentProps<any> {}
@@ -47,7 +47,7 @@ export default GroupNewsPage
 class GroupsNewsPageCpn {
 
     private static data: NewsfeedData = {
-        profiles: new Map(),
+        profiles: [],
         items: []
     };
 

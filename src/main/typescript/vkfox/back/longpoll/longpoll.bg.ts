@@ -12,7 +12,7 @@ function wait() {
     return new Promise( (resolve) => setTimeout(resolve, DEBOUNCE_RATE))
 }
 
-function fetchUpdates(serverRS: LongPollServerRS) {
+function fetchUpdates(serverRS: LongPollServerRS): Promise<void> {
     //console.debug("StartLP", serverRS)
     const params = {
         version: 3,

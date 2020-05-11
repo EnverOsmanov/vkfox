@@ -1,4 +1,6 @@
 import {UserLikesObj} from "../../../vk/types/objects";
+import {ProfileI} from "../../common/users/types";
+import {ItemObj} from "../../../vk/types/newsfeed";
 
 /**
  * @param [Object] params
@@ -14,4 +16,9 @@ export interface LikesChanged {
     item_id: number
 
     likes: UserLikesObj
+}
+
+export interface NewsfeedData {
+    profiles: [number, ProfileI][]
+    items: ItemObj[]
 }
