@@ -1,6 +1,6 @@
 "use strict";
 import RequestBg from "../request/request.bg";
-import * as _ from "underscore"
+import * as _ from "lodash"
 import Mediator from "../../mediator/mediator.bg"
 import {Msg} from "../../mediator/messages"
 import {GProfileCollCmpn} from "../profiles-collection/profiles-collection.bg";
@@ -139,7 +139,7 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
             function takePhotos(attachedPhotos: media.Photo[], post: PostItem): media.Photo[] {
                 if (post.attachments) {
                     const curPhotos = _
-                        .where(post.attachments, { type: "photo" })
+                        .filter(post.attachments, { type: "photo" })
                         .map( (attachment: AttachmentPhotoContainer) => attachment.photo );
 
                     return attachedPhotos.concat(curPhotos);
@@ -149,7 +149,7 @@ function discardOddWallPhotos(items: ItemObj[]): ItemObj[] {
 
 
             const attachedPhotos = _
-                .where(items, postProperties)
+                .filter(items, postProperties)
                 .reduce(takePhotos, []);
 
             //exclude attachedPhotos from wallPhotos

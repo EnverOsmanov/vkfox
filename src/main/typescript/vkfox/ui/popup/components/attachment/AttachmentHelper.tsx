@@ -1,6 +1,6 @@
 import * as React from "react"
 import {CSSProperties} from "react"
-import * as _ from "underscore"
+import * as _ from "lodash"
 
 import Browser, {default as BrowserPu} from "../../../../browser/browser.pu"
 import Request from "../request/request.pu"

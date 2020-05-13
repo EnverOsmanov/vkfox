@@ -1,6 +1,6 @@
 /*
 "use strict";
-import * as _ from "underscore"
+import * as _ from "lodash"
 import * as Config from "../config/config"
 import RequestBg from "../request/request.bg"
 import Auth from "../auth/auth.bg"

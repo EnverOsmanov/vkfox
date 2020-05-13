@@ -5,7 +5,7 @@ import I18N from "../../../../common/i18n/i18n";
 import ItemActions from "../../components/itemActions/ItemActions";
 
 import {getHistory, markAsRead} from "../helpers/chat.pu";
-import * as _ from "underscore"
+import * as _ from "lodash"
 import {MessageHistoryI, Speech} from "../types";
 import BrowserPu from "../../../../browser/browser.pu";
 import {DialogItemProps} from "./DialogItem";

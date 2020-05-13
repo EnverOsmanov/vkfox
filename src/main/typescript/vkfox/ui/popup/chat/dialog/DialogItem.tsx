@@ -1,7 +1,7 @@
 import * as React from "react"
 import {ReplyI, SendMessageParams} from "../types";
 import DialogActions from "./DialogActions";
-import * as _ from "underscore"
+import * as _ from "lodash"
 import {findProfile, foldMessagesByAuthor} from "../helpers/chat.pu";
 import Request from "../../components/request/request.pu"
 import {timeAgo} from "../../components/filters/filters.pu";

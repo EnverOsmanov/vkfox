@@ -1,6 +1,6 @@
 "use strict";
 import {browser, Notifications} from "webextension-polyfill-ts"
-import * as _ from "underscore"
+import * as _ from "lodash"
 import Browser from "../browser/browser.bg"
 import {NotifType, VKNotification} from "./VKNotification";
 import {NotificationsSettingsI, VKNotificationI} from "../../common/notifications/types";

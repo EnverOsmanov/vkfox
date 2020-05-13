@@ -2,7 +2,7 @@
 import RequestBg from '../request/request.bg';
 import ProxyMethods from '../../proxy-methods/proxy-methods.bg'
 import Mediator from "../../mediator/mediator.bg"
-import * as _ from "underscore"
+import * as _ from "lodash"
 import {Msg, ProxyNames} from "../../mediator/messages"
 import {NameSurname, OnlyName} from "../../common/chat/types";
 import {UsersGetElem} from "./types";
@@ -67,7 +67,7 @@ const processGetUsersQueue = _.debounce( (processedQueue: UsersGetElem[]) => {
         .chain(processedQueue)
         .map(uge => uge.uids)
         .flatten()
-        .unique()
+        .uniq()
         .difference([...usersColl.keys()])
         .value();
 

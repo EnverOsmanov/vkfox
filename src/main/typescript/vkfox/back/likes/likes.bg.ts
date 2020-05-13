@@ -1,6 +1,6 @@
 "use strict";
 import Mediator from '../../mediator/mediator.bg'
-import * as _ from "underscore"
+import * as _ from "lodash"
 import RequestBg from '../request/request.bg'
 import {Msg} from "../../mediator/messages";
 import {LikesChanged} from "../newsfeed/types";

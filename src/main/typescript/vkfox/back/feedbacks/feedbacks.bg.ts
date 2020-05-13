@@ -1,6 +1,6 @@
 "use strict";
 import RequestBg from '../request/request.bg'
-import * as _ from "underscore"
+import * as _ from "lodash"
 import User from "../users/users.bg"
 import Mediator from "../../mediator/mediator.bg"
 import Router from "../router/router.bg"

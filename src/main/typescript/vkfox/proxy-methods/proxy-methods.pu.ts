@@ -1,5 +1,5 @@
 "use strict";
-import * as _ from "underscore";
+import * as _ from "lodash";
 import Mediator from '../mediator/mediator.pu';
 
 
