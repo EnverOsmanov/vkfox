@@ -5,8 +5,11 @@ import Groups from "../../components/groups/groups.pu";
 import {ChatUserProfileI, DialogI, GetHistoryParams} from "../../../../common/chat/types";
 import {MessageHistoryI, Speech} from "../types";
 import {GroupProfile, UserProfile} from "../../../../common/users/types";
-import {Message, MessagesGetHistoryResponse, MessageWithAction} from "../../../../../vk/types";
+import {Message, MessagesGetHistoryResponse} from "../../../../../vk/types";
 import {DialogItemProps} from "../dialog/DialogItem";
+import {extractIdsFromMessage} from "../../../../common/chat/chat";
+import ProxyMethods from "../../../../proxy-methods/proxy-methods.pu";
+import {ProxyNames} from "../../../../mediator/messages";
 
 function getProfiles(dialogItem: DialogItemProps, messages: Message[]): Promise<[ UserProfile[], GroupProfile[]]> {
     const {dialog, profilesColl, groupsColl} = dialogItem
@@ -14,11 +17,7 @@ function getProfiles(dialogItem: DialogItemProps, messages: Message[]): Promise<
         //after fetching of news profiles,
         //we must make sure that we have
         //required profile objects
-        const messageIds = messages.map(m => m.from_id);
-        const fwdIds = messages.flatMap(m => m.fwd_messages.map(f => f.from_id))
-        const replyIds = messages.flatMap(m => m.reply_message? [m.reply_message.from_id] : [] )
-        const actionIds = messages.flatMap(m => ("action" in m)? [(m as MessageWithAction).action.member_id] : [] )
-        const ids = messageIds.concat(fwdIds, replyIds, actionIds)
+        const ids = messages.flatMap(extractIdsFromMessage)
 
         const unique = [...new Set(ids)];
 
@@ -135,7 +134,7 @@ export function foldMessagesByAuthor(messages: Message[], profilesColl: ChatUser
  * Mark dialog as read
  *
  */
-export function markAsRead(dialog: DialogI): Promise<any> {
+export async function markAsRead(dialog: DialogI): Promise<any> {
     const {peer_id} = dialog;
 
     const method = "messages.markAsRead";
@@ -143,7 +142,20 @@ export function markAsRead(dialog: DialogI): Promise<any> {
         peer_id
     };
 
-    return Request.directApi(method, params);
+    const status = await Request.directApi<number>(method, params);
+    if (Boolean(status)) {
+        const lastMessage = dialog.messages[dialog.messages.length-1];
+
+        return markAsReadBg(peer_id, lastMessage.id)
+    }
+    else {
+        console.debug("Response to messages.markAsRead is not 0")
+        return Promise.resolve()
+    }
 }
 
+
+function markAsReadBg(peer_id: number, messageId: number): Promise<void> {
+    return ProxyMethods.forwardM(ProxyNames.ChatBg, "markAsRead", peer_id, messageId)
+}
 

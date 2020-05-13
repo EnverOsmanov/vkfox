@@ -65,6 +65,7 @@
     "Authorize VKfox with Vkontakte": "Прежде всего, необходимо авторизироваться в VKfox. Если вы это делаете в первые вам будет необходимо разрешить доступ к вашей странице.",
     "Install Yandex search": "Пожалуйста, поддержите дальнейшее развитие VKfox и установите новый Яндекс поиск.",
     "Thank you!": "Спасибо, установка приложения окончена. Окно может быть закрыто.",
+    "Chat invite user": "{GENDER, select, male{приглашён} female{приглашена} other{исключён}} в беседу",
     "Chat kick user": "{GENDER, select, male{исключён} female{исключена} other{исключён}} из беседы",
     "Chat leave user": "{GENDER, select, male{покинул} female{покинула} other{покинул}} беседу"
 }

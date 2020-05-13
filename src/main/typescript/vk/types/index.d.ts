@@ -199,14 +199,15 @@ interface FwdMessage {
     text    : string
 }
 
-type MessageActionT =
-    "chat_kick_user" |
-    "chat_invite_user" |
-    "chat_create"
+type Action = ChatKickUser | ChatInviteUser
 
-interface Action {
+interface ChatKickUser {
     member_id: number
-    type: MessageActionT
+    type: "chat_kick_user" | "chat_pin_message"
+}
+
+interface ChatInviteUser {
+    type: "chat_invite_user" | "chat_invite_user_by_link" | "chat_create"
 }
 
 export interface MessageWithAction extends Message {

@@ -52,6 +52,7 @@ export const Msg = {
 
 export const ProxyNames = {
     RequestBg: "../request/request.bg.ts",
+    ChatBg: "../chat/chat.bg",
     UsersBg: "../users/users.bg.ts",
     GroupsBg: "../groups/groups.bg.ts",
     BrowserBg: "../browser/browser.bg"

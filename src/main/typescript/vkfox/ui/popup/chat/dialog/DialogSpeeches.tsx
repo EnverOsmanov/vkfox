@@ -26,20 +26,38 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
     getActionText(messageItem: Message, speech: Speech): React.ReactNode | undefined {
         if ("action" in messageItem) {
-            const messageWithAction = messageItem as MessageWithAction;
+            const {action} = messageItem as MessageWithAction;
 
             const {profilesColl} = this.props;
-            switch (messageWithAction.action.type) {
-                case "chat_kick_user": {
-
-                    const profile = profilesColl.find(e => e.id == messageWithAction.action.member_id);
+            switch (action.type) {
+                case "chat_pin_message": return undefined
+                case "chat_invite_user_by_link": {
+                    const profile = profilesColl.find(e => e.isSelf);
 
                     if (!profile) {
-                        console.warn("Profile not found in message with action", messageWithAction.from_id);
+                        console.warn("Self profile not found in message with action");
                         return undefined;
                     }
 
-                    const rawM = speech.author.id === messageWithAction.action.member_id
+                    const i18nAction = I18N.getWithGender("Chat invite user", profile.sex);
+
+                    const targetName = profile2Name(profile);
+                    const finalText = `${targetName} ${i18nAction}`;
+
+                    return (
+                        <small><i>{finalText}</i></small>
+                    )
+                }
+                case "chat_kick_user": {
+
+                    const profile = profilesColl.find(e => e.id == action.member_id);
+
+                    if (!profile) {
+                        console.warn("Profile not found in message with action", action.member_id);
+                        return undefined;
+                    }
+
+                    const rawM = speech.author.id === action.member_id
                         ? "Chat leave user"
                         : "Chat kick user";
 
@@ -52,7 +70,7 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
                     )
                 }
                 default:
-                    console.warn("Unknown message action", messageWithAction.action);
+                    console.warn("Unknown message action", action);
                     return undefined;
             }
         }

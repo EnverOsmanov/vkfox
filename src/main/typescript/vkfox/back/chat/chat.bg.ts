@@ -8,7 +8,7 @@ import Browser from "../browser/browser.bg"
 import I18N from "../../common/i18n/i18n"
 import VKfoxNotifications from "../notifications/notifications.bg"
 import PersistentModel from "../../common/persistent-model/persistent-model"
-import {Msg} from "../../mediator/messages"
+import {Msg, ProxyNames} from "../../mediator/messages"
 import {NotifType} from "../notifications/VKNotification";
 import {LPMessage} from "../longpoll/types";
 import {AuthModelI} from "../auth/types";
@@ -19,7 +19,7 @@ import {
     MessagesGetByIdResponse,
     MessagesGetConversationsByIdResponse,
     MessagesGetConversationsResponse,
-    MessagesGetHistoryResponse, MessageWithAction,
+    MessagesGetHistoryResponse,
     VkConversation,
     VkConversationChat,
     VkConversationCnt
@@ -29,6 +29,8 @@ import {DialogIUtils} from "./collections/DialogColl";
 import {ChatUserProfileI, DialogI} from "../../common/chat/types";
 import {GProfileCollCmpn} from "../profiles-collection/profiles-collection.bg";
 import Groups from "../groups/groups.bg";
+import {extractIdsFromMessage} from "../../common/chat/chat";
+import ProxyMethods from "../../proxy-methods/proxy-methods.bg";
 
 
 const MAX_HISTORY_COUNT = 10;
@@ -91,22 +93,18 @@ function updateLatestMessageId(): void {
 
 async function fetchProfiles(dialogs: DialogI[]): Promise<void> {
 
-    function dialog2Uuids(accUids: number[], dialog: DialogI): number[] {
+    function dialog2Uuids(dialog: DialogI): number[] {
         const {messages} = dialog
-        const allDialogUids = messages.map(message => message.from_id);
 
         const activeUids = dialog.chat_active
             ? dialog.chat_active
             : [];
+        const fromMessages = messages.flatMap(extractIdsFromMessage)
 
-        const fwdIds = messages.flatMap(m => m.fwd_messages.map(f => f.from_id))
-        const replyIds = messages.flatMap(m => m.reply_message? [m.reply_message.from_id] : [] )
-        const actionIds = messages.flatMap(m => ("action" in m)? [(m as MessageWithAction).action.member_id] : [] )
-
-        return accUids.concat(allDialogUids, activeUids, fwdIds, replyIds, actionIds);
+        return activeUids.concat(fromMessages);
     }
 
-    const requiredIds = dialogs.reduce(dialog2Uuids, []);
+    const requiredIds = dialogs.flatMap(dialog2Uuids);
 
     const cachedUids = [...profilesColl.keys()];
     const missingUids = _
@@ -189,6 +187,8 @@ function initialize(readyPromise: Promise<void>) {
         updateLatestMessageId();
         publishData();
     }).catch(console.error);
+
+    ProxyMethods.connect(ProxyNames.ChatBg, Chat);
 }
 
 /**
@@ -199,19 +199,8 @@ function initialize(readyPromise: Promise<void>) {
  */
 function removeReadMessages(dialog: DialogI): DialogI {
     const {messages, conversation} = dialog;
-    const lastMessage = messages.pop();
-    const result = [lastMessage];
-    const originalOut = lastMessage.out;
 
-    messages.reverse().some((message) => {
-        const isRead = message.id === conversation.in_read || message.id == conversation.out_read
-        if (!isRead && message.out === originalOut) {
-            result.unshift(message);
-        }
-        // stop copying messages
-        else return true;
-    });
-    dialog.messages = result;
+    dialog.messages = dropReadMessages(messages, conversation);
 
     return dialog;
 }
@@ -219,11 +208,12 @@ function removeReadMessages(dialog: DialogI): DialogI {
 function dropReadMessages(messages: Message[], conversation: VkConversation): Message[] {
     const lastMessage = messages.pop();
     const result = [lastMessage];
-    const originalOut = lastMessage.out;
+    const readMessageId = lastMessage.out
+        ? conversation.out_read
+        : conversation.in_read
 
     messages.reverse().some( message => {
-        const isRead = message.id === conversation.in_read || message.id == conversation.out_read
-        if (!isRead && message.out === originalOut) {
+        if (message.id != readMessageId) {
             result.unshift(message);
         }
         // stop copying messages
@@ -306,27 +296,31 @@ function onUpdates(updates: LPMessage[]) {
                             break;
                         }*/
             // reset message flags (FLAGS&=~$mask)
-            case 3:
+            case 3: {
                 const messageId = update[1];
                 const mask = update[2];
+                const peer_id = update[3];
                 const readState = mask & 1;
                 if (messageId && mask && readState) {
-                    dialogColl.some((dialog: DialogI) => {
-                        return dialog.messages.some((message) => {
-                            if (message.id === messageId) {
-                                if (message.out) dialog.conversation.out_read = messageId
-                                else dialog.conversation.in_read = messageId
-                                removeReadMessages(dialog);
-                                if (readState) {
-                                    Mediator.pub(Msg.ChatMessageRead, message);
-                                }
-                                notifyAboutChange();
-                                return true;
-                            }
-                        });
-                    });
+                    const dialog = dialogColl.find(d => d.peer_id == peer_id)
+                    if (dialog) {
+                        const message = dialog.messages.find(m => m.id == messageId)
+                        if (message) {
+                            if (message.out) dialog.conversation.out_read = messageId
+                            else dialog.conversation.in_read = messageId
+
+                            removeReadMessages(dialog);
+
+                            if (readState) Mediator.pub(Msg.ChatMessageRead, message);
+
+                            notifyAboutChange();
+                        }
+                        else console.warn("update[3]: Message not found", peer_id, messageId)
+                    }
+                    else console.warn("update[3]: Dialog not found", peer_id)
                 }
                 break;
+            }
             case 4:
                 addNewMessage(update);
                 break;
@@ -352,13 +346,17 @@ async function getUnreadMessages(dialogs: DialogI[]): Promise<DialogI[]> {
 
     async function getUnreadMessagesForDialog(dialog: DialogI): Promise<DialogI> {
         const {conversation, messages} = dialog
-        const lastMessageId = messages[0].id;
-        const isRead = lastMessageId === conversation.out_read || lastMessageId == conversation.in_read;
+        const lastMessage = messages[0];
+        const readMessageId = lastMessage.out
+            ? conversation.out_read
+            : conversation.in_read
+        const isRead = lastMessage.id === readMessageId;
+        //const textMessage = !("action" in lastMessage)
 
         if (isRead) return Promise.resolve(dialog);
         else {
             const historyMessages = await getHistory(dialog);
-            if (historyMessages && historyMessages.items[0]) {
+            if (historyMessages && historyMessages.items.length > 0) {
                 const rawHistoryMessages = historyMessages.items.reverse();
 
                 dialog.messages = dropReadMessages(rawHistoryMessages, conversation);
@@ -519,4 +517,23 @@ function onLatestMessageIdChange() {
 
 function handleError(e: Error): void {
     console.warn("Failed to notify in chat", e)
+}
+
+class Chat {
+    static markAsRead(peer_id: number, messageId: number): Promise<void> {
+        const dialog = dialogColl.find(d => d.peer_id == peer_id)
+        if (dialog) {
+            const message = dialog.messages.find(m => m.id == messageId)
+            if (message) {
+                dialog.conversation.in_read = messageId
+
+                notifyAboutChange();
+            }
+            else console.warn("markAsRead: Message not found", peer_id, messageId)
+        }
+        else console.warn("markAsRead: Dialog not found", peer_id)
+
+        return Promise.resolve()
+    }
+
 }

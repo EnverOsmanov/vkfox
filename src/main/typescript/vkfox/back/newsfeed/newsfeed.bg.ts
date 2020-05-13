@@ -12,7 +12,7 @@ import {
     media,
     Newsfeed,
     NewsfeedRequestParams,
-    NewsfeedResp,
+    NewsfeedResp, NoteItem, PhotoItem, PhotoTagItem,
     PostItem,
     UserId,
     WallPhotoItem
@@ -40,37 +40,19 @@ const autoUpdateParams: NewsfeedRequestParams = {
     count: MAX_ITEMS_COUNT
 };
 
-//
-//
-//Functions
-/*function extractItems(item: ItemObj): ItemObj[] {
-    switch (item.type) {
-        case "wall_photo":
-            return item.photos.items
-        case "photo":
-            return item.photos.items
-        case "photo_tag":
-            return item.photo_tags.items
-        case "note":
-            return item.notes.items
-        case "friend":
-            return item.friends.items
-    }
-}*/
-
 /**
  * Generates unique id for every item,
  * or merges new item into existing one with the same id;
  * For example new wall_photos will be merged with existing for the user
  */
 function processRawItem(item: ItemObj) {
-    const typeToPropertyMap = {
+/*    const typeToPropertyMap = {
         "wall_photo": "photos",
         "photo"     : "photos",
         "photo_tag" : "photo_tags",
         "note"      : "notes",
         "friend"    : "friends"
-    };
+    };*/
 
     const itemId = idMaker(item);
 
@@ -81,22 +63,53 @@ function processRawItem(item: ItemObj) {
     const collisionItem = itemsColl.find(el => idMaker(el) == itemId);
 
     if (collisionItem) {
-        const propertyName = typeToPropertyMap[collisionItem.type];
+        switch(collisionItem.type) {
+            case "photo":
+            case "wall_photo": {
+                const p = (item as WallPhotoItem | PhotoItem)
+                const collection = p.photos.items.concat(collisionItem.photos.items);
 
-        if (propertyName) {
-            // type "photo" item has "photos" property; note - notes etc
-            // used to eliminate duplicate items during merge
-            const collection: ItemObj[] = [];
-
-            collection.push(item[propertyName].items);
-            collection.push(collisionItem[propertyName].items);
-
-            item[propertyName] = {
-                count: collection.length,
-                items: collection
+                p.photos = {
+                    count: collection.length,
+                    items: collection
+                }
+                break;
             }
-        }
 
+            case "photo_tag": {
+                const p = (item as PhotoTagItem)
+                const collection = p.photo_tags.items.concat(collisionItem.photo_tags.items);
+
+                p.photo_tags = {
+                    count: collection.length,
+                    items: collection
+                }
+                break;
+            }
+
+            case "note": {
+                const p = (item as NoteItem)
+                const collection = p.notes.items.concat(collisionItem.notes.items);
+
+                p.notes = {
+                    count: collection.length,
+                    items: collection
+                }
+                break;
+            }
+
+            case "friend": {
+                const p = (item as FriendItem)
+                const collection = p.friends.items.concat(collisionItem.friends.items);
+
+                p.friends = {
+                    count: collection.length,
+                    items: collection
+                }
+                break;
+            }
+            default: break;
+        }
         itemsColl.splice(itemsColl.indexOf(collisionItem), 1);
     }
 
