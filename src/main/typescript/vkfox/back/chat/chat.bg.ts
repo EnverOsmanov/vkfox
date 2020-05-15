@@ -206,21 +206,15 @@ function removeReadMessages(dialog: DialogI): DialogI {
 }
 
 function dropReadMessages(messages: Message[], conversation: VkConversation): Message[] {
-    const lastMessage = messages.pop();
-    const result = [lastMessage];
+    const lastMessage = _.last(messages);
+
     const readMessageId = lastMessage.out
         ? conversation.out_read
         : conversation.in_read
 
-    messages.reverse().some( message => {
-        if (message.id != readMessageId) {
-            result.unshift(message);
-        }
-        // stop copying messages
-        else return true;
-    });
-
-    return result;
+    return lastMessage.id == readMessageId
+        ? [lastMessage]
+        : _.takeRightWhile(messages, m => m.id != readMessageId)
 }
 
 function getDialogs(): Promise<DialogI[]> {
@@ -523,13 +517,11 @@ class Chat {
     static markAsRead(peer_id: number, messageId: number): Promise<void> {
         const dialog = dialogColl.find(d => d.peer_id == peer_id)
         if (dialog) {
-            const message = dialog.messages.find(m => m.id == messageId)
-            if (message) {
-                dialog.conversation.in_read = messageId
+            dialog.conversation.in_read = messageId
 
-                notifyAboutChange();
-            }
-            else console.warn("markAsRead: Message not found", peer_id, messageId)
+            dialog.messages = dropReadMessages(dialog.messages, dialog.conversation)
+
+            notifyAboutChange();
         }
         else console.warn("markAsRead: Dialog not found", peer_id)
 
