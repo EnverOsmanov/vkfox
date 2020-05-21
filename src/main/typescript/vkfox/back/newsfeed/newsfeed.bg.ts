@@ -177,8 +177,8 @@ function freeSpace() {
         let required_uids: number[];
 
         // slice items
-        friendItemsColl.length = MAX_ITEMS_COUNT;
-        groupItemsColl.length = MAX_ITEMS_COUNT;
+        if (friendItemsColl.length > MAX_ITEMS_COUNT) friendItemsColl.length = MAX_ITEMS_COUNT;
+        if (groupItemsColl.length > MAX_ITEMS_COUNT) groupItemsColl.length = MAX_ITEMS_COUNT;
 
         // gather required profiles' ids from new friends
         required_uids = _.chain(
