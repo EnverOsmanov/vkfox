@@ -295,7 +295,7 @@ interface PreviewVideo {
 }
 
 interface PreviewGraffiti {
-    src     : string
+    url     : string
     width   : number
     height  : number
 }

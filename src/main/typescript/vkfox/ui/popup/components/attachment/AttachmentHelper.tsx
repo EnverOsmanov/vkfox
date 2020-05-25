@@ -10,7 +10,7 @@ import {
     docViewPath,
     giftViewPath,
     imageViewPath,
-    imageViewPathByUrl,
+    imageViewPathByUrl, imageViewPathFromUrl,
     stickerImageUrl,
     stickerViewPath,
     videoViewPathByUrl
@@ -30,7 +30,7 @@ import {
 } from "../../../../../vk/types/attachment";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
-import {media, PreviewAudioMsg} from "../../../../../vk/types/newsfeed";
+import {media, PreviewAudioMsg, PreviewGraffiti} from "../../../../../vk/types/newsfeed";
 import AttachmentC from "./AttachmentC";
 import Sticker from "./sticker/Sticker";
 
@@ -111,19 +111,19 @@ function audioMessageDiv(audio_msg: PreviewAudioMsg) {
     )
 }
 
-function imageDiv(type: string, dataGraffiti: media.Photo, showFullWidth: boolean): JSX.Element {
-    const first = dataGraffiti.sizes[0]
+function imageDiv(type: string, photo: media.Photo, showFullWidth: boolean): JSX.Element {
+    const first = photo.sizes[0]
     const size = first.height != 0
         ? first
-        : dataGraffiti.sizes.find(s => s.type == "x")
+        : photo.sizes.find(s => s.type == "x")
 
     const image = (
         <img
             alt=""
             className="item__picture lazyload"
-            data-srcset={buildSrcSet(dataGraffiti)}
+            data-srcset={buildSrcSet(photo)}
             data-src={size.url}
-            onClick={_ => BrowserPu.createTab(imageViewPath(dataGraffiti))}
+            onClick={_ => BrowserPu.createTab(imageViewPath(photo))}
         />
     );
 
@@ -234,7 +234,18 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
             );
         }
 
-        case "graffiti":
+        case "graffiti": {
+            const dataGraffiti = data as PreviewGraffiti;
+            return (
+                <img
+                    alt=""
+                    className="item__picture lazyload"
+                    data-src={dataGraffiti.url}
+                    onClick={_ => BrowserPu.createTab(imageViewPathFromUrl(dataGraffiti.url))}
+                />
+            )
+        }
+
         case "photo":
         case "posted_photo":
             return imageDiv(type, data as media.Photo, showFullWidth);

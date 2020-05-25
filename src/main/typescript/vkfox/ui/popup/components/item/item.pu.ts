@@ -65,8 +65,12 @@ export function imageViewPath(photo: media.Photo): string | null {
 
     if (photo) {
         const url = photo.sizes[photo.sizes.length-1].url
-        return `${IMAGE_VIEW_URL}#${btoa(url)}`;
+        return imageViewPathFromUrl(url);
     }
+}
+
+export function imageViewPathFromUrl(url: string): string {
+    return `${IMAGE_VIEW_URL}#${btoa(url)}`;
 }
 
 export function giftViewPath(gift: AttachmentGift): string | null {
