@@ -142,7 +142,7 @@ export interface AudioAudio {
 }
 
 export interface AudioPlaylist {
-    main_artists  : Artist[]
+    main_artists?  : Artist[]
     title   : string
 }
 

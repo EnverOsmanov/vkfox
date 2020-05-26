@@ -286,10 +286,14 @@ class NewsFeedItem extends React.Component<NewsFeedItemProps, NewsFeedItemState>
                 const audioItem = item as AudioPlaylistItem;
 
                 const audios = audioItem.audio_playlist.items.map( (audio, i) => {
+                    const name = audio.main_artists
+                        ? `${audio.main_artists[0].name} - ${audio.title}`
+                        : audio.title
+
                     return (
                         <div key={i}>
                             <i className="fa fa-music"/>
-                            {audio.main_artists[0].name} - {audio.title}
+                            {name}
                         </div>
                     )
                 });
