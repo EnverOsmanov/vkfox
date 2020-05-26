@@ -3,6 +3,7 @@ import {AnimationSticker} from "../../../../../../vk/types/attachment";
 
 import {AnimationItem} from "lottie-web/index"
 import * as lottie from "lottie-web/build/player/lottie_light"
+
 type LettiePlayer = typeof lottie.default
 const lottiePlayer = lottie as any as LettiePlayer
 
@@ -25,6 +26,7 @@ export default class Sticker extends React.Component<StickerProps, StickerState>
             container: this.animBox, // the dom element that will contain the animation
             renderer : "svg",
             autoplay : false,
+            loop     : false,
             path     : sticker.animation_url // the path to the animation json
         });
 
