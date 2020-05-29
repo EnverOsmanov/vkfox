@@ -23,10 +23,10 @@ import {
     AttachmentDocType,
     AttachmentGift,
     AttachmentLink,
-    AttachmentNote,
+    AttachmentNote, AttachmentPage,
     AttachmentPoll,
     AttachmentSticker, AttachmentT,
-    AttachmentWall
+    AttachmentWall, AttachmentWallReply
 } from "../../../../../vk/types/attachment";
 import RectifyPu from "../../../../rectify/RectifyPu";
 import MyFeedbackPost from "../../news/my/MyFeedbackPost";
@@ -142,14 +142,16 @@ function videoDiv(dataVideo: media.Video, showFullWidth: boolean): JSX.Element {
         ? "item__attachment__wide"
         : "";
 
-    const image = dataVideo.image.find(e => e.width == 320)
+    const imageUrl = dataVideo.image
+        ? dataVideo.image.find(e => e.width == 320).url
+        : "https://vk.com/images/l_null.gif"
 
     return (
         <div className={`item__attachment item__attachment_type_video ${wideClassName}`}>
             <img
                 alt=""
                 className="item__video__poster lazyload"
-                data-src={image.url}
+                data-src={imageUrl}
                 onClick={() => onVideoClick(dataVideo)}
             />
             <div className="item__video-desc">
@@ -162,6 +164,7 @@ function videoDiv(dataVideo: media.Video, showFullWidth: boolean): JSX.Element {
 
 export default function attachmentDiv(type: AttachmentT, data: Attachment, showFullWidth: boolean): JSX.Element | null {
     switch (type) {
+        case "market": return null
         /*            case "app":
                         return <img src={data as Att.src}/>;*/
         case "podcast":
@@ -208,6 +211,20 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
                     {answers}
                 </ul>
             );
+
+        case "page": {
+            const page = data as AttachmentPage
+            return (
+                <div className="item__attachment__wide">
+                    <a
+                        className="item__text_link"
+                        onClick={_ => BrowserPu.createTab(page.view_url)}>
+                        <i className="fa fa-share"/>
+                        {page.title}
+                    </a>
+                </div>
+            )
+        }
 
         case "link": {
             const dataLink = data as AttachmentLink;
@@ -266,6 +283,21 @@ export default function attachmentDiv(type: AttachmentT, data: Attachment, showF
                     onClick={_ => BrowserPu.createTab(stickerViewPath(sticker))}
                 />
                 );
+
+        case "wall_reply": {
+            const wallReply = data as AttachmentWallReply;
+            return (
+                <div className="item__attachment chat__fwd card-1">
+                    <i className="fa fa-bullhorn"/>
+
+                    <div className="item__post">
+                        <RectifyPu text={wallReply.text} hasEmoji={false}/>
+                    </div>
+
+                </div>
+            );
+        }
+
         case "wall":
             const wall = data as AttachmentWall;
             return (

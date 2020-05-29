@@ -10,7 +10,7 @@ import {ChatUserProfileI, DialogI} from "../../../common/chat/types";
 
 
 interface ChatState {
-    dialogs     : DialogI[]
+    dialogs: DialogI[]
     profilesColl: ChatUserProfileI[]
     groupsColl: GroupProfile[]
 }
@@ -69,32 +69,7 @@ class ChatPage extends React.Component<object, ChatState> {
 
     };
 
-    private addToProfilesColl = (profiles: UserProfile[]) => {
-
-        this.setState(prevState => {
-            const profilesColl = prevState.profilesColl.concat(profiles);
-
-            return {
-                ...prevState,
-                profilesColl
-            }
-        })
-    };
-
-    private addToGroupsColl = (profiles: GroupProfile[]) => {
-
-        this.setState(prevState => {
-            const groupsColl = prevState.groupsColl.concat(profiles);
-
-            return {
-                ...prevState,
-                groupsColl
-            }
-        })
-    };
-
-    private addToMessages = (dialogId: number, messages: Message[]) => {
-
+    private addDialogHistory = (dialogId: number, messages: Message[], groups: GroupProfile[], users: UserProfile[]) => {
         this.setState(prevState => {
             const dialogs = prevState.dialogs.slice();
             const i = prevState.dialogs.findIndex( dialog => dialog.peer_id == dialogId);
@@ -105,10 +80,10 @@ class ChatPage extends React.Component<object, ChatState> {
                 messages
             };
 
-            return {
-                ...prevState,
-                dialogs
-            }
+            const groupsColl = prevState.groupsColl.concat(groups);
+            const profilesColl = prevState.profilesColl.concat(users);
+
+            return { profilesColl, groupsColl, dialogs }
         })
     };
 
@@ -129,9 +104,7 @@ class ChatPage extends React.Component<object, ChatState> {
                 dialog={dialog}
                 profilesColl={profilesColl}
                 groupsColl={groupsColl}
-                addToProfilesColl={this.addToProfilesColl}
-                addToGroupsColl={this.addToGroupsColl}
-                addToMessages={this.addToMessages}
+                addDialogHistory={this.addDialogHistory}
             />
         )
     };
@@ -157,6 +130,6 @@ class ChatPageCpn {
     static initialState: ChatState = {
         dialogs     : [],
         profilesColl: [],
-        groupsColl: []
+        groupsColl  : []
     };
 }

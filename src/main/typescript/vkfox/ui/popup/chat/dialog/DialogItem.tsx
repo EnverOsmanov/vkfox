@@ -19,9 +19,7 @@ export interface DialogItemProps {
     profilesColl: ChatUserProfileI[]
     groupsColl: GroupProfile[]
 
-    addToProfilesColl(profiles: UserProfile[]): void
-    addToGroupsColl(profiles: GroupProfile[]): void
-    addToMessages(dialogId: number, messages: Message[]): void
+    addDialogHistory(dialogId: number, messages: Message[], groups: GroupProfile[], users: UserProfile[]): void
 }
 
 interface DialogItemState {

@@ -30,24 +30,10 @@ class DialogSpeeches extends React.Component<DialogSpeechesProps, object> {
 
             const {profilesColl} = this.props;
             switch (action.type) {
-                case "chat_pin_message": return undefined
-                case "chat_invite_user_by_link": {
-                    const profile = profilesColl.find(e => e.isSelf);
+                case "chat_invite_user_by_link":
+                case "chat_pin_message":
+                case "chat_invite_user": return undefined
 
-                    if (!profile) {
-                        console.warn("Self profile not found in message with action");
-                        return undefined;
-                    }
-
-                    const i18nAction = I18N.getWithGender("Chat invite user", profile.sex);
-
-                    const targetName = profile2Name(profile);
-                    const finalText = `${targetName} ${i18nAction}`;
-
-                    return (
-                        <small><i>{finalText}</i></small>
-                    )
-                }
                 case "chat_kick_user": {
 
                     const profile = profilesColl.find(e => e.id == action.member_id);

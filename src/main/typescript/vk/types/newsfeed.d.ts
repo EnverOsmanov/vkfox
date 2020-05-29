@@ -159,7 +159,7 @@ declare namespace media {
         duration    : number
         id          : number
         owner_id    : number
-        image: VideoSizeI[]
+        image?: VideoSizeI[]
         views       : number
         title       : string
     }

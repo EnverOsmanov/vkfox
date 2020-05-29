@@ -30,12 +30,10 @@ class DialogActions extends React.Component<DialogActionsProps> {
             if (messages.length > 0) {
                 const {dialog} = dialogItem;
 
-                dialogItem.addToProfilesColl(profiles);
-                dialogItem.addToGroupsColl(groups);
-
                 const newMessages = dialog.messages.slice();
                 newMessages.unshift(...messages.reverse());
-                dialogItem.addToMessages(dialog.peer_id, newMessages)
+
+                dialogItem.addDialogHistory(dialog.peer_id, newMessages, groups, profiles)
             }
         };
 

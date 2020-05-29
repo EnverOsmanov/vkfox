@@ -8,6 +8,9 @@ export type AttachmentT =
     "audio_message" |
     "video" |
     "wall" |
+    "market" |
+    "page" |
+    "wall_reply" |
     "note" |
     "doc" |
     "poll" |
@@ -157,6 +160,36 @@ export interface AttachmentWall extends Attachment {
     text            : string
     to_id           : number
     views           : object
+}
+
+export interface AttachmentWallReplyContainer extends AttachmentContainer {
+    type: "wall_reply"
+    wall: AttachmentWallReply
+}
+
+export interface AttachmentWallReply extends Attachment {
+    date: number
+    id: number
+    owner_id: number
+    post_id: number
+    text: string
+}
+
+export interface AttachmentPageContainer extends AttachmentContainer {
+    type: "page"
+    wall: AttachmentPage
+}
+
+export interface AttachmentPage extends Attachment {
+    created: 1412409214
+    edited: 0
+    group_id: 54530371
+    id: 48776757
+    title: "Подборка материалов по Java"
+    view_url: "https://m.vk.com/page-54530371_48776757?api_view=2b2b625ee88dc792bffc3fc4bc7d07"
+    views: 77957
+    who_can_edit: 0
+    who_can_view: 2
 }
 
 
