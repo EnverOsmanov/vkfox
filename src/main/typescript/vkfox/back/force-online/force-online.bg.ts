@@ -11,8 +11,7 @@ const MARK_PERIOD   = 30 * 1000; //5 min
 let timeoutId: number;
 
 const settings = new PersistentModel(
-    {enabled: false },
-    {name: "forceOnline"}
+    {enabled: false , name: "forceOnline"}
     );
 
 export default function init() {

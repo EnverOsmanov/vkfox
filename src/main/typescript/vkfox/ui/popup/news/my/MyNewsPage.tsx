@@ -5,16 +5,15 @@ import {Msg} from "../../../../mediator/messages"
 import FeedbackItem from "./FeedbackItem";
 import {FeedbacksData} from "./types";
 import {FeedbackItemObj} from "../types";
+import Spinner from "../../components/loading/Spinner";
 
 
-interface MyNewsProps extends RouteComponentProps<any> {}
+interface MyNewsProps extends RouteComponentProps<any> {
+}
 
 class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
 
-    public readonly state: FeedbacksData = {
-        profiles: [],
-        items   : []
-    };
+    public readonly state: FeedbacksData = null;
 
 
     componentDidMount() {
@@ -52,7 +51,7 @@ class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
     };
 
     render() {
-        return (
+        const withData = () => (
             <div className="item-list news_type_my">
 
                 <div className="item-list__content">
@@ -65,6 +64,8 @@ class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
 
             </div>
         );
+
+        return this.state ? withData() : Spinner
     }
 }
 

@@ -11,10 +11,11 @@ const {
 
 
 const model = new PersistentModel({
+    name: 'resize',
     width   : DEFAULT_WIDTH,
     height  : DEFAULT_HEIGHT,
     fontSize: DEFAULT_FONT_SIZE
-}, {name: 'resize'});
+});
 
 
 class Resizer extends React.Component {

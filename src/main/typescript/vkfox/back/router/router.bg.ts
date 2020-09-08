@@ -6,8 +6,7 @@ import {Msg} from "../../mediator/messages";
 
 
 const model = new PersistentModel(
-    {lastPath: "chat"},
-    {name: "router"}
+    {lastPath: "chat", name: "router"}
 );
 
 

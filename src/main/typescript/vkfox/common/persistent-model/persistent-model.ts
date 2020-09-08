@@ -1,5 +1,5 @@
 "use strict";
-import {Model} from "backbone";
+import {Model, CombinedModelConstructorOptions} from "backbone";
 import {BBCollectionOps} from "../profiles-collection/profiles-collection";
 
 
@@ -14,8 +14,8 @@ export default class PersistentModel extends Model {
     * @param {Object} options
     * @param {String} options.name
     */
-    initialize(attributes?: any, options?: {name: string}) {
-        this._name = options.name;
+    initialize(attributes?: {name: string}, options?: CombinedModelConstructorOptions<{}, this>): void {
+        this._name = attributes.name;
         const item = localStorage.getItem(this._name);
 
         if (item) {
@@ -24,6 +24,8 @@ export default class PersistentModel extends Model {
 
         this.on('change', this._save.bind(this));
     }
+
+
 
     _save() {
         localStorage.setItem(this._name, JSON.stringify(this.toJSON()));

@@ -27,7 +27,7 @@ const defaultSettingsState: NotificationsSettingsI = {
 };
 
 const notificationsSettings: NotificationsSettings =
-    new NotificationsSettings(defaultSettingsState, {name: 'notificationsSettings'});
+    new NotificationsSettings({...defaultSettingsState, name: 'notificationsSettings'});
 const notificationQueue = new NotificationQueue();
 
 

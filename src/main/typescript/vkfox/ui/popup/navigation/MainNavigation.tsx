@@ -18,8 +18,7 @@ import {VKNotificationI} from "../../../common/notifications/types";
 class MainNavigation extends React.Component {
 
     static model = new PersistentModel(
-        {lastPath: '/chat'},
-        {name: 'router'}
+        {lastPath: '/chat', name: 'router'}
     );
 
     constructor(props) {

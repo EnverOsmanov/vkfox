@@ -1,5 +1,5 @@
 "use strict";
-import PersistentModel from '../../../common/persistent-model/persistent-model'
+import PersistentModel from "../../../common/persistent-model/persistent-model"
 import {profile2Name} from "../components/filters/filters.pu";
 import {BuddiesFilters} from "./types";
 import {UserProfile} from "../../../common/users/types";
@@ -46,6 +46,7 @@ export function initBuddiesFilter() {
         male   : true,
         female : true,
         offline: false,
-        faves  : true
-    }, {name: 'buddiesFilters'})
+        faves  : true,
+        name: "buddiesFilters"
+    })
 }

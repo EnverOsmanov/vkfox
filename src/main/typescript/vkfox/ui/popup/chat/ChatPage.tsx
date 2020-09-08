@@ -7,6 +7,7 @@ import {ChatDataI} from "./types";
 import {GroupProfile, UserProfile} from "../../../common/users/types";
 import {Message} from "../../../../vk/types";
 import {ChatUserProfileI, DialogI} from "../../../common/chat/types";
+import Spinner from "../components/loading/Spinner";
 
 
 interface ChatState {
@@ -17,7 +18,7 @@ interface ChatState {
 
 class ChatPage extends React.Component<object, ChatState> {
 
-    public readonly state = ChatPageCpn.initialState;
+    public readonly state: ChatState = null;
 
     componentDidMount() {
         Mediator.sub(Msg.ChatData, this.onChatData);
@@ -30,7 +31,8 @@ class ChatPage extends React.Component<object, ChatState> {
 
     private onChatData = ({dialogs, profiles, groups}: ChatDataI) => {
 
-        this.setState(prevState => {
+        this.setState(prevStateNullable => {
+                const prevState = prevStateNullable ? prevStateNullable : ChatPageCpn.initialState
 
                 function mergeDialogs(bgDialog: DialogI): DialogI {
                     const maybeUiDialog = prevState.dialogs.find(d => d.peer_id === bgDialog.peer_id);
@@ -72,7 +74,7 @@ class ChatPage extends React.Component<object, ChatState> {
     private addDialogHistory = (dialogId: number, messages: Message[], groups: GroupProfile[], users: UserProfile[]) => {
         this.setState(prevState => {
             const dialogs = prevState.dialogs.slice();
-            const i = prevState.dialogs.findIndex( dialog => dialog.peer_id == dialogId);
+            const i = prevState.dialogs.findIndex(dialog => dialog.peer_id == dialogId);
 
             const prevDialog = dialogs[i];
             dialogs[i] = {
@@ -83,7 +85,7 @@ class ChatPage extends React.Component<object, ChatState> {
             const groupsColl = prevState.groupsColl.concat(groups);
             const profilesColl = prevState.profilesColl.concat(users);
 
-            return { profilesColl, groupsColl, dialogs }
+            return {profilesColl, groupsColl, dialogs}
         })
     };
 
@@ -98,7 +100,7 @@ class ChatPage extends React.Component<object, ChatState> {
     dialogElms = () => {
         const {dialogs, profilesColl, groupsColl} = this.state;
 
-        return dialogs.map( dialog =>
+        return dialogs.map(dialog =>
             <DialogItem
                 key={dialog.peer_id}
                 dialog={dialog}
@@ -110,7 +112,7 @@ class ChatPage extends React.Component<object, ChatState> {
     };
 
     render() {
-        return (
+        const withData = () => (
             <div className="item-list chat">
                 <div className="item-list__content">
                     <div className="item-list__scroll">
@@ -120,6 +122,8 @@ class ChatPage extends React.Component<object, ChatState> {
 
             </div>
         );
+
+        return this.state ? withData() : Spinner
     }
 }
 

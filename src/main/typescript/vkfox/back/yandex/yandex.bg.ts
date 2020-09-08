@@ -9,8 +9,9 @@ import {Msg} from "../../mediator/messages";
 const storageModel = new PersistentModel({
     enabled: false,
     //show or not install dialog
-    dialog: true
-}, {name: "yandexSettings"});
+    dialog: true,
+    name: "yandexSettings"
+});
 
 export default function init() {
     Mediator.sub(Msg.YandexDialogClose, () => Browser.closeTabs("pages/install.html") );

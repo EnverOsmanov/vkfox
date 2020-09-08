@@ -176,9 +176,9 @@ function initialize(readyPromise: Promise<void>) {
 
     Mediator.sub(Msg.LongpollUpdates, onUpdates);
 
-    persistentModel = new PersistentModel({}, {
+    persistentModel = new PersistentModel({
         name: `chat:background:${userId}`
-    });
+    }, {});
 
     persistentModel.on("change:latestMessageId", onLatestMessageIdChange);
 

@@ -122,9 +122,9 @@ function onChangeUser(data: AuthModelI): void {
     itemsColl.reset();
     profilesColl.clear();
 
-    persistentModel = new PersistentModel({}, {
+    persistentModel = new PersistentModel({
         name: `feedbacks:background:${userId}`
-    });
+    }, {});
 }
 
 export default function init() {

@@ -15,10 +15,6 @@ class Feedback extends Model {
         return super.get("feedback")
     }
 
-    get id(): string {
-        return super.get("id")
-    }
-
 }
 
 export class FeedbacksCollection extends Collection<Feedback> {
