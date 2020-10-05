@@ -220,11 +220,11 @@ function fetchNewsfeed(): Promise<number | object> {
 
             discardOddWallPhotos(newsfeedObj.items).forEach(processRawItem);
 
-            // try to remove old items, if new were inserted
-            if (newsfeedObj.items.length) freeSpace();
-
             friendItemsColl.sort(itemObjSorter)
             groupItemsColl.sort(itemObjSorter)
+
+            // try to remove old items, if new were inserted
+            if (newsfeedObj.items.length) freeSpace();
 
             return markAsOfflineIfModeOnOnce();
         }

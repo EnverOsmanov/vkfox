@@ -59,11 +59,11 @@ function xhrMy(type: string, url: string, data: string | object, networkIssues: 
 
     function myFetch(): Promise<Response> {
         const encodedData = typeof data === "string" ? data : Request.querystring(data);
-        type = type.toUpperCase();
+        const method = type.toUpperCase();
 
         if (type === 'POST') {
             const opts = {
-                method : type,
+                method,
                 body   : encodedData,
                 headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
             };
