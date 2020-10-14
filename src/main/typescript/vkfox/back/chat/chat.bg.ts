@@ -232,7 +232,6 @@ function getDialogs(): Promise<DialogI[]> {
 
             return {
                 peer_id : conversation.peer.id,
-                //chat_id     : last_message.chat_id,
                 chat_active,
                 messages: [last_message],
                 conversation
@@ -451,8 +450,8 @@ function findProfile(
     return profiles.get(Math.abs(id));
 }
 
-function onLatestMessageIdChange() {
-    function notifyAboutMessage(): void {
+async function onLatestMessageIdChange() {
+    function notifyAboutMessage(lastMessage: Message): void {
 
         const profile = findProfile(lastMessage.from_id, profilesColl, groupsColl);
         const chatActive = Browser.isPopupOpened() && Router.isChatTabActive();
@@ -486,7 +485,7 @@ function onLatestMessageIdChange() {
         });
     }
 
-    const messages = dialogColl[0].messages;
+    const {messages, conversation} = dialogColl[0];
     const lastMessage = messages[messages.length - 1];
 
     // don't notify on first run,
@@ -496,16 +495,23 @@ function onLatestMessageIdChange() {
     }
 
     if (!lastMessage.out) {
-        function notifyIfVkIsNotActive(active: boolean): Promise<void> {
-            return active
-                ? Promise.resolve()
-                : fetchProfiles(dialogColl).then(notifyAboutMessage)
-        }
 
         // Don't notify, when active tab is vk.com
-        Browser.isVKSiteActive()
-            .then(notifyIfVkIsNotActive)
-            .catch(handleError);
+        try {
+            const no_sound = conversation?.push_settings.no_sound
+            if (no_sound) return Promise.resolve()
+            else {
+                const active = await Browser.isVKSiteActive();
+                if (active) return Promise.resolve()
+                else {
+                    await fetchProfiles(dialogColl)
+
+                    return notifyAboutMessage(lastMessage)
+                }
+            }
+        } catch (e) {
+            return handleError(e);
+        }
     }
 }
 

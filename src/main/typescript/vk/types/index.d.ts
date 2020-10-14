@@ -233,12 +233,18 @@ export interface CanWrite {
     allowed: boolean
 }
 
+interface PushSettings {
+    disabled_forever: boolean
+    no_sound: boolean
+}
+
 export interface VkConversation {
     can_write: CanWrite
     in_read: number
     last_message_id: number
     out_read: number
     peer: Peer
+    push_settings?: PushSettings
 }
 
 export interface WithBot {
