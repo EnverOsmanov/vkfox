@@ -1,11 +1,5 @@
 const webpack = require("webpack");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-
-const extractLess = new ExtractTextPlugin({
-    filename: "[name].css"
-});
-
 
 
 const isDev = process.env.NODE_ENV === "development";
@@ -27,7 +21,6 @@ module.exports = {
   watch  : isDev,
   devtool: isDev ? "inline-cheap-module-source-map" : false,
   plugins: [
-      extractLess,
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /ru|en|uk/),
       new HtmlWebpackPlugin({
           chunks: ["doc~photo~video", "photo"],
@@ -61,7 +54,11 @@ module.exports = {
       })
   ],
   resolve: {
-    // Add ".ts" and ".tsx" as resolvable extensions.
+      alias: {
+          path: "path-browserify",
+          util: "util"
+      },
+      // Add ".ts" and ".tsx" as resolvable extensions.
     extensions: [".ts", ".tsx", ".js"]
   },
   module: {
@@ -72,19 +69,20 @@ module.exports = {
         { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
         {
             test: /\.(css|scss|sass)$/,
-            use: extractLess.extract(
+            use: [
+                // Creates `style` nodes from JS strings
+                "style-loader",
+                // Translates CSS into CommonJS
                 {
-                    use:[{
-                        loader: "css-loader",
-                        options: {sourceMap: isDev}
-                    }, {
-                        loader: "sass-loader",
-                        options: {sourceMap: isDev}
-                    },
-                        {loader: "resolve-url-loader"}
-                    ],
-                    fallback: "style-loader"
-                })
+                    loader: "css-loader",
+                    options: {sourceMap: isDev}
+                },
+                // Compiles Sass to CSS
+                {
+                    loader: "sass-loader",
+                    options: {sourceMap: isDev}
+                },
+            ],
         },
         {
             test: /.*(:?ru|en|uk)\.(json)$/,
@@ -107,7 +105,7 @@ module.exports = {
     ]
   },
     optimization: {
-        noEmitOnErrors: true,
+        emitOnErrors: false,
         splitChunks: {
             chunks: "all"
         }
