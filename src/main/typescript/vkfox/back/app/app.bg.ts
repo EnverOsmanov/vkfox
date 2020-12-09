@@ -1,5 +1,6 @@
 "use strict";
 import Browser from "../browser/browser.bg";
+import {browser} from "webextension-polyfill-ts"
 import Buddies from "../buddies/buddies.bg";
 import ChatBg from "../chat/chat.bg";
 import NewsfeedBg from "../newsfeed/newsfeed.bg";
@@ -32,5 +33,5 @@ LongpollBg();
 InstallPageOrLogin();
 
 if (process.env.NODE_ENV === "development")
- Browser.createTab("/pages/popup.html");
+ browser.tabs.create({url: "/pages/popup.html"});
 

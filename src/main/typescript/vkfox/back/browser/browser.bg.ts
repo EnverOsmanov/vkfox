@@ -74,6 +74,10 @@ class Browser {
             : false;
     }
 
+    /**
+     * For front-end
+     * @param url
+     */
     static createTab(url: string): Promise<Tab> {
         return browser.tabs.create({url})
     }
@@ -86,7 +90,7 @@ class Browser {
 
             return found
                 ? Promise.resolve(found)
-                : Browser.createTab(url)
+                : browser.tabs.create({url, active: false})
         }
 
         return browser.tabs.query({})

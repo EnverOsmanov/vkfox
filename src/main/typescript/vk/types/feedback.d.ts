@@ -35,7 +35,8 @@ interface WithUserLikes {
 }
 
 export interface CommentFromNews extends Comment, WithUserLikes {
-    from_id : number
+    deleted ?: boolean
+    from_id ?: number
 }
 
 interface FeedbackComment extends Comment, CommentReply {

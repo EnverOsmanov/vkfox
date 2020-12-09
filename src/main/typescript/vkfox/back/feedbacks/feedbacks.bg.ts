@@ -346,7 +346,7 @@ function addRawCommentsItem(newsItem: CommentsNewsItem) {
         const fbItemModel = createItemModelIfNotExistComm(parentType, parent, lastCommentDate);
 
         fbItemModel.feedbacks
-            .add(limitedComments.map(comment2Feedback));
+            .add(limitedComments.filter(t => !t.deleted).map(comment2Feedback));
 
         lastCommentDate = fbItemModel.feedbacks.last().date;
         if (!fbItemModel.has('date') || fbItemModel.date < lastCommentDate) {

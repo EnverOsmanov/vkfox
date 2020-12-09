@@ -498,7 +498,9 @@ async function onLatestMessageIdChange() {
 
         // Don't notify, when active tab is vk.com
         try {
-            const no_sound = conversation?.push_settings.no_sound
+            const no_sound = conversation.push_settings
+                ? conversation.push_settings.no_sound
+                : false
             if (no_sound) return Promise.resolve()
             else {
                 const active = await Browser.isVKSiteActive();

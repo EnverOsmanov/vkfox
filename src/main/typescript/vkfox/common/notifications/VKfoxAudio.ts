@@ -24,7 +24,7 @@ class VKfoxAudio {
 
 
     static async readTextInVoice(text: string, sex: Sex) {
-        this.readTextInVoicePolly(text, sex)
+        this.textInVoiceYandex(text, sex)
     }
 
     private static async readTextInVoicePolly(text: string, sex: Sex) {
