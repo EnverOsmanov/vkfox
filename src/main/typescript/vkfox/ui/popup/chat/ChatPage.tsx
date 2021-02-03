@@ -111,6 +111,11 @@ class ChatPage extends React.Component<object, ChatState> {
         )
     };
 
+    componentDidCatch(error, info) {
+        console.error("ChatPage")
+        console.error(this.state)
+    }
+
     render() {
         const withData = () => (
             <div className="item-list chat">

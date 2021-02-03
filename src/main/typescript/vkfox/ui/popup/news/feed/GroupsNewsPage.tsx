@@ -29,6 +29,10 @@ class GroupNewsPage extends React.Component<ChatProps, ChatState> {
         this.setState( {data})
     };
 
+    componentDidCatch(error, info) {
+        console.error("GroupNewsPage")
+        console.error(this.state)
+    }
 
     render() {
         return (

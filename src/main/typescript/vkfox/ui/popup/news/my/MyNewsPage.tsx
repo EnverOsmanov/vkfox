@@ -50,6 +50,11 @@ class MyNewsPage extends React.Component<MyNewsProps, FeedbacksData> {
         return this.state.items.map(singleNewsItem)
     };
 
+    componentDidCatch(error, info) {
+        console.error("MyNewsPage")
+        console.error(this.state)
+    }
+
     render() {
         const withData = () => (
             <div className="item-list news_type_my">

@@ -27,6 +27,10 @@ class FriendNewsPage extends React.Component<ChatProps, ChatState> {
         Mediator.unsub(Msg.NewsfeedFriends);
     }
 
+    componentDidCatch(error, info) {
+        console.error("FriendNewsPage")
+        console.error(this.state)
+    }
 
     render() {
         const withData = () => (
