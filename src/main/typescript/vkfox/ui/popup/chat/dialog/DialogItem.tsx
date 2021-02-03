@@ -90,6 +90,9 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
         else if (dialog.chat_active.length == 1) {
             return findProfile(dialog.chat_active[0], profilesColl, groupsColl)
         }
+        else if (dialog.peer_id > 2000000000) {
+            return dialog.messages.map(m => findProfile(m.from_id, profilesColl, groupsColl)) as UserProfile[]
+        }
         else {
             return findProfile(dialog.peer_id, profilesColl, groupsColl)
         }
@@ -122,6 +125,7 @@ class DialogItem extends React.Component<DialogItemProps, DialogItemState> {
 
 
         if (!owners) {
+            console.debug("owners is undefined in DialogItem")
             console.debug(dialog, profilesColl, groupsColl)
         }
 
